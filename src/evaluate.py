@@ -70,8 +70,10 @@ def load_model(hf_path, adapter_path):
         torch_dtype=torch.bfloat16,
     )
     if adapter_path:
-        print(f"  Loading adapter: {adapter_path}")
-        model = PeftModel.from_pretrained(base, adapter_path)
+        # Paths starting with /mnt/ are local filesystem mounts (Nebius job volumes)
+        is_local = adapter_path.startswith("/mnt/") or adapter_path.startswith("/")
+        print(f"  Loading adapter ({'local' if is_local else 'HuggingFace Hub'}): {adapter_path}")
+        model = PeftModel.from_pretrained(base, adapter_path, is_trainable=False)
     else:
         model = base
     model.eval()
@@ -139,7 +141,7 @@ def compute_sari(sources, predictions, references):
 def main():
     parser = argparse.ArgumentParser(description="MediSimplifier Evaluation")
     parser.add_argument("--model", default="openbio", choices=list(MODELS.keys()))
-    parser.add_argument("--adapter-path", default="GuyDor007/MediSimplifier-LoRA-Adapters")
+    parser.add_argument("--adapter-path", default="/mnt/adapters/full_training")
     parser.add_argument("--split", default="test", choices=["test", "validation"])
     parser.add_argument("--output-dir", default="/output/eval")
     parser.add_argument("--zero-shot", action="store_true",

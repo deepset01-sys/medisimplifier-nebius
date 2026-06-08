@@ -9,7 +9,7 @@ from peft import PeftModel
 
 app = FastAPI(title="MediSimplifier API", version="1.0")
 
-ADAPTER_REPO = "GuyDor007/MediSimplifier-LoRA-Adapters"
+ADAPTER_REPO = "GuyDor007/MediSimplifier-LoRA-Adapters/openbiollm_8b_lora"
 BASE_MODEL = "aaditya/Llama3-OpenBioLLM-8B"
 
 TASK_INSTRUCTION = """Simplify the following medical discharge summary in plain language for patients with no medical background.
