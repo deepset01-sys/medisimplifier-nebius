@@ -1,0 +1,39 @@
+{
+  "phase1_rank": {
+    "description": "Rank ablation (q_v modules, 2K samples, 1 epoch)",
+    "results": {
+      "r8":  {"train_loss": 1.025,  "eval_loss": 0.9040, "accuracy": 0.7697},
+      "r16": {"train_loss": 0.9785, "eval_loss": 0.8836, "accuracy": 0.7737},
+      "r32": {"train_loss": 0.949,  "eval_loss": 0.8695, "accuracy": 0.7771}
+    },
+    "winner": "r32",
+    "finding": "Higher rank consistently improves — contradicts Hu et al. 2021"
+  },
+  "phase2_modules": {
+    "description": "Module ablation (r=32, 2K samples, 1 epoch)",
+    "results": {
+      "q_only":   {"train_loss": 1.023,  "eval_loss": 0.9309, "accuracy": 0.7667},
+      "q_v":      {"train_loss": 0.949,  "eval_loss": 0.8695, "accuracy": 0.7771},
+      "all_attn": {"train_loss": 0.9237, "eval_loss": 0.8527, "accuracy": 0.7809}
+    },
+    "winner": "all_attn",
+    "finding": "All attention projections outperform standard Q+V"
+  },
+  "phase3_data_size": {
+    "description": "Data size ablation (r=32, all_attn, 1 epoch)",
+    "results": {
+      "2k": {"train_loss": 0.9237, "eval_loss": 0.8527, "accuracy": 0.7809},
+      "4k": {"train_loss": 0.8851, "eval_loss": 0.8334, "accuracy": 0.7851},
+      "8k": {"train_loss": 0.8618, "eval_loss": 0.8156, "accuracy": 0.7895}
+    },
+    "winner": "8k",
+    "finding": "More data consistently improves performance"
+  },
+  "full_training": {
+    "description": "Full training — r=32, all_attn, 3 epochs, 8K",
+    "best_eval_loss": 0.8152,
+    "best_accuracy": 0.7912,
+    "train_loss_final": 0.7565,
+    "runtime_minutes": 70.2
+  }
+}
