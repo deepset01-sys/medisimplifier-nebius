@@ -1,0 +1,136 @@
+# MediSimplifier — Serverless LoRA Fine-Tuning on Nebius
+
+[![Nebius Jobs](https://img.shields.io/badge/Nebius-Serverless%20AI%20Jobs-blue)](https://nebius.com)
+[![HuggingFace Models](https://img.shields.io/badge/HF-Models-yellow)](https://huggingface.co/GuyDor007/MediSimplifier-LoRA-Adapters)
+[![HuggingFace Dataset](https://img.shields.io/badge/HF-Dataset-blue)](https://huggingface.co/datasets/GuyDor007/medisimplifier-dataset)
+[![License](https://img.shields.io/badge/License-Apache%202.0-green)](LICENSE)
+
+> Nebius Serverless AI Builders Challenge submission.
+> Reproducible LoRA fine-tuning pipeline for medical text simplification,
+> running entirely on Nebius Serverless AI Jobs and Endpoints.
+
+## What this project does
+
+Medical discharge summaries are written at college reading level (FK-Grade 14.5).
+Only 12% of American adults have sufficient health literacy to understand them.
+
+MediSimplifier fine-tunes open-source LLMs using LoRA to automatically simplify
+these documents to 7th-grade reading level — ~50% readability reduction —
+while preserving all critical medical information.
+
+**Key findings (contradicting established literature):**
+
+| Finding | Result |
+|---------|--------|
+| Optimal LoRA rank | r=32 outperforms r=4-8 recommended by Hu et al. 2021 |
+| Optimal modules | all_attn (Q+K+V+O) outperforms standard Q+V |
+| Ranking reversal | Worst zero-shot model becomes best fine-tuned (+157%) |
+| Readability | FK-Grade 14.5 → 6.91, all differences p<0.001 |
+
+## Results
+
+| Model | ROUGE-L | SARI | BERTScore | FK-Grade | Improvement |
+|-------|---------|------|-----------|----------|-------------|
+| OpenBioLLM-8B | 0.6749 | 74.64 | 0.9498 | 7.16 | +157.3% |
+| Mistral-7B | 0.6491 | 73.79 | 0.9464 | 6.91 | +65.9% |
+| BioMistral-7B-DARE | 0.6318 | 73.01 | 0.9439 | 6.95 | +53.3% |
+
+All pairwise ROUGE-L differences significant (p < 0.001, bootstrap n=10,000).
+
+## How it runs on Nebius
+
+Nebius Serverless AI Jobs handle training and ablation.
+Nebius Serverless AI Endpoints serve live inference.
+
+Pipeline:
+
+    Dataset (HuggingFace: GuyDor007/medisimplifier-dataset)
+        |
+        v
+    Nebius Job: Ablation (9 parallel jobs — rank x modules x data size)
+        |
+        v
+    Nebius Job: Full training (r=32, all_attn, 3 epochs, H100)
+        |
+        v
+    Nebius Job: Evaluation (ROUGE-L, SARI, BERTScore, FK-Grade)
+        |
+        v
+    Nebius Endpoint: POST /simplify -> simplified text
+
+### Hardware and cost
+
+| Step | GPU | Time | Cost |
+|------|-----|------|------|
+| Ablation x9 parallel | H100 | ~20 min each | ~$15 |
+| Full training | H100 | ~4.5 hours | ~$22 |
+| Evaluation | H100 | ~45 min | ~$5 |
+| Total | | | ~$42 |
+
+## Reproduce in one command
+
+### 1. Clone and install
+
+    git clone https://github.com/gd007/MediSimplifier.git
+    cd MediSimplifier
+    pip install -r requirements.txt
+
+### 2. Run full training on Nebius
+
+    nebius job run --config jobs/job_train.yaml
+
+### 3. Run ablation (9 parallel jobs)
+
+    # Phase 1: rank
+    nebius job run --config jobs/job_ablation.yaml --env LORA_RANK=8  MODULES=q_v EPOCHS=1
+    nebius job run --config jobs/job_ablation.yaml --env LORA_RANK=16 MODULES=q_v EPOCHS=1
+    nebius job run --config jobs/job_ablation.yaml --env LORA_RANK=32 MODULES=q_v EPOCHS=1
+
+    # Phase 2: modules
+    nebius job run --config jobs/job_ablation.yaml --env LORA_RANK=32 MODULES=q_only   EPOCHS=1
+    nebius job run --config jobs/job_ablation.yaml --env LORA_RANK=32 MODULES=q_v      EPOCHS=1
+    nebius job run --config jobs/job_ablation.yaml --env LORA_RANK=32 MODULES=all_attn EPOCHS=1
+
+    # Phase 3: data size
+    nebius job run --config jobs/job_ablation.yaml --env LORA_RANK=32 MODULES=all_attn DATA_SIZE=2000 EPOCHS=1
+    nebius job run --config jobs/job_ablation.yaml --env LORA_RANK=32 MODULES=all_attn DATA_SIZE=4000 EPOCHS=1
+    nebius job run --config jobs/job_ablation.yaml --env LORA_RANK=32 MODULES=all_attn DATA_SIZE=7999 EPOCHS=1
+
+### 4. Evaluate
+
+    nebius job run --config jobs/job_evaluate.yaml --env MODEL=openbio
+
+### 5. Call the live endpoint
+
+    curl -X POST https://YOUR_ENDPOINT/simplify \
+      -H "Content-Type: application/json" \
+      -d '{"text": "Patient presented with acute myocardial infarction..."}'
+
+## Project structure
+
+    src/
+      train.py          LoRA training — runs as Nebius Job
+      evaluate.py       Metrics: ROUGE-L, SARI, BERTScore, FK-Grade
+      serve.py          FastAPI inference — runs as Nebius Endpoint
+    docker/
+      Dockerfile.train  Training image
+      Dockerfile.serve  Serving image
+    jobs/
+      job_train.yaml    Full training job config
+      job_ablation.yaml Parametrized ablation job config
+      job_evaluate.yaml Evaluation job config
+    requirements.txt
+
+## Dataset and models
+
+| Resource | Link |
+|----------|------|
+| Dataset | GuyDor007/medisimplifier-dataset — 10K samples, public |
+| Models | GuyDor007/MediSimplifier-LoRA-Adapters — 3 adapters, public |
+
+Dataset: Asclepius-Synthetic-Clinical-Notes (public, anonymized synthetic notes).
+No real patient data. HCLS compliant.
+
+## License
+
+Apache 2.0

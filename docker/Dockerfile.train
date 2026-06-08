@@ -1,0 +1,28 @@
+FROM pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir \
+    torch>=2.1.0 \
+    transformers>=4.40.0 \
+    peft>=0.10.0 \
+    datasets>=2.18.0 \
+    trl>=0.8.0 \
+    accelerate>=0.28.0 \
+    bitsandbytes>=0.43.0 \
+    sentencepiece>=0.2.0 \
+    huggingface-hub>=0.22.0 \
+    numpy>=1.26.0 \
+    tqdm>=4.66.0
+
+COPY src/train.py .
+
+ENV PYTHONUNBUFFERED=1
+ENV HF_HOME=/tmp/hf_cache
+
+CMD ["python", "train.py", "--model", "openbio", "--output-dir", "/output/adapter", "--epochs", "3"]

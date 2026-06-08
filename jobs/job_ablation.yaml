@@ -1,0 +1,30 @@
+name: medisimplifier-ablation
+description: "MediSimplifier ablation study - parametrized rank/modules/data-size"
+
+resources:
+  gpu: H100
+  gpu_count: 1
+
+docker:
+  image: ghcr.io/gd007/medisimplifier:train-latest
+
+env:
+  HF_TOKEN: "${HF_TOKEN}"
+  PYTHONUNBUFFERED: "1"
+
+# Ablation parameters - override per run:
+# Phase 1 (rank):    --rank 8/16/32  --modules q_v    --epochs 1
+# Phase 2 (modules): --rank 32       --modules q_only/q_v/all_attn --epochs 1
+# Phase 3 (data):    --rank 32       --modules all_attn --data-size 2000/4000/7999 --epochs 1
+
+command: >
+  python train.py
+  --model ${MODEL:-openbio}
+  --epochs ${EPOCHS:-1}
+  --rank ${LORA_RANK:-32}
+  --modules ${MODULES:-all_attn}
+  --data-size ${DATA_SIZE:-7999}
+  --output-dir /output/ablation/${MODEL:-openbio}_r${LORA_RANK:-32}_${MODULES:-all_attn}
+
+output:
+  path: /output/ablation

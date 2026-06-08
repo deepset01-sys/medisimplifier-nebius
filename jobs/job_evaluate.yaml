@@ -1,0 +1,23 @@
+name: medisimplifier-evaluate
+description: "MediSimplifier evaluation - ROUGE-L, SARI, BERTScore, FK-Grade on test set"
+
+resources:
+  gpu: H100
+  gpu_count: 1
+
+docker:
+  image: ghcr.io/gd007/medisimplifier:train-latest
+
+env:
+  HF_TOKEN: "${HF_TOKEN}"
+  PYTHONUNBUFFERED: "1"
+
+command: >
+  python evaluate.py
+  --model ${MODEL:-openbio}
+  --adapter-path ${ADAPTER_PATH:-GuyDor007/MediSimplifier-LoRA-Adapters}
+  --split test
+  --output-dir /output/eval
+
+output:
+  path: /output/eval

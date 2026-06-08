@@ -1,0 +1,12 @@
+nebius ai job create \
+  --name medisimplifier-ablation-r8 \
+  --parent-id project-e00g1ev2pr00wjxv40r6ga \
+  --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
+  --container-command sh \
+  --args "-c \"pip install transformers peft datasets trl accelerate bitsandbytes sentencepiece huggingface-hub --quiet && git clone https://github.com/gd007/MediSimplifier.git && cd MediSimplifier && python medisimplifier-nebius/src/train.py --model openbio --epochs 1 --rank 8 --modules q_v --data-size 2000 --output-dir /output/ablation/r8_qv\"" \
+  --platform gpu-h100-sxm \
+  --preset 1gpu-16vcpu-200gb \
+  --disk-size 250Gi \
+  --subnet-id vpcsubnet-e00jsdqfjrz04ygxc0 \
+  --ssh-key "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOWqoI8de74LUA3NeSKSV2PieK93SkPwB82apK96yScS Owner@Lenovo-PF2AQJTT" \
+  --timeout 2h

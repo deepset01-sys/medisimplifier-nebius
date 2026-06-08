@@ -1,0 +1,25 @@
+name: medisimplifier-full-train
+description: "MediSimplifier full LoRA training - OpenBioLLM-8B, r=32, all_attn, 3 epochs"
+
+resources:
+  gpu: H100
+  gpu_count: 1
+
+docker:
+  image: ghcr.io/gd007/medisimplifier:train-latest
+
+env:
+  HF_TOKEN: "${HF_TOKEN}"
+  PYTHONUNBUFFERED: "1"
+
+command: >
+  python train.py
+  --model openbio
+  --epochs 3
+  --rank 32
+  --modules all_attn
+  --data-size 7999
+  --output-dir /output/adapter
+
+output:
+  path: /output/adapter
