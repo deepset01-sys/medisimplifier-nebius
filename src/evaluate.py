@@ -55,10 +55,7 @@ def build_prompt(sample, model_format):
 
 def load_model(hf_path, adapter_path):
     bnb_config = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_use_double_quant=True,
-        bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=torch.bfloat16,
+        load_in_8bit=True,
     )
     tokenizer = AutoTokenizer.from_pretrained(hf_path, trust_remote_code=True)
     tokenizer.pad_token = tokenizer.eos_token
