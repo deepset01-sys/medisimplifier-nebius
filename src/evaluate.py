@@ -146,6 +146,8 @@ def main():
     parser.add_argument("--output-dir", default="/output/eval")
     parser.add_argument("--zero-shot", action="store_true",
                         help="Evaluate without adapter (zero-shot baseline)")
+    parser.add_argument("--fast", action="store_true",
+                        help="Skip BERTScore and SARI (faster evaluation)")
     args = parser.parse_args()
 
     model_info = MODELS[args.model]
@@ -174,8 +176,14 @@ def main():
     print("Computing metrics...")
     rouge_l = compute_rouge_l(predictions, references)
     fk_grade = compute_fk_grade(predictions)
-    bertscore = compute_bertscore(predictions, references)
-    sari = compute_sari(sources, predictions, references)
+
+    if not args.fast:
+        bertscore = compute_bertscore(predictions, references)
+        sari = compute_sari(sources, predictions, references)
+    else:
+        bertscore = 0.0
+        sari = 0.0
+        print("Fast mode: skipping BERTScore and SARI")
 
     results = {
         "model": args.model,
