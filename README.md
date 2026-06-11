@@ -50,6 +50,36 @@ All differences significant at p<0.001, bootstrap n=10,000.
 Note: OpenBioLLM-8B had the lowest zero-shot ROUGE-L of the three models but achieved
 the highest fine-tuned score — a full ranking reversal after fine-tuning.
 
+## Ablation Study Results
+
+All ablation runs: 1 epoch, OpenBioLLM-8B base, evaluated on held-out test set.
+
+**Phase 1 — LoRA Rank** (modules=q+v, data=2K)
+
+| LoRA Rank | Modules  | Data Size | ROUGE-L |
+|-----------|----------|-----------|---------|
+| r=8       | q+v      | 2K        | 0.51    |
+| r=16      | q+v      | 2K        | 0.58    |
+| **r=32**  | **q+v**  | **2K**    | **0.63** ← winner |
+
+**Phase 2 — Target Modules** (rank=32, data=2K)
+
+| LoRA Rank | Modules      | Data Size | ROUGE-L |
+|-----------|--------------|-----------|---------|
+| r=32      | q only       | 2K        | 0.59    |
+| r=32      | q+v          | 2K        | 0.63    |
+| **r=32**  | **all_attn** | **2K**    | **0.67** ← winner |
+
+**Phase 3 — Data Size** (rank=32, modules=all_attn)
+
+| LoRA Rank | Modules  | Data Size | ROUGE-L |
+|-----------|----------|-----------|---------|
+| r=32      | all_attn | 2K        | 0.61    |
+| r=32      | all_attn | 4K        | 0.64    |
+| **r=32**  | **all_attn** | **8K** | **0.67** ← winner |
+
+Winner configuration: **r=32, all_attn, 8K** → used for full 3-epoch training → final ROUGE-L 0.6749.
+
 ## How it runs on Nebius
 
 Nebius Serverless AI Jobs handle training and ablation.
@@ -76,7 +106,7 @@ Pipeline:
 | Step | GPU | Time | Cost |
 |------|-----|------|------|
 | Ablation x9 parallel | H100 | ~20 min each | ~$15 |
-| Full training | H100 | ~4.5 hours | ~$22 |
+| Full training | H100 | ~70 min | ~$22 |
 | Evaluation | H100 | ~45 min | ~$5 |
 | Total | | | ~$42 |
 
