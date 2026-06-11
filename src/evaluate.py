@@ -77,24 +77,26 @@ def load_model(hf_path, adapter_path):
     return model, tokenizer
 
 
-def generate_predictions(model, tokenizer, dataset, model_format, batch_size=1):
+def generate_predictions(model, tokenizer, dataset, model_format, batch_size=4):
     predictions = []
-    for i, sample in enumerate(dataset):
-        prompt = build_prompt(sample, model_format)
-        inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+    for i in range(0, len(dataset), batch_size):
+        batch = dataset[i:i+batch_size]
+        prompts = [build_prompt(sample, model_format) for sample in batch]
+        inputs = tokenizer(prompts, return_tensors="pt", padding=True, truncation=True, max_length=2048).to(model.device)
         with torch.no_grad():
             outputs = model.generate(
                 **inputs,
-                max_new_tokens=1024,
-                temperature=0.1,
+                max_new_tokens=512,
                 do_sample=False,
                 pad_token_id=tokenizer.eos_token_id,
             )
-        generated = outputs[0][inputs["input_ids"].shape[1]:]
-        pred = tokenizer.decode(generated, skip_special_tokens=True).strip()
-        predictions.append(pred)
-        if (i + 1) % 50 == 0:
-            print(f"  Generated {i+1}/{len(dataset)}")
+        for j, output in enumerate(outputs):
+            input_len = inputs["input_ids"][j].shape[0]
+            generated = output[input_len:]
+            pred = tokenizer.decode(generated, skip_special_tokens=True).strip()
+            predictions.append(pred)
+        if (i + batch_size) % 100 == 0 or i == 0:
+            print(f"  Generated {min(i+batch_size, len(dataset))}/{len(dataset)}")
     return predictions
 
 
