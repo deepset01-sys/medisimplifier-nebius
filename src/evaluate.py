@@ -4,11 +4,14 @@ import argparse
 from pathlib import Path
 
 import torch
+import torch.nn as nn
 import numpy as np
 from datasets import load_dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import PeftModel
 from rouge_score import rouge_scorer
+from bert_score import score as bert_score
+from easse.sari import corpus_sari
 import textstat
 
 MODELS = {
@@ -122,111 +125,118 @@ def compute_rouge_l(predictions, references):
     return float(np.mean(scores))
 
 
-def compute_fk_grade(texts):
-    scores = [textstat.flesch_kincaid_grade(t) for t in texts if t.strip()]
-    return float(np.mean(scores))
-
-
 def compute_bertscore(predictions, references):
-    try:
-        from bert_score import score as bs_score
-        P, R, F = bs_score(predictions, references, lang="en", verbose=False)
-        return float(F.mean())
-    except Exception as e:
-        print(f"  BERTScore failed: {e}")
-        return 0.0
+    P, R, F1 = bert_score(
+        predictions,
+        references,
+        lang="en",
+        model_type="roberta-large",
+        device="cuda" if torch.cuda.is_available() else "cpu",
+        verbose=False,
+    )
+    return float(F1.mean())
 
 
 def compute_sari(sources, predictions, references):
-    try:
-        from easse.sari import corpus_sari
-        return float(corpus_sari(
-            orig_sents=sources,
-            sys_sents=predictions,
-            refs_sents=[references],
-        ))
-    except Exception as e:
-        print(f"  SARI failed: {e}")
-        return 0.0
+    return corpus_sari(
+        orig_sents=sources,
+        sys_sents=predictions,
+        refs_sents=[[r] for r in references],
+    )
+
+
+def compute_fk_grade(texts):
+    scores = []
+    for t in texts:
+        try:
+            scores.append(textstat.flesch_kincaid_grade(t))
+        except Exception:
+            pass
+    return float(np.mean(scores)) if scores else 0.0
 
 
 def main():
-    parser = argparse.ArgumentParser(description="MediSimplifier Evaluation")
-    parser.add_argument("--model", default="openbio", choices=list(MODELS.keys()))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model",        default="openbio")
     parser.add_argument("--adapter-path", default="/mnt/adapters/full_training")
-    parser.add_argument("--split", default="test", choices=["test", "validation"])
-    parser.add_argument("--output-dir", default="/output/eval")
-    parser.add_argument("--zero-shot", action="store_true",
-                        help="Evaluate without adapter (zero-shot baseline)")
-    parser.add_argument("--fast", action="store_true",
-                        help="Skip BERTScore and SARI (faster evaluation)")
+    parser.add_argument("--split",        default="test")
+    parser.add_argument("--output-dir",   default="/output/eval")
+    parser.add_argument("--zero-shot",    action="store_true")
+    parser.add_argument("--fast",         action="store_true",
+                        help="Skip BERTScore and SARI")
     args = parser.parse_args()
 
-    model_info = MODELS[args.model]
-    adapter = None if args.zero_shot else args.adapter_path
+    out = Path(args.output_dir)
+    out.mkdir(parents=True, exist_ok=True)
 
-    print(f"\n{'='*60}")
-    print(f"MediSimplifier Evaluation on Nebius")
-    print(f"  Model:   {model_info['hf_path']}")
-    print(f"  Adapter: {adapter or 'None (zero-shot)'}")
-    print(f"  Split:   {args.split}")
-    print(f"{'='*60}\n")
+    # ── Load data ──────────────────────────────────────────────
+    print("Loading dataset...")
+    from datasets import load_dataset
+    ds = load_dataset("GuyDor007/medisimplifier-dataset", split=args.split)
+    sources     = [ex["note"]       for ex in ds]
+    references  = [ex["simplified"] for ex in ds]
 
-    dataset = load_dataset("GuyDor007/medisimplifier-dataset")[args.split]
-    print(f"Loaded {len(dataset)} samples from {args.split} split")
-    print(f"Dataset loaded: {len(dataset)} samples")
-
-    model, tokenizer = load_model(model_info["hf_path"], adapter)
-    print("Model loaded successfully")
-
-    print("Generating predictions...")
-    print(f"Starting generation on {len(dataset)} samples...")
-    predictions = generate_predictions(
-        model, tokenizer, dataset, model_info["format"], batch_size=1
+    # ── Load model ─────────────────────────────────────────────
+    print("Loading model...")
+    tokenizer, model = load_model(
+        args.model,
+        adapter_path=None if args.zero_shot else args.adapter_path,
     )
 
-    references = [s["output"] for s in dataset]
-    sources = [s["input"] for s in dataset]
+    # ── Generate predictions ───────────────────────────────────
+    print(f"Generating on {len(sources)} samples...")
+    predictions = []
+    for src in sources:
+        prompt = build_prompt(args.model, src)
+        inputs = tokenizer(prompt, return_tensors="pt",
+                           truncation=True, max_length=2048).to(model.device)
+        with torch.no_grad():
+            out_ids = model.generate(
+                **inputs,
+                max_new_tokens=512,
+                do_sample=False,
+                pad_token_id=tokenizer.eos_token_id,
+            )
+        decoded = tokenizer.decode(
+            out_ids[0][inputs["input_ids"].shape[1]:],
+            skip_special_tokens=True,
+        )
+        predictions.append(decoded.strip())
 
-    print("Computing metrics...")
-    rouge_l = compute_rouge_l(predictions, references)
-    fk_grade = compute_fk_grade(predictions)
+    # ── Metrics ────────────────────────────────────────────────
+    print("Computing ROUGE-L...")
+    rouge = compute_rouge_l(predictions, references)
 
-    if not args.fast:
-        bertscore = compute_bertscore(predictions, references)
-        sari = compute_sari(sources, predictions, references)
+    print("Computing FK-Grade...")
+    fk = compute_fk_grade(predictions)
+
+    if args.fast:
+        bertscore_val, sari_val = 0.0, 0.0
+        print("Skipping BERTScore + SARI (--fast mode)")
     else:
-        bertscore = 0.0
-        sari = 0.0
-        print("Fast mode: skipping BERTScore and SARI")
+        print("Computing BERTScore...")
+        bertscore_val = compute_bertscore(predictions, references)
+        print("Computing SARI...")
+        sari_val = compute_sari(sources, predictions, references)
 
+    # ── Save results ───────────────────────────────────────────
     results = {
-        "model": args.model,
-        "adapter": adapter,
-        "split": args.split,
-        "n_samples": len(dataset),
-        "metrics": {
-            "ROUGE-L": round(rouge_l, 4),
-            "SARI": round(sari, 2),
-            "BERTScore-F1": round(bertscore, 4),
-            "FK-Grade": round(fk_grade, 2),
-        },
+        "model":      args.model,
+        "split":      args.split,
+        "n_samples":  len(predictions),
+        "zero_shot":  args.zero_shot,
+        "rouge_l":    rouge,
+        "bertscore":  bertscore_val,
+        "sari":       sari_val,
+        "fk_grade":   fk,
     }
-
-    print(f"\n{'='*40}")
-    print(f"Results — {args.model} ({'zero-shot' if args.zero_shot else 'fine-tuned'})")
-    print(f"  ROUGE-L:     {rouge_l:.4f}")
-    print(f"  SARI:        {sari:.2f}")
-    print(f"  BERTScore:   {bertscore:.4f}")
-    print(f"  FK-Grade:    {fk_grade:.2f}")
-    print(f"{'='*40}\n")
-
-    output_path = Path(args.output_dir)
-    output_path.mkdir(parents=True, exist_ok=True)
-    out_file = output_path / f"{args.model}_{'zeroshot' if args.zero_shot else 'finetuned'}_{args.split}.json"
-    with open(out_file, "w") as f:
+    with open(out / "results.json", "w") as f:
         json.dump(results, f, indent=2)
-    print(f"Results saved to: {out_file}")
+
+    print("\n── Results ──────────────────────────────")
+    for k, v in results.items():
+        print(f"  {k}: {v}")
+    print(f"\nSaved to {out / 'results.json'}")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 name: medisimplifier-evaluate
-description: "MediSimplifier evaluation - ROUGE-L, SARI, BERTScore, FK-Grade on test set"
+description: "MediSimplifier evaluation — ROUGE-L, SARI, BERTScore, FK-Grade"
 
 resources:
   gpu: H100
@@ -15,7 +15,7 @@ env:
 command: >
   python evaluate.py
   --model ${MODEL:-openbio}
-  --adapter-path ${ADAPTER_PATH:-GuyDor007/MediSimplifier-LoRA-Adapters}
+  --adapter-path ${ADAPTER_PATH:-/mnt/adapters/full_training}
   --split test
   --output-dir /output/eval
 
