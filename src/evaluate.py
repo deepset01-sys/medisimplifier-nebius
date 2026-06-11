@@ -174,10 +174,13 @@ def main():
 
     dataset = load_dataset("GuyDor007/medisimplifier-dataset")[args.split]
     print(f"Loaded {len(dataset)} samples from {args.split} split")
+    print(f"Dataset loaded: {len(dataset)} samples")
 
     model, tokenizer = load_model(model_info["hf_path"], adapter)
+    print("Model loaded successfully")
 
     print("Generating predictions...")
+    print(f"Starting generation on {len(dataset)} samples...")
     predictions = generate_predictions(
         model, tokenizer, dataset, model_info["format"], batch_size=1
     )
