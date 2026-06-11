@@ -95,6 +95,7 @@ def generate_predictions(model, tokenizer, dataset, model_format, batch_size=4):
             truncation=True,
             max_length=2048
         ).to(model.device)
+        print(f"Generating sample {i+1}/{len(dataset)}...")
         with torch.no_grad():
             outputs = model.generate(
                 **inputs,
