@@ -178,7 +178,7 @@ def main():
 
     print("Generating predictions...")
     predictions = generate_predictions(
-        model, tokenizer, dataset, model_info["format"]
+        model, tokenizer, dataset, model_info["format"], batch_size=1
     )
 
     references = [s["output"] for s in dataset]
