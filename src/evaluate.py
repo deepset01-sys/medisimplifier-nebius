@@ -178,7 +178,7 @@ def main():
 
     # ── Load model ─────────────────────────────────────────────
     print("Loading model...")
-    tokenizer, model = load_model(
+    model, tokenizer = load_model(
         args.model,
         adapter_path=None if args.zero_shot else args.adapter_path,
     )
