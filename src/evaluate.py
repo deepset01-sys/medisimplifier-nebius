@@ -173,8 +173,8 @@ def main():
     print("Loading dataset...")
     from datasets import load_dataset
     ds = load_dataset("GuyDor007/medisimplifier-dataset", split=args.split)
-    sources     = [ex["note"]       for ex in ds]
-    references  = [ex["simplified"] for ex in ds]
+    sources     = [ex["input"]    for ex in ds]
+    references  = [ex["output"]   for ex in ds]
 
     # ── Load model ─────────────────────────────────────────────
     print("Loading model...")
