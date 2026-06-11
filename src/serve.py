@@ -47,6 +47,11 @@ class SimplifyResponse(BaseModel):
 @app.on_event("startup")
 async def load_model():
     global model, tokenizer
+    hf_token = os.environ.get("HF_TOKEN", None)
+    if hf_token:
+        from huggingface_hub import login
+        login(token=hf_token)
+        print("Logged in to HuggingFace Hub")
     print(f"Loading tokenizer: {BASE_MODEL}")
     tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, trust_remote_code=True)
     tokenizer.pad_token = tokenizer.eos_token
