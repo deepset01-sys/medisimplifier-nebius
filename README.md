@@ -18,7 +18,7 @@ MediSimplifier fine-tunes open-source LLMs using LoRA to automatically simplify
 these documents to 7th-grade reading level — ~50% readability reduction —
 while preserving all critical medical information.
 
-**Key findings (contradicting established literature):**
+**Key findings (challenging the conventional recommendation of r=4-8 (Hu et al. 2021)):**
 
 | Finding | Result |
 |---------|--------|
@@ -144,29 +144,40 @@ Our training run:
 - **Job name:** `medisimplifier-full-training`
 - **GPU:** H100 SXM · 1 GPU · 3 epochs · ~70 min
 
-### 3. Run ablation (9 parallel jobs)
+### 3. Run ablation study (9 parallel jobs)
 
-Submit `jobs/job_ablation.yaml` via Nebius Console, setting the environment
-variables below for each configuration. All 9 jobs can run in parallel.
-
-    # Phase 1: rank (MODULES=q_v, EPOCHS=1)
-    LORA_RANK=8   MODULES=q_v EPOCHS=1
-    LORA_RANK=16  MODULES=q_v EPOCHS=1
-    LORA_RANK=32  MODULES=q_v EPOCHS=1
-
-    # Phase 2: modules (LORA_RANK=32, EPOCHS=1)
-    LORA_RANK=32  MODULES=q_only   EPOCHS=1
-    LORA_RANK=32  MODULES=q_v      EPOCHS=1
-    LORA_RANK=32  MODULES=all_attn EPOCHS=1
-
-    # Phase 3: data size (LORA_RANK=32, MODULES=all_attn, EPOCHS=1)
-    LORA_RANK=32  MODULES=all_attn DATA_SIZE=2000 EPOCHS=1
-    LORA_RANK=32  MODULES=all_attn DATA_SIZE=4000 EPOCHS=1
-    LORA_RANK=32  MODULES=all_attn DATA_SIZE=7999 EPOCHS=1
+```bash
+# Phase 1 — LoRA rank
+for RANK in 8 16 32; do
+  nebius ai job create \
+    --name medisimplifier-ablation-r${RANK} \
+    --parent-id project-e00g1ev2pr00wjxv40r6ga \
+    --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
+    --container-command sh \
+    --args "-c 'pip install transformers peft datasets trl accelerate bitsandbytes sentencepiece huggingface-hub --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 1 --rank ${RANK} --modules q_v --data-size 2000'" \
+    --platform gpu-h100-sxm \
+    --preset 1gpu-16vcpu-200gb \
+    --disk-size 250Gi \
+    --subnet-id vpcsubnet-e00jsdqfjrz04ygxc0 \
+    --timeout 2h
+done
+```
 
 ### 4. Evaluate
 
-Submit `jobs/job_evaluate.yaml` via Nebius Console with `MODEL=openbio`.
+```bash
+nebius ai job create \
+  --name medisimplifier-evaluate \
+  --parent-id project-e00g1ev2pr00wjxv40r6ga \
+  --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
+  --container-command sh \
+  --args "-c 'pip install transformers peft datasets accelerate bitsandbytes sentencepiece huggingface-hub rouge-score bert-score textstat --quiet && pip install git+https://github.com/feralvam/easse.git --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/evaluate.py --model openbio --adapter-path /mnt/adapters/full_training --split test --output-dir /mnt/adapters/eval_results'" \
+  --platform gpu-h100-sxm \
+  --preset 1gpu-16vcpu-200gb \
+  --disk-size 250Gi \
+  --subnet-id vpcsubnet-e00jsdqfjrz04ygxc0 \
+  --timeout 5h
+```
 
 Our evaluation run:
 
@@ -188,24 +199,23 @@ The endpoint exposes:
 
 ### 6. Call the live endpoint
 
-    curl -X POST http://195.242.29.108:8000/simplify \
+    curl -X POST http://<endpoint-ip>:8000/simplify \
       -H "Content-Type: application/json" \
       -d '{"text": "Patient presented with acute myocardial infarction..."}'
 
+To redeploy: see `jobs/endpoint_serve.yaml` and step 5 above.
+
 ## Live Demo
 
-The endpoint was tested live during development:
+The endpoint was live during development and returned:
 
-    curl -X POST http://195.242.29.108:8000/simplify \
-      -H "Content-Type: application/json" \
-      -d '{"text": "Patient presented with acute myocardial infarction and was administered thrombolytic therapy."}'
+    Input:  "Patient presented with acute myocardial infarction
+             and was administered thrombolytic therapy."
+    Output: "The patient came in with a heart attack and received
+             medicine to break up blood clots."
 
-    Response:
-    {
-      "simplified": "The patient came in with a heart attack and received medicine to break up blood clots.",
-      "model": "aaditya/Llama3-OpenBioLLM-8B",
-      "adapter": "/mnt/adapters/full_training"
-    }
+To redeploy: see `jobs/endpoint_serve.yaml` and step 5 above.
+Full response: `{"simplified": "...", "model": "aaditya/Llama3-OpenBioLLM-8B", "adapter": "/mnt/adapters/full_training"}`
 
 ## Project structure
 
