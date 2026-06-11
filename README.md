@@ -145,7 +145,11 @@ nebius ai job create \
 
 > The `ghcr.io/gd007/medisimplifier:train-latest` image is built from
 > `docker/Dockerfile.train` and includes all dependencies pre-installed.
-> Source: https://github.com/gd007/MediSimplifier/pkgs/container/medisimplifier
+> Source: https://ghcr.io/gd007/medisimplifier
+>
+> Note: `ghcr.io/gd007/medisimplifier` is the training image built
+> from the original research repo. The Nebius pipeline code lives at
+> `github.com/deepset01-sys/medisimplifier-nebius`.
 
 > Alternatively, submit via Nebius Console → AI Services → Jobs → Create job
 > using the config in `jobs/job_train.yaml`.
@@ -246,25 +250,20 @@ Full response: `{"simplified": "...", "model": "aaditya/Llama3-OpenBioLLM-8B", "
 
 ## Key Configuration
 
-### Training Job (job_train.yaml)
+All jobs use the `nebius ai job create` CLI. The training job parameters:
 
-```yaml
-name: medisimplifier-full-train
-description: "LoRA training — OpenBioLLM-8B, r=32, all_attn, 3 epochs"
-resources:
-  gpu: H100
-  gpu_count: 1
-docker:
-  image: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
-command: >
-  python train.py
-  --model openbio
-  --epochs 3
-  --rank 32
-  --modules all_attn
-  --data-size 7999
-  --output-dir /output/adapter
-```
+| Parameter | Value |
+|-----------|-------|
+| Image | `ghcr.io/gd007/medisimplifier:train-latest` |
+| Platform | `gpu-h100-sxm` |
+| Preset | `1gpu-16vcpu-200gb` |
+| Disk | `250Gi` |
+| Timeout | `5h` |
+| LoRA rank | 32 |
+| Target modules | q_proj, k_proj, v_proj, o_proj (all_attn) |
+| Epochs | 3 |
+| Batch size | 4 (grad_accum=4, effective=16) |
+| Learning rate | 2e-4 (cosine, warmup 3%) |
 
 ## Dataset and models
 
