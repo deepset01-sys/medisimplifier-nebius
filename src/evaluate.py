@@ -80,9 +80,20 @@ def load_model(hf_path, adapter_path):
 def generate_predictions(model, tokenizer, dataset, model_format, batch_size=4):
     predictions = []
     for i in range(0, len(dataset), batch_size):
-        batch = dataset[i:i+batch_size]
+        batch_dict = dataset[i:i+batch_size]
+        batch_size_actual = len(batch_dict["input"])
+        batch = [
+            {"input": batch_dict["input"][j], "output": batch_dict["output"][j]}
+            for j in range(batch_size_actual)
+        ]
         prompts = [build_prompt(sample, model_format) for sample in batch]
-        inputs = tokenizer(prompts, return_tensors="pt", padding=True, truncation=True, max_length=2048).to(model.device)
+        inputs = tokenizer(
+            prompts,
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+            max_length=2048
+        ).to(model.device)
         with torch.no_grad():
             outputs = model.generate(
                 **inputs,
