@@ -59,6 +59,7 @@ def load_model(hf_path, adapter_path):
     )
     tokenizer = AutoTokenizer.from_pretrained(hf_path, trust_remote_code=True)
     tokenizer.pad_token = tokenizer.eos_token
+    tokenizer.padding_side = "left"
     base = AutoModelForCausalLM.from_pretrained(
         hf_path,
         quantization_config=bnb_config,
