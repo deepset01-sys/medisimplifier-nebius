@@ -114,6 +114,13 @@ Pipeline:
 
 **Environment:** Python 3.11 · CUDA 12.1 · PyTorch 2.1.0
 
+### Prerequisites
+
+```bash
+export NEBIUS_PROJECT_ID=project-e00g1ev2pr00wjxv40r6ga
+export NEBIUS_SUBNET_ID=vpcsubnet-e00jsdqfjrz04ygxc0
+```
+
 ### 1. Clone and install
 
     git clone https://github.com/deepset01-sys/medisimplifier-nebius.git
@@ -125,16 +132,20 @@ Pipeline:
 ```bash
 nebius ai job create \
   --name medisimplifier-full-train \
-  --parent-id project-e00g1ev2pr00wjxv40r6ga \
-  --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
-  --container-command sh \
-  --args "-c 'pip install transformers peft datasets trl accelerate bitsandbytes sentencepiece huggingface-hub --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 3 --rank 32 --modules all_attn'" \
+  --parent-id ${NEBIUS_PROJECT_ID} \
+  --image ghcr.io/gd007/medisimplifier:train-latest \
+  --container-command python \
+  --args "src/train.py --model openbio --epochs 3 --rank 32 --modules all_attn" \
   --platform gpu-h100-sxm \
   --preset 1gpu-16vcpu-200gb \
   --disk-size 250Gi \
-  --subnet-id vpcsubnet-e00jsdqfjrz04ygxc0 \
+  --subnet-id ${NEBIUS_SUBNET_ID} \
   --timeout 5h
 ```
+
+> The `ghcr.io/gd007/medisimplifier:train-latest` image is built from
+> `docker/Dockerfile.train` and includes all dependencies pre-installed.
+> Source: https://github.com/gd007/MediSimplifier/pkgs/container/medisimplifier
 
 > Alternatively, submit via Nebius Console → AI Services → Jobs → Create job
 > using the config in `jobs/job_train.yaml`.
@@ -151,14 +162,14 @@ Our training run:
 for RANK in 8 16 32; do
   nebius ai job create \
     --name medisimplifier-ablation-r${RANK} \
-    --parent-id project-e00g1ev2pr00wjxv40r6ga \
-    --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
-    --container-command sh \
-    --args "-c 'pip install transformers peft datasets trl accelerate bitsandbytes sentencepiece huggingface-hub --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 1 --rank ${RANK} --modules q_v --data-size 2000'" \
+    --parent-id ${NEBIUS_PROJECT_ID} \
+    --image ghcr.io/gd007/medisimplifier:train-latest \
+    --container-command python \
+    --args "src/train.py --model openbio --epochs 1 --rank ${RANK} --modules q_v --data-size 2000" \
     --platform gpu-h100-sxm \
     --preset 1gpu-16vcpu-200gb \
     --disk-size 250Gi \
-    --subnet-id vpcsubnet-e00jsdqfjrz04ygxc0 \
+    --subnet-id ${NEBIUS_SUBNET_ID} \
     --timeout 2h
 done
 ```
@@ -168,14 +179,14 @@ done
 ```bash
 nebius ai job create \
   --name medisimplifier-evaluate \
-  --parent-id project-e00g1ev2pr00wjxv40r6ga \
-  --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
-  --container-command sh \
-  --args "-c 'pip install transformers peft datasets accelerate bitsandbytes sentencepiece huggingface-hub rouge-score bert-score textstat --quiet && pip install git+https://github.com/feralvam/easse.git --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/evaluate.py --model openbio --adapter-path /mnt/adapters/full_training --split test --output-dir /mnt/adapters/eval_results'" \
+  --parent-id ${NEBIUS_PROJECT_ID} \
+  --image ghcr.io/gd007/medisimplifier:train-latest \
+  --container-command python \
+  --args "src/evaluate.py --model openbio --adapter-path /mnt/adapters/full_training --split test --output-dir /mnt/adapters/eval_results" \
   --platform gpu-h100-sxm \
   --preset 1gpu-16vcpu-200gb \
   --disk-size 250Gi \
-  --subnet-id vpcsubnet-e00jsdqfjrz04ygxc0 \
+  --subnet-id ${NEBIUS_SUBNET_ID} \
   --timeout 5h
 ```
 
