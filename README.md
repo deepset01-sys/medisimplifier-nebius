@@ -37,6 +37,19 @@ while preserving all critical medical information.
 
 All pairwise ROUGE-L differences significant (p < 0.001, bootstrap n=10,000).
 
+## Baseline vs Fine-Tuned Results
+
+| Model | Zero-Shot ROUGE-L | Fine-Tuned ROUGE-L | Improvement |
+|-------|-------------------|---------------------|-------------|
+| OpenBioLLM-8B | 0.2625 | 0.6749 | +157.3% |
+| Mistral-7B | 0.3912 | 0.6491 | +65.9% |
+| BioMistral-7B-DARE | 0.4123 | 0.6318 | +53.3% |
+
+All differences significant at p<0.001, bootstrap n=10,000.
+
+Note: OpenBioLLM-8B had the lowest zero-shot ROUGE-L of the three models but achieved
+the highest fine-tuned score — a full ranking reversal after fine-tuning.
+
 ## How it runs on Nebius
 
 Nebius Serverless AI Jobs handle training and ablation.
@@ -67,7 +80,9 @@ Pipeline:
 | Evaluation | H100 | ~45 min | ~$5 |
 | Total | | | ~$42 |
 
-## Reproduce in one command
+## Reproduce step by step
+
+**Environment:** Python 3.11 · CUDA 12.1 · PyTorch 2.1.0
 
 ### 1. Clone and install
 
@@ -77,28 +92,42 @@ Pipeline:
 
 ### 2. Run full training on Nebius
 
-    nebius job run --config jobs/job_train.yaml
+Jobs are submitted via the **Nebius Console** (console.nebius.com → AI Jobs).
+Upload `jobs/job_train.yaml` as the job configuration and submit.
+
+Our training run:
+
+- **Job name:** `medisimplifier-full-training`
+- **GPU:** H100 SXM · 1 GPU · 3 epochs · ~70 min
 
 ### 3. Run ablation (9 parallel jobs)
 
-    # Phase 1: rank
-    nebius job run --config jobs/job_ablation.yaml --env LORA_RANK=8  MODULES=q_v EPOCHS=1
-    nebius job run --config jobs/job_ablation.yaml --env LORA_RANK=16 MODULES=q_v EPOCHS=1
-    nebius job run --config jobs/job_ablation.yaml --env LORA_RANK=32 MODULES=q_v EPOCHS=1
+Submit `jobs/job_ablation.yaml` via Nebius Console, setting the environment
+variables below for each configuration. All 9 jobs can run in parallel.
 
-    # Phase 2: modules
-    nebius job run --config jobs/job_ablation.yaml --env LORA_RANK=32 MODULES=q_only   EPOCHS=1
-    nebius job run --config jobs/job_ablation.yaml --env LORA_RANK=32 MODULES=q_v      EPOCHS=1
-    nebius job run --config jobs/job_ablation.yaml --env LORA_RANK=32 MODULES=all_attn EPOCHS=1
+    # Phase 1: rank (MODULES=q_v, EPOCHS=1)
+    LORA_RANK=8   MODULES=q_v EPOCHS=1
+    LORA_RANK=16  MODULES=q_v EPOCHS=1
+    LORA_RANK=32  MODULES=q_v EPOCHS=1
 
-    # Phase 3: data size
-    nebius job run --config jobs/job_ablation.yaml --env LORA_RANK=32 MODULES=all_attn DATA_SIZE=2000 EPOCHS=1
-    nebius job run --config jobs/job_ablation.yaml --env LORA_RANK=32 MODULES=all_attn DATA_SIZE=4000 EPOCHS=1
-    nebius job run --config jobs/job_ablation.yaml --env LORA_RANK=32 MODULES=all_attn DATA_SIZE=7999 EPOCHS=1
+    # Phase 2: modules (LORA_RANK=32, EPOCHS=1)
+    LORA_RANK=32  MODULES=q_only   EPOCHS=1
+    LORA_RANK=32  MODULES=q_v      EPOCHS=1
+    LORA_RANK=32  MODULES=all_attn EPOCHS=1
+
+    # Phase 3: data size (LORA_RANK=32, MODULES=all_attn, EPOCHS=1)
+    LORA_RANK=32  MODULES=all_attn DATA_SIZE=2000 EPOCHS=1
+    LORA_RANK=32  MODULES=all_attn DATA_SIZE=4000 EPOCHS=1
+    LORA_RANK=32  MODULES=all_attn DATA_SIZE=7999 EPOCHS=1
 
 ### 4. Evaluate
 
-    nebius job run --config jobs/job_evaluate.yaml --env MODEL=openbio
+Submit `jobs/job_evaluate.yaml` via Nebius Console with `MODEL=openbio`.
+
+Our evaluation run:
+
+- **Job name:** `medisimplifier-evaluation-prompt`
+- **GPU:** H100 SXM · 1 GPU · ~45 min
 
 ### 5. Call the live endpoint
 
