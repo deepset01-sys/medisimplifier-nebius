@@ -129,11 +129,39 @@ Our evaluation run:
 - **Job name:** `medisimplifier-evaluation-prompt`
 - **GPU:** H100 SXM · 1 GPU · ~45 min
 
-### 5. Call the live endpoint
+### 5. Deploy live endpoint
 
-    curl -X POST https://YOUR_ENDPOINT/simplify \
+Via Nebius Console → AI Services → Endpoints → Create endpoint,
+or using the config in `jobs/endpoint_serve.yaml`.
+
+The endpoint exposes:
+
+    POST http://<endpoint-ip>:8000/simplify
+    {"text": "Patient presented with acute MI..."}
+    → {"simplified": "The patient had a heart attack...",
+       "model": "aaditya/Llama3-OpenBioLLM-8B",
+       "adapter": "/mnt/adapters/full_training"}
+
+### 6. Call the live endpoint
+
+    curl -X POST http://195.242.29.108:8000/simplify \
       -H "Content-Type: application/json" \
       -d '{"text": "Patient presented with acute myocardial infarction..."}'
+
+## Live Demo
+
+The endpoint was tested live during development:
+
+    curl -X POST http://195.242.29.108:8000/simplify \
+      -H "Content-Type: application/json" \
+      -d '{"text": "Patient presented with acute myocardial infarction and was administered thrombolytic therapy."}'
+
+    Response:
+    {
+      "simplified": "The patient came in with a heart attack and received medicine to break up blood clots.",
+      "model": "aaditya/Llama3-OpenBioLLM-8B",
+      "adapter": "/mnt/adapters/full_training"
+    }
 
 ## Project structure
 
@@ -145,9 +173,10 @@ Our evaluation run:
       Dockerfile.train  Training image
       Dockerfile.serve  Serving image
     jobs/
-      job_train.yaml    Full training job config
-      job_ablation.yaml Parametrized ablation job config
-      job_evaluate.yaml Evaluation job config
+      job_train.yaml       Full training job config
+      job_ablation.yaml    Parametrized ablation job config
+      job_evaluate.yaml    Evaluation job config
+      endpoint_serve.yaml  Endpoint deployment config
     requirements.txt
 
 ## Dataset and models
