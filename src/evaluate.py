@@ -187,7 +187,7 @@ def main():
     print(f"Generating on {len(sources)} samples...")
     predictions = []
     for src in sources:
-        prompt = build_prompt(args.model, src)
+        prompt = build_prompt(args.model, {"input": src})
         inputs = tokenizer(prompt, return_tensors="pt",
                            truncation=True, max_length=2048).to(model.device)
         with torch.no_grad():
