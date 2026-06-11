@@ -179,7 +179,7 @@ def main():
     # ── Load model ─────────────────────────────────────────────
     print("Loading model...")
     model, tokenizer = load_model(
-        args.model,
+        MODELS[args.model]["hf_path"],
         adapter_path=None if args.zero_shot else args.adapter_path,
     )
 
