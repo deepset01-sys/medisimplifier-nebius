@@ -9,7 +9,7 @@ from peft import PeftModel
 
 app = FastAPI(title="MediSimplifier API", version="1.0")
 
-ADAPTER_REPO = "GuyDor007/MediSimplifier-LoRA-Adapters/openbiollm_8b_lora"
+ADAPTER_REPO = "/mnt/adapters/full_training"
 BASE_MODEL = "aaditya/Llama3-OpenBioLLM-8B"
 
 TASK_INSTRUCTION = """Simplify the following medical discharge summary in plain language for patients with no medical background.
@@ -47,11 +47,6 @@ class SimplifyResponse(BaseModel):
 @app.on_event("startup")
 async def load_model():
     global model, tokenizer
-    hf_token = os.environ.get("HF_TOKEN", None)
-    if hf_token:
-        from huggingface_hub import login
-        login(token=hf_token)
-        print("Logged in to HuggingFace Hub")
     print(f"Loading tokenizer: {BASE_MODEL}")
     tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, trust_remote_code=True)
     tokenizer.pad_token = tokenizer.eos_token
