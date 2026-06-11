@@ -6,7 +6,7 @@ from pathlib import Path
 import torch
 import numpy as np
 from datasets import load_dataset
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import PeftModel
 from rouge_score import rouge_scorer
 import textstat
@@ -54,27 +54,27 @@ def build_prompt(sample, model_format):
 
 
 def load_model(hf_path, adapter_path):
-    bnb_config = BitsAndBytesConfig(
-        load_in_8bit=True,
-    )
+    print(f"Loading tokenizer: {hf_path}")
     tokenizer = AutoTokenizer.from_pretrained(hf_path, trust_remote_code=True)
     tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = "left"
+
+    print(f"Loading base model (no quantization)...")
     base = AutoModelForCausalLM.from_pretrained(
         hf_path,
-        quantization_config=bnb_config,
         device_map="auto",
         trust_remote_code=True,
-        torch_dtype=torch.bfloat16,
+        torch_dtype=torch.float16,
     )
+
     if adapter_path:
-        # Paths starting with /mnt/ are local filesystem mounts (Nebius job volumes)
-        is_local = adapter_path.startswith("/mnt/") or adapter_path.startswith("/")
-        print(f"  Loading adapter ({'local' if is_local else 'HuggingFace Hub'}): {adapter_path}")
-        model = PeftModel.from_pretrained(base, adapter_path, is_trainable=False)
+        print(f"Loading adapter: {adapter_path}")
+        model = PeftModel.from_pretrained(base, adapter_path)
     else:
         model = base
+
     model.eval()
+    print("Model ready!")
     return model, tokenizer
 
 
