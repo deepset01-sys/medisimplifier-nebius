@@ -116,31 +116,28 @@ Pipeline:
 
 ### 1. Clone and install
 
-    git clone https://github.com/gd007/MediSimplifier.git
-    cd MediSimplifier
+    git clone https://github.com/deepset01-sys/medisimplifier-nebius.git
+    cd medisimplifier-nebius
     pip install -r requirements.txt
 
-### 2. Run full training on Nebius
+### 2. Submit training job (Nebius CLI)
 
-Jobs are submitted via the **Nebius Console** (console.nebius.com → AI Jobs).
-Upload `jobs/job_train.yaml` as the job configuration and submit.
+```bash
+nebius ai job create \
+  --name medisimplifier-full-train \
+  --parent-id project-e00g1ev2pr00wjxv40r6ga \
+  --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
+  --container-command sh \
+  --args "-c 'pip install transformers peft datasets trl accelerate bitsandbytes sentencepiece huggingface-hub --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 3 --rank 32 --modules all_attn'" \
+  --platform gpu-h100-sxm \
+  --preset 1gpu-16vcpu-200gb \
+  --disk-size 250Gi \
+  --subnet-id vpcsubnet-e00jsdqfjrz04ygxc0 \
+  --timeout 5h
+```
 
-> **Note:** Nebius AI Jobs can also be submitted programmatically
-> via the Nebius CLI. The equivalent CLI command for the training job:
->
-> ```bash
-> nebius ai job create \
->   --name medisimplifier-full-train \
->   --parent-id project-e00g1ev2pr00wjxv40r6ga \
->   --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
->   --container-command sh \
->   --args "-c 'pip install transformers peft datasets trl accelerate bitsandbytes sentencepiece huggingface-hub --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 3 --rank 32 --modules all_attn'" \
->   --platform gpu-h100-sxm \
->   --preset 1gpu-16vcpu-200gb \
->   --disk-size 250Gi \
->   --subnet-id vpcsubnet-e00jsdqfjrz04ygxc0 \
->   --timeout 5h
-> ```
+> Alternatively, submit via Nebius Console → AI Services → Jobs → Create job
+> using the config in `jobs/job_train.yaml`.
 
 Our training run:
 
