@@ -74,7 +74,7 @@ All ablation runs: 1 epoch, OpenBioLLM-8B base, evaluated on held-out test set.
 
 | LoRA Rank | Modules  | Data Size | ROUGE-L |
 |-----------|----------|-----------|---------|
-| r=32      | all_attn | 2K        | 0.61    |
+| r=32      | all_attn | 2K        | 0.63    |
 | r=32      | all_attn | 4K        | 0.64    |
 | **r=32**  | **all_attn** | **8K** | **0.67** ← winner |
 
@@ -124,6 +124,23 @@ Pipeline:
 
 Jobs are submitted via the **Nebius Console** (console.nebius.com → AI Jobs).
 Upload `jobs/job_train.yaml` as the job configuration and submit.
+
+> **Note:** Nebius AI Jobs can also be submitted programmatically
+> via the Nebius CLI. The equivalent CLI command for the training job:
+>
+> ```bash
+> nebius ai job create \
+>   --name medisimplifier-full-train \
+>   --parent-id project-e00g1ev2pr00wjxv40r6ga \
+>   --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
+>   --container-command sh \
+>   --args "-c 'pip install transformers peft datasets trl accelerate bitsandbytes sentencepiece huggingface-hub --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 3 --rank 32 --modules all_attn'" \
+>   --platform gpu-h100-sxm \
+>   --preset 1gpu-16vcpu-200gb \
+>   --disk-size 250Gi \
+>   --subnet-id vpcsubnet-e00jsdqfjrz04ygxc0 \
+>   --timeout 5h
+> ```
 
 Our training run:
 
@@ -208,6 +225,28 @@ The endpoint was tested live during development:
       job_evaluate.yaml    Evaluation job config
       endpoint_serve.yaml  Endpoint deployment config
     requirements.txt
+
+## Key Configuration
+
+### Training Job (job_train.yaml)
+
+```yaml
+name: medisimplifier-full-train
+description: "LoRA training — OpenBioLLM-8B, r=32, all_attn, 3 epochs"
+resources:
+  gpu: H100
+  gpu_count: 1
+docker:
+  image: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
+command: >
+  python train.py
+  --model openbio
+  --epochs 3
+  --rank 32
+  --modules all_attn
+  --data-size 7999
+  --output-dir /output/adapter
+```
 
 ## Dataset and models
 
