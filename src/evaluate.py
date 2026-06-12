@@ -10,7 +10,6 @@ from datasets import load_dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import PeftModel
 from rouge_score import rouge_scorer
-from bert_score import score as bert_score
 from easse.sari import corpus_sari
 import textstat
 
@@ -121,6 +120,7 @@ def compute_rouge_l(predictions, references):
 
 
 def compute_bertscore(predictions, references):
+    from bert_score import score as bert_score
     P, R, F1 = bert_score(
         predictions,
         references,
