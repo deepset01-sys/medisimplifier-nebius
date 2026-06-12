@@ -72,16 +72,26 @@ async def load_model():
 
 
 @app.get("/health")
-async def health():
-    return {"status": "ok", "model": BASE_MODEL, "adapter": ADAPTER_REPO}
+def health():
+    return {
+        "status": "ok",
+        "model": BASE_MODEL,
+        "adapter": ADAPTER_REPO,
+        "max_input_chars": 8000,
+        "max_new_tokens": 512,
+        "batching": "single-request (one inference per call)",
+        "device": "cuda" if torch.cuda.is_available() else "cpu",
+    }
 
 
 @app.post("/simplify", response_model=SimplifyResponse)
 async def simplify(request: SimplifyRequest):
     if model is None or tokenizer is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
-    if not request.text.strip():
-        raise HTTPException(status_code=400, detail="text field is empty")
+    if not request.text or len(request.text.strip()) == 0:
+        raise HTTPException(status_code=400, detail="text field is required and cannot be empty")
+    if len(request.text) > 8000:
+        raise HTTPException(status_code=400, detail="text too long — maximum 8000 characters")
 
     prompt = INFERENCE_TEMPLATE.format(
         system=SYSTEM_MESSAGE,
@@ -90,14 +100,19 @@ async def simplify(request: SimplifyRequest):
     )
     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
 
-    with torch.no_grad():
-        outputs = model.generate(
-            **inputs,
-            max_new_tokens=request.max_new_tokens,
-            temperature=request.temperature,
-            do_sample=request.temperature > 0,
-            pad_token_id=tokenizer.eos_token_id,
-        )
+    try:
+        with torch.no_grad():
+            outputs = model.generate(
+                **inputs,
+                max_new_tokens=request.max_new_tokens,
+                temperature=request.temperature,
+                do_sample=request.temperature > 0,
+                pad_token_id=tokenizer.eos_token_id,
+            )
+    except torch.cuda.OutOfMemoryError:
+        raise HTTPException(status_code=503, detail="GPU out of memory — try shorter input")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Inference error: {str(e)}")
 
     generated = outputs[0][inputs["input_ids"].shape[1]:]
     simplified = tokenizer.decode(generated, skip_special_tokens=True).strip()
