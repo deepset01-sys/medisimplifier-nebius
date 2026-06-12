@@ -5,6 +5,12 @@
 [![HuggingFace Dataset](https://img.shields.io/badge/HF-Dataset-blue)](https://huggingface.co/datasets/GuyDor007/medisimplifier-dataset)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green)](LICENSE)
 
+> **Repository structure:**
+> - **Research & results:** [gd007/MediSimplifier](https://github.com/gd007/MediSimplifier) —
+>   original Technion course project with notebooks, IEEE paper, and all results
+> - **Nebius pipeline:** [deepset01-sys/medisimplifier-nebius](https://github.com/deepset01-sys/medisimplifier-nebius) —
+>   this repository: serverless Jobs + Endpoints on Nebius
+
 > Nebius Serverless AI Builders Challenge submission.
 > Reproducible LoRA fine-tuning pipeline for medical text simplification,
 > running entirely on Nebius Serverless AI Jobs and Endpoints.
@@ -335,6 +341,98 @@ All jobs use the `nebius ai job create` CLI. The training job parameters:
 | Dropout | 0.05 |
 | Trainable parameters | 27.3M (0.38% of total) |
 | Random seed | 42 |
+
+## Job & Endpoint Configs
+
+### Training Job (jobs/job_train.yaml)
+
+```yaml
+name: medisimplifier-full-train
+description: "MediSimplifier full LoRA training - OpenBioLLM-8B, r=32, all_attn, 3 epochs"
+
+resources:
+  gpu: H100
+  gpu_count: 1
+
+docker:
+  image: ghcr.io/gd007/medisimplifier:train-latest
+
+env:
+  HF_TOKEN: "${HF_TOKEN}"
+  PYTHONUNBUFFERED: "1"
+
+command: >
+  python train.py
+  --model openbio
+  --epochs 3
+  --rank 32
+  --modules all_attn
+  --data-size 7999
+  --output-dir /output/adapter
+
+output:
+  path: /output/adapter
+```
+
+### Evaluation Job (jobs/job_evaluate.yaml)
+
+```yaml
+name: medisimplifier-evaluate
+description: "MediSimplifier evaluation — ROUGE-L, SARI, BERTScore, FK-Grade"
+
+resources:
+  gpu: H100
+  gpu_count: 1
+
+docker:
+  image: ghcr.io/gd007/medisimplifier:train-latest
+
+env:
+  HF_TOKEN: "${HF_TOKEN}"
+  PYTHONUNBUFFERED: "1"
+
+command: >
+  python evaluate.py
+  --model ${MODEL:-openbio}
+  --adapter-path ${ADAPTER_PATH:-/mnt/adapters/full_training}
+  --split test
+  --output-dir /output/eval
+
+output:
+  path: /output/eval
+```
+
+### Endpoint (jobs/endpoint_serve.yaml)
+
+```yaml
+name: medisimplifier-serve
+description: "MediSimplifier inference endpoint — POST /simplify → simplified text"
+
+resources:
+  gpu: H100
+  gpu_count: 1
+
+docker:
+  image: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
+
+env:
+  HF_HOME: "/tmp/hf_cache"
+  PYTHONUNBUFFERED: "1"
+
+entrypoint: >
+  sh -c "apt-get update -qq && apt-get install -y git -qq &&
+  pip install transformers peft accelerate bitsandbytes
+  sentencepiece huggingface-hub fastapi uvicorn --quiet &&
+  git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace &&
+  python /workspace/src/serve.py"
+
+ports:
+  - 8000
+
+volumes:
+  - bucket: medisimplifier-adapters
+    mount: /mnt/adapters
+```
 
 ## Dependencies
 
