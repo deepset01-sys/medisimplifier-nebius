@@ -1,7 +1,14 @@
 import sys
 import types
-sys.modules['torchaudio'] = types.ModuleType('torchaudio')
-sys.modules['torchaudio'].__version__ = '0.0.0'
+
+_torchaudio = types.ModuleType('torchaudio')
+_torchaudio.__version__ = '0.0.0'
+_torchaudio.__spec__ = types.SimpleNamespace(
+    name='torchaudio',
+    origin=None,
+    submodule_search_locations=[]
+)
+sys.modules['torchaudio'] = _torchaudio
 
 import os
 import json
