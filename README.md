@@ -36,6 +36,7 @@ while preserving all critical medical information.
 | BioMistral-7B-DARE | 0.6318 [0.6272–0.6365] | 73.01 | 0.9439 | 6.95 | +53.3% |
 
 95% CIs from bootstrap (n=10,000). All pairwise ROUGE-L differences significant at p<0.001.
+All results use seed=42. Bootstrap CIs computed with n=10,000 resamples.
 
 ## Baseline vs Fine-Tuned Results
 
@@ -125,6 +126,20 @@ Pipeline:
 ## Reproduce step by step
 
 **Environment:** Python 3.11 · CUDA 12.1 · PyTorch 2.1.0
+
+### 0. Install and authenticate Nebius CLI
+
+Install:
+
+    pip install nebius
+
+Authenticate:
+
+    nebius auth login
+
+Verify:
+
+    nebius profile list
 
 ### Prerequisites
 
@@ -276,6 +291,53 @@ All jobs use the `nebius ai job create` CLI. The training job parameters:
 | Epochs | 3 |
 | Batch size | 4 (grad_accum=4, effective=16) |
 | Learning rate | 2e-4 (cosine, warmup 3%) |
+| Random seed | 42 |
+
+## Dependencies
+
+<details>
+<summary>requirements.txt (click to expand)</summary>
+
+```
+# MediSimplifier Dependencies
+# Tested on Python 3.9+ with CUDA 12.4
+
+# Core ML
+torch>=2.0.0
+transformers>=4.36.0
+datasets>=2.14.0
+accelerate>=0.24.0
+peft>=0.7.0
+bitsandbytes>=0.41.0
+
+# Evaluation Metrics
+evaluate>=0.4.0
+rouge-score>=0.1.2
+bert-score>=0.3.13
+textstat>=0.7.3
+sacrebleu>=2.3.0
+
+# SARI metric (install from GitHub)
+# pip install git+https://github.com/feralvam/easse.git
+
+# Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Utilities
+tqdm>=4.65.0
+typing_extensions>=4.10.0
+
+# Jupyter
+jupyter>=1.0.0
+ipywidgets>=8.0.0
+```
+
+</details>
 
 ## Dataset and models
 
