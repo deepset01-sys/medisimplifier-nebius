@@ -1,3 +1,8 @@
+import sys
+import types
+sys.modules['torchaudio'] = types.ModuleType('torchaudio')
+sys.modules['torchaudio'].__version__ = '0.0.0'
+
 import os
 import json
 import argparse
