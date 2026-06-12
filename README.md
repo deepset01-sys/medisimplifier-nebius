@@ -26,6 +26,9 @@ while preserving all critical medical information.
 | Optimal modules | all_attn (Q+K+V+O) outperforms standard Q+V |
 | Ranking reversal | Worst zero-shot model becomes best fine-tuned (+157%) |
 | Readability | FK-Grade 14.5 → 6.91, all differences p<0.001 |
+| Data efficiency | 4K samples achieves 97% of 8K performance |
+| Baseline-improvement correlation | r ≈ -0.998 — lower zero-shot = higher gain |
+| Total compute | 18 ablation runs + 3 full training runs, ~7.5 GPU hours |
 
 ## Results
 
@@ -37,6 +40,11 @@ while preserving all critical medical information.
 
 95% CIs from bootstrap (n=10,000). All pairwise ROUGE-L differences significant at p<0.001.
 All results use seed=42. Bootstrap CIs computed with n=10,000 resamples.
+
+> **Note on FK-Grade target:** The original research target was FK ≤ 6.0.
+> Best achieved: 6.91 (Mistral-7B). The gap of ~0.91 grade levels
+> reflects the inherent tension between medical accuracy preservation
+> and maximum simplification.
 
 ## Baseline vs Fine-Tuned Results
 
@@ -59,6 +67,21 @@ All results use seed=42. Bootstrap CIs computed with n=10,000 resamples.
 **Key finding:** OpenBioLLM-8B had the *lowest* zero-shot score (0.2623)
 but achieved the *highest* fine-tuned score (0.6749) — a full ranking
 reversal. All pairwise differences significant at p<0.001 (bootstrap n=10,000).
+
+## Visualizations
+
+Key figures from the research (available in the
+[original repository](https://github.com/gd007/MediSimplifier/tree/main/results/figures)):
+
+| Figure | Description |
+|--------|-------------|
+| `ranking_reversal.png` | Full ranking reversal — worst zero-shot → best fine-tuned |
+| `ablation_study_summary.png` | All 3 ablation phases in one chart |
+| `confidence_intervals.png` | 95% bootstrap CIs for all models |
+| `baseline_vs_finetuned_metrics.png` | Before/after across all 4 metrics |
+| `significance_matrix.png` | Pairwise statistical significance |
+| `error_analysis_dashboard.png` | Qualitative error analysis |
+| `model_performance_heatmap.png` | Full metrics heatmap |
 
 ## Ablation Study Results
 
@@ -259,6 +282,22 @@ The endpoint was live during development and returned:
 To redeploy: see `jobs/endpoint_serve.yaml` and step 5 above.
 Full response: `{"simplified": "...", "model": "aaditya/Llama3-OpenBioLLM-8B", "adapter": "/mnt/adapters/full_training"}`
 
+## Qualitative Example
+
+**Input (FK-Grade 16.2):**
+> "The patient was admitted with acute decompensated heart failure,
+> presenting with dyspnea, orthopnea, and bilateral lower extremity
+> edema. Echocardiography revealed an ejection fraction of 25%."
+
+**Output — OpenBioLLM-8B (FK-Grade 6.8):**
+> "The patient came in with severe heart failure. They had trouble
+> breathing, couldn't lie flat, and had swelling in both legs.
+> A heart ultrasound showed the heart was only pumping at 25%
+> of its normal strength."
+
+**Preserved:** diagnosis, symptoms, test result, ejection fraction value
+**Simplified:** all medical terms replaced with plain language
+
 ## Project structure
 
     src/
@@ -291,6 +330,10 @@ All jobs use the `nebius ai job create` CLI. The training job parameters:
 | Epochs | 3 |
 | Batch size | 4 (grad_accum=4, effective=16) |
 | Learning rate | 2e-4 (cosine, warmup 3%) |
+| LoRA alpha (α) | 64 (= 2 × rank) |
+| rsLoRA | True |
+| Dropout | 0.05 |
+| Trainable parameters | 27.3M (0.38% of total) |
 | Random seed | 42 |
 
 ## Dependencies
