@@ -31,52 +31,61 @@ while preserving all critical medical information.
 
 | Model | ROUGE-L | SARI | BERTScore | FK-Grade | Improvement |
 |-------|---------|------|-----------|----------|-------------|
-| OpenBioLLM-8B | 0.6749 | 74.64 | 0.9498 | 7.16 | +157.3% |
-| Mistral-7B | 0.6491 | 73.79 | 0.9464 | 6.91 | +65.9% |
-| BioMistral-7B-DARE | 0.6318 | 73.01 | 0.9439 | 6.95 | +53.3% |
+| OpenBioLLM-8B | 0.6749 [0.6705–0.6793] | 74.64 | 0.9498 | 7.16 | +157.3% |
+| Mistral-7B | 0.6491 [0.6445–0.6537] | 73.79 | 0.9464 | 6.91 | +65.9% |
+| BioMistral-7B-DARE | 0.6318 [0.6272–0.6365] | 73.01 | 0.9439 | 6.95 | +53.3% |
 
-All pairwise ROUGE-L differences significant (p < 0.001, bootstrap n=10,000).
+95% CIs from bootstrap (n=10,000). All pairwise ROUGE-L differences significant at p<0.001.
 
 ## Baseline vs Fine-Tuned Results
 
-| Model | Zero-Shot ROUGE-L | Fine-Tuned ROUGE-L | Improvement |
-|-------|-------------------|---------------------|-------------|
-| OpenBioLLM-8B | 0.2625 | 0.6749 | +157.3% |
-| Mistral-7B | 0.3912 | 0.6491 | +65.9% |
-| BioMistral-7B-DARE | 0.4123 | 0.6318 | +53.3% |
+### Zero-Shot Baseline (no fine-tuning, 1,001 test samples)
 
-All differences significant at p<0.001, bootstrap n=10,000.
+| Model | ROUGE-L | SARI | BERTScore | FK-Grade |
+|-------|---------|------|-----------|----------|
+| OpenBioLLM-8B | 0.2623 | 36.98 | 0.637 | 12.53 |
+| Mistral-7B | 0.3912 | 46.38 | 0.734 | 10.60 |
+| BioMistral-7B-DARE | 0.4120 | 51.91 | 0.743 | 9.52 |
 
-Note: OpenBioLLM-8B had the lowest zero-shot ROUGE-L of the three models but achieved
-the highest fine-tuned score — a full ranking reversal after fine-tuning.
+### After LoRA Fine-Tuning
+
+| Model | ROUGE-L | SARI | BERTScore | FK-Grade | Improvement |
+|-------|---------|------|-----------|----------|-------------|
+| OpenBioLLM-8B | 0.6749 [0.6705–0.6793] | 74.64 | 0.9498 | 7.16 | +157.3% |
+| Mistral-7B | 0.6491 [0.6445–0.6537] | 73.79 | 0.9464 | 6.91 | +65.9% |
+| BioMistral-7B-DARE | 0.6318 [0.6272–0.6365] | 73.01 | 0.9439 | 6.95 | +53.3% |
+
+**Key finding:** OpenBioLLM-8B had the *lowest* zero-shot score (0.2623)
+but achieved the *highest* fine-tuned score (0.6749) — a full ranking
+reversal. All pairwise differences significant at p<0.001 (bootstrap n=10,000).
 
 ## Ablation Study Results
 
-All ablation runs: 1 epoch, OpenBioLLM-8B base, evaluated on held-out test set.
+All ablation runs: 1 epoch, OpenBioLLM-8B base, evaluated on held-out test set (1,001 samples).
 
-**Phase 1 — LoRA Rank** (modules=q+v, data=2K)
+**Phase 1 — LoRA Rank** (modules=q+v, data=8K)
 
-| LoRA Rank | Modules  | Data Size | ROUGE-L |
-|-----------|----------|-----------|---------|
-| r=8       | q+v      | 2K        | 0.51    |
-| r=16      | q+v      | 2K        | 0.58    |
-| **r=32**  | **q+v**  | **2K**    | **0.63** ← winner |
+| LoRA Rank | Modules | Data Size | ROUGE-L |
+|-----------|---------|-----------|---------|
+| r=8       | q+v     | 8K        | 0.6033  |
+| r=16      | q+v     | 8K        | 0.6080  |
+| **r=32**  | **q+v** | **8K**    | **0.6183** ← winner |
 
-**Phase 2 — Target Modules** (rank=32, data=2K)
+**Phase 2 — Target Modules** (rank=32, data=8K)
 
 | LoRA Rank | Modules      | Data Size | ROUGE-L |
 |-----------|--------------|-----------|---------|
-| r=32      | q only       | 2K        | 0.59    |
-| r=32      | q+v          | 2K        | 0.63    |
-| **r=32**  | **all_attn** | **2K**    | **0.67** ← winner |
+| r=32      | q only       | 8K        | 0.6006  |
+| r=32      | q+v          | 8K        | 0.6192  |
+| **r=32**  | **all_attn** | **8K**    | **0.6357** ← winner |
 
 **Phase 3 — Data Size** (rank=32, modules=all_attn)
 
 | LoRA Rank | Modules  | Data Size | ROUGE-L |
 |-----------|----------|-----------|---------|
-| r=32      | all_attn | 2K        | 0.63    |
-| r=32      | all_attn | 4K        | 0.64    |
-| **r=32**  | **all_attn** | **8K** | **0.67** ← winner |
+| r=32      | all_attn | 2K        | 0.6014  |
+| r=32      | all_attn | 4K        | 0.6198  |
+| **r=32**  | **all_attn** | **8K** | **0.6345** ← winner |
 
 Winner configuration: **r=32, all_attn, 8K** → used for full 3-epoch training → final ROUGE-L 0.6749.
 
@@ -106,9 +115,12 @@ Pipeline:
 | Step | GPU | Time | Cost |
 |------|-----|------|------|
 | Ablation x9 parallel | H100 | ~20 min each | ~$15 |
-| Full training | H100 | ~70 min | ~$22 |
-| Evaluation | H100 | ~45 min | ~$5 |
+| Full training | H100 NVLink | ~70 min | ~$22 |
+| Evaluation | H100 NVLink | ~45 min | ~$5 |
 | Total | | | ~$42 |
+
+> Original research hardware: RunPod H200 SXM (~90 min/model across 3 GPUs).
+> Nebius reproduction uses H100 NVLink (~70 min, single GPU per job).
 
 ## Reproduce step by step
 
