@@ -84,12 +84,7 @@ def load_model(hf_path, adapter_path):
 def generate_predictions(model, tokenizer, dataset, model_format, batch_size=4):
     predictions = []
     for i in range(0, len(dataset), batch_size):
-        batch_dict = dataset[i:i+batch_size]
-        batch_size_actual = len(batch_dict["input"])
-        batch = [
-            {"input": batch_dict["input"][j], "output": batch_dict["output"][j]}
-            for j in range(batch_size_actual)
-        ]
+        batch = dataset[i:i+batch_size]
         prompts = [build_prompt(sample, model_format) for sample in batch]
         inputs = tokenizer(
             prompts,
@@ -185,23 +180,14 @@ def main():
 
     # ── Generate predictions ───────────────────────────────────
     print(f"Generating on {len(sources)} samples...")
-    predictions = []
-    for src in sources:
-        prompt = build_prompt({"input": src}, MODELS[args.model]["format"])
-        inputs = tokenizer(prompt, return_tensors="pt",
-                           truncation=True, max_length=2048).to(model.device)
-        with torch.no_grad():
-            out_ids = model.generate(
-                **inputs,
-                max_new_tokens=512,
-                do_sample=False,
-                pad_token_id=tokenizer.eos_token_id,
-            )
-        decoded = tokenizer.decode(
-            out_ids[0][inputs["input_ids"].shape[1]:],
-            skip_special_tokens=True,
-        )
-        predictions.append(decoded.strip())
+    dataset_for_gen = [{"input": s, "output": r}
+                       for s, r in zip(sources, references)]
+    predictions = generate_predictions(
+        model, tokenizer,
+        dataset_for_gen,
+        MODELS[args.model]["format"],
+        batch_size=4,
+    )
 
     # ── Metrics ────────────────────────────────────────────────
     print("Computing ROUGE-L...")
