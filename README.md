@@ -358,17 +358,17 @@ The endpoint is live on Nebius Serverless Endpoints:
       Dockerfile.train  Training image
       Dockerfile.serve  Serving image
     jobs/
+      job_train.yaml       Full training job config
+      job_ablation.yaml    Parametrized ablation job config
+      job_evaluate.yaml    Evaluation job config
+      endpoint_serve.yaml  Endpoint deployment config
+    requirements.txt
 
 > **Note on Dockerfiles:** `docker/Dockerfile.train` and `docker/Dockerfile.serve`
 > provide a containerized alternative to the inline pip install approach used in
 > the CLI commands above. Both approaches install identical dependencies.
 > The CLI approach (pip at startup) is used in this submission for simplicity
 > and to avoid private registry dependencies.
-      job_train.yaml       Full training job config
-      job_ablation.yaml    Parametrized ablation job config
-      job_evaluate.yaml    Evaluation job config
-      endpoint_serve.yaml  Endpoint deployment config
-    requirements.txt
 
 ## Key Configuration
 
@@ -395,10 +395,101 @@ All jobs use the `nebius ai job create` CLI. The training job parameters:
 ## Job & Endpoint Configs
 
 All jobs are submitted via `nebius ai job create` CLI (see Reproduce section).
-The YAML config files in `jobs/` document the parameters for reference:
-- `jobs/job_train.yaml` — full training parameters
-- `jobs/job_evaluate.yaml` — evaluation parameters
-- `jobs/endpoint_serve.yaml` — endpoint configuration
+The YAML files below match the CLI commands exactly and can be used as reference.
+
+### Training Job (jobs/job_train.yaml)
+
+```yaml
+name: medisimplifier-full-train
+description: "LoRA fine-tuning — OpenBioLLM-8B, r=32, all_attn, 3 epochs"
+parent_id: ${NEBIUS_PROJECT_ID}
+
+resources:
+  platform: gpu-h100-sxm
+  preset: 1gpu-16vcpu-200gb
+  disk_size: 250Gi
+  subnet_id: ${NEBIUS_SUBNET_ID}
+
+docker:
+  image: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
+  command: sh
+  args:
+    - "-c"
+    - "pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 3 --rank 32 --modules all_attn"
+
+env:
+  HF_TOKEN: "${HF_TOKEN}"
+  HF_HOME: "/tmp/hf_cache"
+  PYTHONUNBUFFERED: "1"
+
+timeout: 5h
+```
+
+### Evaluation Job (jobs/job_evaluate.yaml)
+
+```yaml
+name: medisimplifier-evaluate
+description: "Evaluation — ROUGE-L, SARI, BERTScore, FK-Grade on test split"
+parent_id: ${NEBIUS_PROJECT_ID}
+
+resources:
+  platform: gpu-h100-sxm
+  preset: 1gpu-16vcpu-200gb
+  disk_size: 250Gi
+  subnet_id: ${NEBIUS_SUBNET_ID}
+
+docker:
+  image: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
+  command: sh
+  args:
+    - "-c"
+    - "pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 rouge-score textstat --quiet && pip install git+https://github.com/feralvam/easse.git --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/evaluate.py --model openbio --adapter-path /mnt/adapters/full_training --split test --output-dir /mnt/adapters/eval_results"
+
+env:
+  HF_TOKEN: "${HF_TOKEN}"
+  HF_HOME: "/tmp/hf_cache"
+  PYTHONUNBUFFERED: "1"
+
+volumes:
+  - bucket: medisimplifier-adapters
+    mount: /mnt/adapters
+    mode: rw
+
+timeout: 5h
+```
+
+### Endpoint (jobs/endpoint_serve.yaml)
+
+```yaml
+name: medisimplifier-serve
+description: "MediSimplifier inference endpoint — POST /simplify → simplified text"
+parent_id: ${NEBIUS_PROJECT_ID}
+
+resources:
+  platform: gpu-h100-sxm
+  preset: 1gpu-16vcpu-200gb
+  subnet_id: ${NEBIUS_SUBNET_ID}
+
+docker:
+  image: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
+  command: sh
+  args:
+    - "-c"
+    - "pip install transformers==4.40.0 peft==0.10.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 fastapi==0.110.0 uvicorn==0.29.0 --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/serve.py"
+
+env:
+  HF_TOKEN: "${HF_TOKEN}"
+  HF_HOME: "/tmp/hf_cache"
+  PYTHONUNBUFFERED: "1"
+
+ports:
+  - 8000
+
+volumes:
+  - bucket: medisimplifier-adapters
+    mount: /mnt/adapters
+    mode: ro
+```
 
 ## Dependencies
 
@@ -406,42 +497,26 @@ The YAML config files in `jobs/` document the parameters for reference:
 <summary>requirements.txt (click to expand)</summary>
 
 ```
-# MediSimplifier Dependencies
-# Tested on Python 3.9+ with CUDA 12.4
-
-# Core ML
-torch>=2.0.0
-transformers>=4.36.0
-datasets>=2.14.0
-accelerate>=0.24.0
-peft>=0.7.0
-bitsandbytes>=0.41.0
-
-# Evaluation Metrics
-evaluate>=0.4.0
-rouge-score>=0.1.2
-bert-score>=0.3.13
-textstat>=0.7.3
-sacrebleu>=2.3.0
-
-# SARI metric (install from GitHub)
-# pip install git+https://github.com/feralvam/easse.git
-
-# Data Processing
-pandas>=2.0.0
-numpy>=1.24.0
-
-# Visualization
-matplotlib>=3.7.0
-seaborn>=0.12.0
-
-# Utilities
-tqdm>=4.65.0
-typing_extensions>=4.10.0
-
-# Jupyter
-jupyter>=1.0.0
-ipywidgets>=8.0.0
+torch==2.1.0
+transformers==4.40.0
+peft==0.10.0
+datasets==2.18.0
+trl==0.8.0
+accelerate==0.28.0
+bitsandbytes==0.43.0
+sentencepiece==0.2.0
+protobuf==4.25.0
+rouge-score==0.1.2
+bert-score==0.3.13
+evaluate==0.4.1
+fastapi==0.110.0
+uvicorn==0.29.0
+huggingface-hub==0.22.0
+numpy==1.26.0
+pandas==2.2.0
+tqdm==4.66.0
+easse @ git+https://github.com/feralvam/easse.git@main
+textstat==0.7.3
 ```
 
 </details>
