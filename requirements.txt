@@ -2,7 +2,7 @@ torch==2.1.0
 transformers==4.40.0
 peft==0.10.0
 datasets==2.18.0
-trl==0.8.6
+trl==0.8.0
 accelerate==0.28.0
 bitsandbytes==0.43.0
 sentencepiece==0.2.0
@@ -16,5 +16,5 @@ huggingface-hub==0.22.0
 numpy==1.26.0
 pandas==2.2.0
 tqdm==4.66.0
-easse @ git+https://github.com/feralvam/easse.git
-textstat==0.7.0
+easse @ git+https://github.com/feralvam/easse.git@main
+textstat==0.7.3
