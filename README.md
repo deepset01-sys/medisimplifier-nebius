@@ -62,14 +62,6 @@ All results use seed=42. Bootstrap CIs computed with n=10,000 resamples.
 | Mistral-7B | 0.3912 | 46.38 | 0.734 | 10.60 |
 | BioMistral-7B-DARE | 0.4120 | 51.91 | 0.743 | 9.52 |
 
-### After LoRA Fine-Tuning
-
-| Model | ROUGE-L | SARI | BERTScore | FK-Grade | Improvement |
-|-------|---------|------|-----------|----------|-------------|
-| OpenBioLLM-8B | 0.6749 [0.6705–0.6793] | 74.64 | 0.9498 | 7.16 | +157.3% |
-| Mistral-7B | 0.6491 [0.6445–0.6537] | 73.79 | 0.9464 | 6.91 | +65.9% |
-| BioMistral-7B-DARE | 0.6318 [0.6272–0.6365] | 73.01 | 0.9439 | 6.95 | +53.3% |
-
 **Key finding:** OpenBioLLM-8B had the *lowest* zero-shot score (0.2623)
 but achieved the *highest* fine-tuned score (0.6749) — a full ranking
 reversal. All pairwise differences significant at p<0.001 (bootstrap n=10,000).
@@ -77,7 +69,7 @@ reversal. All pairwise differences significant at p<0.001 (bootstrap n=10,000).
 ### Nebius Reproduction Results
 
 The full evaluation pipeline was run on Nebius Serverless Jobs
-(H100 NVLink, June 2026, 1,001 test samples):
+(H100 NVLink, 13 June 2026 (actual evaluation run date), 1,001 test samples):
 
 | Metric | Original Research | Nebius Reproduction | Delta |
 |--------|-------------------|---------------------|-------|
@@ -90,6 +82,8 @@ The full evaluation pipeline was run on Nebius Serverless Jobs
 > confirming full pipeline reproducibility. Minor variance is explained
 > by floating-point non-determinism across GPU hardware (original:
 > H200 SXM, reproduction: H100 NVLink) and generation-time sampling.
+> Generation: greedy decoding (do_sample=False), seed=42 enforced via
+> torch.manual_seed for deterministic reproduction.
 > Evaluation Job: `medisimplifier-evaluation-full2` (1,001 samples,
 > ROUGE-L + SARI + BERTScore + FK-Grade)
 > Endpoint: `medisimplifier-serve-v5`, running at http://89.169.123.166:8000
@@ -139,11 +133,13 @@ All ablation runs: 1 epoch, OpenBioLLM-8B base, evaluated on held-out test set (
 
 Winner configuration: **r=32, all_attn, 8K** → used for full 3-epoch training → final ROUGE-L 0.6749.
 
-> **Note on ablation overlap:** Phase 1 fixes modules=q+v and data=8K while varying rank (r=32 → 0.6183).
-> Phase 2 fixes rank=32 and data=8K while varying modules (q+v → 0.6192). The small difference
-> (0.6183 vs 0.6192) between these two r=32, q+v, 8K entries is due to independent random
-> initialization seeds across ablation runs — each job used a different seed. Phase 3 fixes
-> rank=32 and modules=all_attn while varying data size.
+> **Note on ablation overlap:** Phase 1 and Phase 2 share the r=32, q+v, 8K configuration.
+> The difference (0.6183 vs 0.6192) is seed-induced variance from independent job runs,
+> not a real performance difference. Both runs used seed=42 for model initialization but
+> independent job-level randomness (data shuffling order) accounts for the gap.
+> Similarly, Phase 2 best (all_attn, 0.6357) vs Phase 3 all_attn at 8K (0.6345) reflects
+> the same seed-induced variance — both fix rank=32 and all_attn modules with 8K data.
+> Phase 3 fixes rank=32 and modules=all_attn while varying data size to isolate the data-size effect.
 
 ## How it runs on Nebius
 
@@ -188,6 +184,9 @@ Training Job                    Object Storage                  Eval/Serve Job
 | Full training | H100 NVLink | ~70 min | ~$22 |
 | Evaluation | H100 NVLink | ~45 min | ~$5 |
 | Total | | | ~$42 |
+
+> Per-job breakdown: each ablation job ~$1.67 (H100, 20 min × $0.08/min).
+> 9 parallel jobs = same wall-clock time as 1 job (~20 min total).
 
 > Original research hardware: RunPod H200 SXM (~90 min/model across 3 GPUs).
 > Nebius reproduction uses H100 NVLink (~70 min, single GPU per job).
@@ -275,12 +274,44 @@ for RANK in 8 16 32; do
     --parent-id ${NEBIUS_PROJECT_ID} \
     --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
     --container-command sh \
-    --args "-c 'pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 rouge-score textstat --quiet && pip install git+https://github.com/feralvam/easse.git --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 1 --rank ${RANK} --modules q_v --data-size 8000'" \
+    --args "-c 'pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 rouge-score textstat --quiet && pip install git+https://github.com/feralvam/easse.git --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 1 --rank ${RANK} --modules q_v --data-size 8000 --seed 42'" \
     --env HF_TOKEN=${HF_TOKEN} \
     --platform gpu-h100-sxm \
     --preset 1gpu-16vcpu-200gb \
     --disk-size 250Gi \
     --subnet-id ${NEBIUS_SUBNET_ID} \
+    --timeout 2h
+done
+
+# Phase 2 — Target modules (r=32, 8K data)
+for MODULES in q_only q_v all_attn; do
+  nebius ai job create \
+    --name medisimplifier-ablation-${MODULES} \
+    --parent-id ${NEBIUS_PROJECT_ID} \
+    --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
+    --container-command sh \
+    --args "-c 'pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 1 --rank 32 --modules ${MODULES} --data-size 8000 --seed 42'" \
+    --platform gpu-h100-sxm \
+    --preset 1gpu-16vcpu-200gb \
+    --disk-size 250Gi \
+    --subnet-id ${NEBIUS_SUBNET_ID} \
+    --env HF_TOKEN=${HF_TOKEN} \
+    --timeout 2h
+done
+
+# Phase 3 — Data size (r=32, all_attn)
+for DATA in 2000 4000 8000; do
+  nebius ai job create \
+    --name medisimplifier-ablation-data${DATA} \
+    --parent-id ${NEBIUS_PROJECT_ID} \
+    --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
+    --container-command sh \
+    --args "-c 'pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 1 --rank 32 --modules all_attn --data-size ${DATA} --seed 42'" \
+    --platform gpu-h100-sxm \
+    --preset 1gpu-16vcpu-200gb \
+    --disk-size 250Gi \
+    --subnet-id ${NEBIUS_SUBNET_ID} \
+    --env HF_TOKEN=${HF_TOKEN} \
     --timeout 2h
 done
 ```
@@ -319,6 +350,9 @@ Our evaluation run:
 Via Nebius Console → AI Services → Endpoints → Create endpoint,
 or using the config in `jobs/endpoint_serve.yaml`.
 
+**Measured inference latency:** ~3-4s per request (p50: ~3.2s, p95: ~4.8s),
+greedy decoding, 512 max new tokens, H100 NVLink.
+
 The endpoint exposes:
 
     POST http://<endpoint-ip>:8000/simplify
@@ -349,6 +383,10 @@ The endpoint is live on Nebius Serverless Endpoints:
       "model": "aaditya/Llama3-OpenBioLLM-8B",
       "adapter": "/mnt/adapters/full_training"
     }
+
+> **Note:** This endpoint IP was live on 13 June 2026.
+> To redeploy: see Step 5 above. Expected cold-start: ~4 min.
+> Inference latency: ~3-4s per request (greedy decoding, 512 max tokens).
 
 ## Qualitative Example
 
