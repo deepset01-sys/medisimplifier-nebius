@@ -16,5 +16,5 @@ huggingface-hub==0.22.0
 numpy==1.26.0
 pandas==2.2.0
 tqdm==4.66.0
-easse @ git+https://github.com/feralvam/easse.git@main
+easse @ git+https://github.com/feralvam/easse.git@master
 textstat==0.7.3
