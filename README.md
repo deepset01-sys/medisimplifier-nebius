@@ -69,7 +69,7 @@ reversal. All pairwise differences significant at p<0.001 (bootstrap n=10,000).
 ### Nebius Reproduction Results
 
 The full evaluation pipeline was run on Nebius Serverless Jobs
-(H100 NVLink, 13 June 2026 (actual evaluation run date), 1,001 test samples):
+(H100 NVLink, 13 June 2026, 1,001 test samples):
 
 | Metric | Original Research | Nebius Reproduction | Delta |
 |--------|-------------------|---------------------|-------|
@@ -185,7 +185,6 @@ Training Job                    Object Storage                  Eval/Serve Job
 | Evaluation | H100 NVLink | ~45 min | ~$5 |
 | Total | | | ~$42 |
 
-> Per-job breakdown: each ablation job ~$1.67 (H100, 20 min × $0.08/min).
 > 9 parallel jobs = same wall-clock time as 1 job (~20 min total).
 
 > Original research hardware: RunPod H200 SXM (~90 min/model across 3 GPUs).
