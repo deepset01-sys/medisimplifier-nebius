@@ -148,7 +148,7 @@ def compute_sari(sources, predictions, references):
     return corpus_sari(
         orig_sents=sources,
         sys_sents=predictions,
-        refs_sents=[[r] for r in references],
+        refs_sents=[references],
     )
 
 
