@@ -218,6 +218,16 @@ export NEBIUS_SUBNET_ID=vpcsubnet-e00jsdqfjrz04ygxc0
 export HF_TOKEN=your_huggingface_token  # for gated models
 ```
 
+> **Note:** `aaditya/Llama3-OpenBioLLM-8B` is a gated model — you must request access
+> at https://huggingface.co/aaditya/Llama3-OpenBioLLM-8B before the job can download it.
+
+```bash
+# Create the output bucket (one-time setup)
+nebius storage bucket create \
+  --name medisimplifier-adapters \
+  --parent-id ${NEBIUS_PROJECT_ID}
+```
+
 ### 1. Clone and install
 
     git clone https://github.com/deepset01-sys/medisimplifier-nebius.git
@@ -387,6 +397,9 @@ All jobs use the `nebius ai job create` CLI. The training job parameters:
 | Random seed | 42 |
 
 ## Job & Endpoint Configs
+
+> These files document job parameters for reference.
+> The Reproduce section above shows the equivalent CLI commands.
 
 All jobs are submitted via `nebius ai job create` CLI (see Reproduce section).
 The YAML config files in `jobs/` document the parameters for reference:
