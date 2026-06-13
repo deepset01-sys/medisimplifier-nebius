@@ -1,25 +1,23 @@
 name: medisimplifier-full-train
-description: "MediSimplifier full LoRA training - OpenBioLLM-8B, r=32, all_attn, 3 epochs"
+description: "LoRA fine-tuning — OpenBioLLM-8B, r=32, all_attn, 3 epochs"
+parent_id: ${NEBIUS_PROJECT_ID}
 
 resources:
-  gpu: H100
-  gpu_count: 1
+  platform: gpu-h100-sxm
+  preset: 1gpu-16vcpu-200gb
+  disk_size: 250Gi
+  subnet_id: ${NEBIUS_SUBNET_ID}
 
 docker:
-  image: ghcr.io/gd007/medisimplifier:train-latest
+  image: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
+  command: sh
+  args:
+    - "-c"
+    - "pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 3 --rank 32 --modules all_attn"
 
 env:
   HF_TOKEN: "${HF_TOKEN}"
+  HF_HOME: "/tmp/hf_cache"
   PYTHONUNBUFFERED: "1"
 
-command: >
-  python train.py
-  --model openbio
-  --epochs 3
-  --rank 32
-  --modules all_attn
-  --data-size 7999
-  --output-dir /output/adapter
-
-output:
-  path: /output/adapter
+timeout: 5h

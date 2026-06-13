@@ -1,23 +1,23 @@
 name: medisimplifier-serve
 description: "MediSimplifier inference endpoint — POST /simplify → simplified text"
+parent_id: ${NEBIUS_PROJECT_ID}
 
 resources:
-  gpu: H100
-  gpu_count: 1
+  platform: gpu-h100-sxm
+  preset: 1gpu-16vcpu-200gb
+  subnet_id: ${NEBIUS_SUBNET_ID}
 
 docker:
   image: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
+  command: sh
+  args:
+    - "-c"
+    - "pip install transformers==4.40.0 peft==0.10.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 fastapi==0.110.0 uvicorn==0.29.0 --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/serve.py"
 
 env:
+  HF_TOKEN: "${HF_TOKEN}"
   HF_HOME: "/tmp/hf_cache"
   PYTHONUNBUFFERED: "1"
-
-entrypoint: >
-  sh -c "apt-get update -qq && apt-get install -y git -qq &&
-  pip install transformers peft accelerate bitsandbytes
-  sentencepiece huggingface-hub fastapi uvicorn --quiet &&
-  git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace &&
-  python /workspace/src/serve.py"
 
 ports:
   - 8000
@@ -25,3 +25,4 @@ ports:
 volumes:
   - bucket: medisimplifier-adapters
     mount: /mnt/adapters
+    mode: ro

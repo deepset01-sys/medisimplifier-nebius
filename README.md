@@ -358,6 +358,12 @@ The endpoint is live on Nebius Serverless Endpoints:
       Dockerfile.train  Training image
       Dockerfile.serve  Serving image
     jobs/
+
+> **Note on Dockerfiles:** `docker/Dockerfile.train` and `docker/Dockerfile.serve`
+> provide a containerized alternative to the inline pip install approach used in
+> the CLI commands above. Both approaches install identical dependencies.
+> The CLI approach (pip at startup) is used in this submission for simplicity
+> and to avoid private registry dependencies.
       job_train.yaml       Full training job config
       job_ablation.yaml    Parametrized ablation job config
       job_evaluate.yaml    Evaluation job config
