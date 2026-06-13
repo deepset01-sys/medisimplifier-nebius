@@ -218,6 +218,14 @@ export NEBIUS_SUBNET_ID=vpcsubnet-e00jsdqfjrz04ygxc0
 export HF_TOKEN=your_huggingface_token  # for gated models
 ```
 
+### Create storage bucket (first time only)
+
+```bash
+nebius storage bucket create \
+  --name medisimplifier-adapters \
+  --parent-id ${NEBIUS_PROJECT_ID}
+```
+
 ### 1. Clone and install
 
     git clone https://github.com/deepset01-sys/medisimplifier-nebius.git
@@ -318,6 +326,30 @@ The endpoint exposes:
 To redeploy: see `jobs/endpoint_serve.yaml` and step 5 above.
 
 ## Live Demo
+
+### Nebius Serverless Endpoint
+
+The inference API runs as a **Nebius AI Serverless Endpoint**
+(AI Services → Endpoints in the Nebius Console), not a raw VM.
+
+- Platform: NVIDIA H100 NVLink (gpu-h100-sxm)
+- Endpoint ID: `aiendpoint-e00gc4dnfv4n2w8e7q`
+- Type: Serverless (pay-per-second, auto-managed VM lifecycle)
+- API: FastAPI on port 8000 with `/simplify` and `/health` routes
+
+The endpoint is created via Nebius Console → AI Services → Endpoints,
+or equivalently via the Nebius CLI:
+
+```bash
+nebius ai endpoint create \
+  --name medisimplifier-serve \
+  --parent-id ${NEBIUS_PROJECT_ID} \
+  --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
+  --port 8000 \
+  --platform gpu-h100-sxm \
+  --preset 1gpu-16vcpu-200gb \
+  --subnet-id ${NEBIUS_SUBNET_ID}
+```
 
 The endpoint is live on Nebius Serverless Endpoints:
 
