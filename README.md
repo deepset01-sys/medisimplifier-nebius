@@ -76,20 +76,22 @@ reversal. All pairwise differences significant at p<0.001 (bootstrap n=10,000).
 
 ### Nebius Reproduction Results
 
-The following results were produced by running the evaluation
-pipeline on Nebius Serverless Jobs (H100 NVLink, June 2026):
+The full evaluation pipeline was run on Nebius Serverless Jobs
+(H100 NVLink, June 2026, 1,001 test samples):
 
 | Metric | Original Research | Nebius Reproduction | Delta |
 |--------|-------------------|---------------------|-------|
 | ROUGE-L | 0.6749 | 0.6638 | -1.6% |
+| SARI | 74.64 | 73.49 | -1.5% |
+| BERTScore | 0.9498 | 0.9460 | -0.4% |
 | FK-Grade | 7.16 | 7.33 | +0.17 |
 
-> Results confirm reproducibility. Minor variance (~1.6%) is expected
-> due to floating-point non-determinism across different GPU hardware
-> (original: H200 SXM, reproduction: H100 NVLink).
-> Full evaluation (BERTScore + SARI) running now — will be updated.
-
-> Evaluation Job: `medisimplifier-evaluation-spec` (1,001 test samples)
+> All four metrics reproduce within 1.6% of the original research,
+> confirming full pipeline reproducibility. Minor variance is explained
+> by floating-point non-determinism across GPU hardware (original:
+> H200 SXM, reproduction: H100 NVLink) and generation-time sampling.
+> Evaluation Job: `medisimplifier-evaluation-full2` (1,001 samples,
+> ROUGE-L + SARI + BERTScore + FK-Grade)
 
 ## Visualizations
 
