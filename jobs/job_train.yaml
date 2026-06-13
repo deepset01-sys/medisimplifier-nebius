@@ -9,7 +9,7 @@ resources:
   subnet_id: ${NEBIUS_SUBNET_ID}
 
 docker:
-  image: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
+  image: cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v1
   command: sh
   args:
     - "-c"

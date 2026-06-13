@@ -238,7 +238,7 @@ nebius storage bucket create \
 nebius ai job create \
   --name medisimplifier-full-train \
   --parent-id ${NEBIUS_PROJECT_ID} \
-  --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
+  --image cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v1 \
   --container-command sh \
   --args "-c 'pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 rouge-score textstat --quiet && pip install git+https://github.com/feralvam/easse.git --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 3 --rank 32 --modules all_attn --seed 42'" \
   --env HF_TOKEN=${HF_TOKEN} \
@@ -250,10 +250,10 @@ nebius ai job create \
   --timeout 5h
 ```
 
-> **Runtime setup:** Jobs use the official `pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime`
-> base image. Dependencies are installed at job startup via pip, and the pipeline
-> code is cloned from this repository. This keeps the setup fully reproducible
-> with no private image dependencies.
+> **Runtime setup:** Jobs use a pre-built image from Nebius Container Registry
+> (`cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v1`),
+> built from `docker/Dockerfile.train`. All dependencies are pre-installed;
+> the pipeline code is cloned from this repository at job startup.
 
 > Alternatively, submit via Nebius Console → AI Services → Jobs → Create job
 > using the config in `jobs/job_train.yaml`.
@@ -271,7 +271,7 @@ for RANK in 8 16 32; do
   nebius ai job create \
     --name medisimplifier-ablation-r${RANK} \
     --parent-id ${NEBIUS_PROJECT_ID} \
-    --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
+    --image cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v1 \
     --container-command sh \
     --args "-c 'pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 rouge-score textstat --quiet && pip install git+https://github.com/feralvam/easse.git --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 1 --rank ${RANK} --modules q_v --data-size 8000 --seed 42'" \
     --env HF_TOKEN=${HF_TOKEN} \
@@ -287,7 +287,7 @@ for MODULES in q_only q_v all_attn; do
   nebius ai job create \
     --name medisimplifier-ablation-${MODULES} \
     --parent-id ${NEBIUS_PROJECT_ID} \
-    --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
+    --image cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v1 \
     --container-command sh \
     --args "-c 'pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 1 --rank 32 --modules ${MODULES} --data-size 8000 --seed 42'" \
     --platform gpu-h100-sxm \
@@ -303,7 +303,7 @@ for DATA in 2000 4000 8000; do
   nebius ai job create \
     --name medisimplifier-ablation-data${DATA} \
     --parent-id ${NEBIUS_PROJECT_ID} \
-    --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
+    --image cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v1 \
     --container-command sh \
     --args "-c 'pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 1 --rank 32 --modules all_attn --data-size ${DATA} --seed 42'" \
     --platform gpu-h100-sxm \
@@ -321,7 +321,7 @@ done
 nebius ai job create \
   --name medisimplifier-evaluate \
   --parent-id ${NEBIUS_PROJECT_ID} \
-  --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
+  --image cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v1 \
   --container-command sh \
   --args "-c 'pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 rouge-score textstat --quiet && pip install git+https://github.com/feralvam/easse.git --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/evaluate.py --model openbio --adapter-path /mnt/adapters/full_training --split test --output-dir /mnt/adapters/eval_results'" \
   --env HF_TOKEN=${HF_TOKEN} \
@@ -425,7 +425,7 @@ All jobs use the `nebius ai job create` CLI. The training job parameters:
 
 | Parameter | Value |
 |-----------|-------|
-| Image | `pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime` (deps installed at startup) |
+| Image | `cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v1` (deps installed at startup) |
 | Platform | `gpu-h100-sxm` |
 | Preset | `1gpu-16vcpu-200gb` |
 | Disk | `250Gi` |
@@ -440,6 +440,18 @@ All jobs use the `nebius ai job create` CLI. The training job parameters:
 | Dropout | 0.05 |
 | Trainable parameters | 27.3M (0.38% of total) |
 | Random seed | 42 |
+
+### Container Image
+
+All jobs use a pre-built Docker image hosted on Nebius Container Registry:
+
+    cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v1
+
+Built from `docker/Dockerfile.train`. To rebuild and push:
+
+    docker build -t cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v1 \
+      -f docker/Dockerfile.train .
+    docker push cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v1
 
 ## Job & Endpoint Configs
 
@@ -464,7 +476,7 @@ resources:
   subnet_id: ${NEBIUS_SUBNET_ID}
 
 docker:
-  image: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
+  image: cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v1
   command: sh
   args:
     - "-c"
@@ -495,7 +507,7 @@ resources:
   subnet_id: ${NEBIUS_SUBNET_ID}
 
 docker:
-  image: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
+  image: cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v1
   command: sh
   args:
     - "-c"
@@ -530,7 +542,7 @@ resources:
   subnet_id: ${NEBIUS_SUBNET_ID}
 
 docker:
-  image: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
+  image: cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v1
   command: sh
   args:
     - "-c"
