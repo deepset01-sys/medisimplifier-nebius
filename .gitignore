@@ -8,3 +8,8 @@ build/
 .DS_Store
 *.log
 /output/
+review_output*.txt
+review_prompt.txt
+run_review.py
+blog_post_outline.md
+results/nebius_logs/

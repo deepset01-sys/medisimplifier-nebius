@@ -610,4 +610,4 @@ No real patient data. HCLS compliant.
 
 ## License
 
-Apache 2.0
+This project is licensed under the [Apache 2.0 License](LICENSE).
