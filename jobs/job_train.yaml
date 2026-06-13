@@ -13,11 +13,16 @@ docker:
   command: sh
   args:
     - "-c"
-    - "pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 3 --rank 32 --modules all_attn"
+    - "pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 3 --rank 32 --modules all_attn --seed 42"
 
 env:
   HF_TOKEN: "${HF_TOKEN}"
   HF_HOME: "/tmp/hf_cache"
   PYTHONUNBUFFERED: "1"
+
+volumes:
+  - bucket: medisimplifier-adapters
+    mount: /output
+    mode: rw
 
 timeout: 5h

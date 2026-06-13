@@ -242,12 +242,13 @@ nebius ai job create \
   --parent-id ${NEBIUS_PROJECT_ID} \
   --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
   --container-command sh \
-  --args "-c 'pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 rouge-score textstat --quiet && pip install git+https://github.com/feralvam/easse.git --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 3 --rank 32 --modules all_attn'" \
+  --args "-c 'pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 rouge-score textstat --quiet && pip install git+https://github.com/feralvam/easse.git --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 3 --rank 32 --modules all_attn --seed 42'" \
   --env HF_TOKEN=${HF_TOKEN} \
   --platform gpu-h100-sxm \
   --preset 1gpu-16vcpu-200gb \
   --disk-size 250Gi \
   --subnet-id ${NEBIUS_SUBNET_ID} \
+  --volume medisimplifier-adapters:/output:rw \
   --timeout 5h
 ```
 
@@ -300,6 +301,13 @@ nebius ai job create \
   --subnet-id ${NEBIUS_SUBNET_ID} \
   --timeout 5h
 ```
+
+> **Adapter source options:**
+> - **Option A — from bucket** (after running training): `--adapter-path /mnt/adapters/full_training`
+> - **Option B — from HuggingFace** (no training needed): `--adapter-hf-repo GuyDor007/MediSimplifier-LoRA-Adapters`
+>
+> Replace `--adapter-path` with `--adapter-hf-repo GuyDor007/MediSimplifier-LoRA-Adapters` in the
+> `--args` string above to evaluate directly from the public HF adapters.
 
 Our evaluation run:
 

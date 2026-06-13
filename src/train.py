@@ -160,7 +160,14 @@ def main():
                         help="Target modules (ablation)")
     parser.add_argument("--data-size", type=int, default=7999,
                         help="Training samples (ablation: 2000/4000/7999)")
+    parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
+
+    import random
+    import numpy as np
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
 
     # Resolve module configs for ablation
     MODULE_MAP = {

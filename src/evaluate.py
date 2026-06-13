@@ -164,12 +164,14 @@ def compute_fk_grade(texts):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model",        default="openbio")
-    parser.add_argument("--adapter-path", default="/mnt/adapters/full_training")
-    parser.add_argument("--split",        default="test")
-    parser.add_argument("--output-dir",   default="/output/eval")
-    parser.add_argument("--zero-shot",    action="store_true")
-    parser.add_argument("--fast",         action="store_true",
+    parser.add_argument("--model",           default="openbio")
+    parser.add_argument("--adapter-path",    default="/mnt/adapters/full_training")
+    parser.add_argument("--adapter-hf-repo", default=None,
+                        help="HuggingFace repo ID for adapter (skips bucket mount)")
+    parser.add_argument("--split",           default="test")
+    parser.add_argument("--output-dir",      default="/output/eval")
+    parser.add_argument("--zero-shot",       action="store_true")
+    parser.add_argument("--fast",            action="store_true",
                         help="Skip BERTScore and SARI")
     args = parser.parse_args()
 
@@ -185,9 +187,15 @@ def main():
 
     # ── Load model ─────────────────────────────────────────────
     print("Loading model...")
+    if args.zero_shot:
+        adapter_path = None
+    elif args.adapter_hf_repo:
+        adapter_path = args.adapter_hf_repo
+    else:
+        adapter_path = args.adapter_path
     model, tokenizer = load_model(
         MODELS[args.model]["hf_path"],
-        adapter_path=None if args.zero_shot else args.adapter_path,
+        adapter_path=adapter_path,
     )
 
     # ── Generate predictions ───────────────────────────────────
