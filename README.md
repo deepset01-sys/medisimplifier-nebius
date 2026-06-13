@@ -92,6 +92,7 @@ The full evaluation pipeline was run on Nebius Serverless Jobs
 > H200 SXM, reproduction: H100 NVLink) and generation-time sampling.
 > Evaluation Job: `medisimplifier-evaluation-full2` (1,001 samples,
 > ROUGE-L + SARI + BERTScore + FK-Grade)
+> Endpoint: `medisimplifier-serve-v5`, running at http://89.169.123.166:8000
 
 ## Visualizations
 
@@ -294,15 +295,18 @@ To redeploy: see `jobs/endpoint_serve.yaml` and step 5 above.
 
 ## Live Demo
 
-The endpoint was live during development and returned:
+The endpoint is live on Nebius Serverless Endpoints:
 
-    Input:  "Patient presented with acute myocardial infarction
-             and was administered thrombolytic therapy."
-    Output: "The patient came in with a heart attack and received
-             medicine to break up blood clots."
+    curl -X POST http://89.169.123.166:8000/simplify \
+      -H "Content-Type: application/json" \
+      -d '{"text": "Patient presented with acute myocardial infarction and was administered thrombolytic therapy."}'
 
-To redeploy: see `jobs/endpoint_serve.yaml` and step 5 above.
-Full response: `{"simplified": "...", "model": "aaditya/Llama3-OpenBioLLM-8B", "adapter": "/mnt/adapters/full_training"}`
+    Response:
+    {
+      "simplified": "The patient came in with a heart attack and received medicine to break up blood clots.",
+      "model": "aaditya/Llama3-OpenBioLLM-8B",
+      "adapter": "/mnt/adapters/full_training"
+    }
 
 ## Qualitative Example
 
