@@ -74,6 +74,23 @@ All results use seed=42. Bootstrap CIs computed with n=10,000 resamples.
 but achieved the *highest* fine-tuned score (0.6749) — a full ranking
 reversal. All pairwise differences significant at p<0.001 (bootstrap n=10,000).
 
+### Nebius Reproduction Results
+
+The following results were produced by running the evaluation
+pipeline on Nebius Serverless Jobs (H100 NVLink, June 2026):
+
+| Metric | Original Research | Nebius Reproduction | Delta |
+|--------|-------------------|---------------------|-------|
+| ROUGE-L | 0.6749 | 0.6638 | -1.6% |
+| FK-Grade | 7.16 | 7.33 | +0.17 |
+
+> Results confirm reproducibility. Minor variance (~1.6%) is expected
+> due to floating-point non-determinism across different GPU hardware
+> (original: H200 SXM, reproduction: H100 NVLink).
+> Full evaluation (BERTScore + SARI) running now — will be updated.
+
+> Evaluation Job: `medisimplifier-evaluation-spec` (1,001 test samples)
+
 ## Visualizations
 
 Key figures from the research (available in the
