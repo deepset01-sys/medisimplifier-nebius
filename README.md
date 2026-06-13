@@ -139,6 +139,12 @@ All ablation runs: 1 epoch, OpenBioLLM-8B base, evaluated on held-out test set (
 
 Winner configuration: **r=32, all_attn, 8K** → used for full 3-epoch training → final ROUGE-L 0.6749.
 
+> **Note on ablation overlap:** Phase 1 fixes modules=q+v and data=8K while varying rank (r=32 → 0.6183).
+> Phase 2 fixes rank=32 and data=8K while varying modules (q+v → 0.6192). The small difference
+> (0.6183 vs 0.6192) between these two r=32, q+v, 8K entries is due to independent random
+> initialization seeds across ablation runs — each job used a different seed. Phase 3 fixes
+> rank=32 and modules=all_attn while varying data size.
+
 ## How it runs on Nebius
 
 Nebius Serverless AI Jobs handle training and ablation.
@@ -159,6 +165,20 @@ Pipeline:
         |
         v
     Nebius Endpoint: POST /simplify -> simplified text
+
+### Adapter Storage Flow
+
+Training jobs write the LoRA adapter to `/output/adapter` inside the job.
+The job config mounts the `medisimplifier-adapters` bucket to `/output`,
+so the adapter is automatically persisted to Object Storage.
+Evaluation and serving jobs mount the same bucket to `/mnt/adapters`
+and read the adapter from `/mnt/adapters/full_training`.
+
+```
+Training Job                    Object Storage                  Eval/Serve Job
+/output/adapter/  ──────────►  medisimplifier-adapters  ◄────  /mnt/adapters/full_training/
+                                bucket (persistent)
+```
 
 ### Hardware and cost
 
@@ -195,6 +215,7 @@ Verify:
 ```bash
 export NEBIUS_PROJECT_ID=project-e00g1ev2pr00wjxv40r6ga
 export NEBIUS_SUBNET_ID=vpcsubnet-e00jsdqfjrz04ygxc0
+export HF_TOKEN=your_huggingface_token  # for gated models
 ```
 
 ### 1. Clone and install
@@ -211,7 +232,8 @@ nebius ai job create \
   --parent-id ${NEBIUS_PROJECT_ID} \
   --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
   --container-command sh \
-  --args "-c 'pip install transformers peft datasets trl accelerate bitsandbytes sentencepiece huggingface-hub rouge-score textstat --quiet && pip install git+https://github.com/feralvam/easse.git --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 3 --rank 32 --modules all_attn'" \
+  --args "-c 'pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 rouge-score textstat --quiet && pip install git+https://github.com/feralvam/easse.git --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 3 --rank 32 --modules all_attn'" \
+  --env HF_TOKEN=${HF_TOKEN} \
   --platform gpu-h100-sxm \
   --preset 1gpu-16vcpu-200gb \
   --disk-size 250Gi \
@@ -242,7 +264,8 @@ for RANK in 8 16 32; do
     --parent-id ${NEBIUS_PROJECT_ID} \
     --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
     --container-command sh \
-    --args "-c 'pip install transformers peft datasets trl accelerate bitsandbytes sentencepiece huggingface-hub rouge-score textstat --quiet && pip install git+https://github.com/feralvam/easse.git --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 1 --rank ${RANK} --modules q_v --data-size 2000'" \
+    --args "-c 'pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 rouge-score textstat --quiet && pip install git+https://github.com/feralvam/easse.git --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 1 --rank ${RANK} --modules q_v --data-size 2000'" \
+    --env HF_TOKEN=${HF_TOKEN} \
     --platform gpu-h100-sxm \
     --preset 1gpu-16vcpu-200gb \
     --disk-size 250Gi \
@@ -259,7 +282,8 @@ nebius ai job create \
   --parent-id ${NEBIUS_PROJECT_ID} \
   --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
   --container-command sh \
-  --args "-c 'pip install transformers peft datasets trl accelerate bitsandbytes sentencepiece huggingface-hub rouge-score textstat --quiet && pip install git+https://github.com/feralvam/easse.git --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/evaluate.py --model openbio --adapter-path /mnt/adapters/full_training --split test --output-dir /mnt/adapters/eval_results'" \
+  --args "-c 'pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 rouge-score textstat --quiet && pip install git+https://github.com/feralvam/easse.git --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/evaluate.py --model openbio --adapter-path /mnt/adapters/full_training --split test --output-dir /mnt/adapters/eval_results'" \
+  --env HF_TOKEN=${HF_TOKEN} \
   --platform gpu-h100-sxm \
   --preset 1gpu-16vcpu-200gb \
   --disk-size 250Gi \
@@ -364,95 +388,11 @@ All jobs use the `nebius ai job create` CLI. The training job parameters:
 
 ## Job & Endpoint Configs
 
-### Training Job (jobs/job_train.yaml)
-
-```yaml
-name: medisimplifier-full-train
-description: "MediSimplifier full LoRA training - OpenBioLLM-8B, r=32, all_attn, 3 epochs"
-
-resources:
-  gpu: H100
-  gpu_count: 1
-
-docker:
-  image: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
-
-env:
-  HF_TOKEN: "${HF_TOKEN}"
-  PYTHONUNBUFFERED: "1"
-
-command: >
-  python train.py
-  --model openbio
-  --epochs 3
-  --rank 32
-  --modules all_attn
-  --data-size 7999
-  --output-dir /output/adapter
-
-output:
-  path: /output/adapter
-```
-
-### Evaluation Job (jobs/job_evaluate.yaml)
-
-```yaml
-name: medisimplifier-evaluate
-description: "MediSimplifier evaluation — ROUGE-L, SARI, BERTScore, FK-Grade"
-
-resources:
-  gpu: H100
-  gpu_count: 1
-
-docker:
-  image: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
-
-env:
-  HF_TOKEN: "${HF_TOKEN}"
-  PYTHONUNBUFFERED: "1"
-
-command: >
-  python evaluate.py
-  --model ${MODEL:-openbio}
-  --adapter-path ${ADAPTER_PATH:-/mnt/adapters/full_training}
-  --split test
-  --output-dir /output/eval
-
-output:
-  path: /output/eval
-```
-
-### Endpoint (jobs/endpoint_serve.yaml)
-
-```yaml
-name: medisimplifier-serve
-description: "MediSimplifier inference endpoint — POST /simplify → simplified text"
-
-resources:
-  gpu: H100
-  gpu_count: 1
-
-docker:
-  image: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
-
-env:
-  HF_HOME: "/tmp/hf_cache"
-  PYTHONUNBUFFERED: "1"
-
-entrypoint: >
-  sh -c "apt-get update -qq && apt-get install -y git -qq &&
-  pip install transformers peft accelerate bitsandbytes
-  sentencepiece huggingface-hub fastapi uvicorn --quiet &&
-  git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace &&
-  python /workspace/src/serve.py"
-
-ports:
-  - 8000
-
-volumes:
-  - bucket: medisimplifier-adapters
-    mount: /mnt/adapters
-```
+All jobs are submitted via `nebius ai job create` CLI (see Reproduce section).
+The YAML config files in `jobs/` document the parameters for reference:
+- `jobs/job_train.yaml` — full training parameters
+- `jobs/job_evaluate.yaml` — evaluation parameters
+- `jobs/endpoint_serve.yaml` — endpoint configuration
 
 ## Dependencies
 
