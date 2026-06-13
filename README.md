@@ -206,9 +206,9 @@ export NEBIUS_SUBNET_ID=vpcsubnet-e00jsdqfjrz04ygxc0
 nebius ai job create \
   --name medisimplifier-full-train \
   --parent-id ${NEBIUS_PROJECT_ID} \
-  --image ghcr.io/gd007/medisimplifier:train-latest \
-  --container-command python \
-  --args "src/train.py --model openbio --epochs 3 --rank 32 --modules all_attn" \
+  --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
+  --container-command sh \
+  --args "-c 'pip install transformers peft datasets trl accelerate bitsandbytes sentencepiece huggingface-hub rouge-score textstat --quiet && pip install git+https://github.com/feralvam/easse.git --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 3 --rank 32 --modules all_attn'" \
   --platform gpu-h100-sxm \
   --preset 1gpu-16vcpu-200gb \
   --disk-size 250Gi \
@@ -216,13 +216,10 @@ nebius ai job create \
   --timeout 5h
 ```
 
-> The `ghcr.io/gd007/medisimplifier:train-latest` image is built from
-> `docker/Dockerfile.train` and includes all dependencies pre-installed.
-> Source: https://ghcr.io/gd007/medisimplifier
->
-> Note: `ghcr.io/gd007/medisimplifier` is the training image built
-> from the original research repo. The Nebius pipeline code lives at
-> `github.com/deepset01-sys/medisimplifier-nebius`.
+> **Runtime setup:** Jobs use the official `pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime`
+> base image. Dependencies are installed at job startup via pip, and the pipeline
+> code is cloned from this repository. This keeps the setup fully reproducible
+> with no private image dependencies.
 
 > Alternatively, submit via Nebius Console → AI Services → Jobs → Create job
 > using the config in `jobs/job_train.yaml`.
@@ -240,9 +237,9 @@ for RANK in 8 16 32; do
   nebius ai job create \
     --name medisimplifier-ablation-r${RANK} \
     --parent-id ${NEBIUS_PROJECT_ID} \
-    --image ghcr.io/gd007/medisimplifier:train-latest \
-    --container-command python \
-    --args "src/train.py --model openbio --epochs 1 --rank ${RANK} --modules q_v --data-size 2000" \
+    --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
+    --container-command sh \
+    --args "-c 'pip install transformers peft datasets trl accelerate bitsandbytes sentencepiece huggingface-hub rouge-score textstat --quiet && pip install git+https://github.com/feralvam/easse.git --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 1 --rank ${RANK} --modules q_v --data-size 2000'" \
     --platform gpu-h100-sxm \
     --preset 1gpu-16vcpu-200gb \
     --disk-size 250Gi \
@@ -257,9 +254,9 @@ done
 nebius ai job create \
   --name medisimplifier-evaluate \
   --parent-id ${NEBIUS_PROJECT_ID} \
-  --image ghcr.io/gd007/medisimplifier:train-latest \
-  --container-command python \
-  --args "src/evaluate.py --model openbio --adapter-path /mnt/adapters/full_training --split test --output-dir /mnt/adapters/eval_results" \
+  --image pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime \
+  --container-command sh \
+  --args "-c 'pip install transformers peft datasets trl accelerate bitsandbytes sentencepiece huggingface-hub rouge-score textstat --quiet && pip install git+https://github.com/feralvam/easse.git --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/evaluate.py --model openbio --adapter-path /mnt/adapters/full_training --split test --output-dir /mnt/adapters/eval_results'" \
   --platform gpu-h100-sxm \
   --preset 1gpu-16vcpu-200gb \
   --disk-size 250Gi \
@@ -343,7 +340,7 @@ All jobs use the `nebius ai job create` CLI. The training job parameters:
 
 | Parameter | Value |
 |-----------|-------|
-| Image | `ghcr.io/gd007/medisimplifier:train-latest` |
+| Image | `pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime` (deps installed at startup) |
 | Platform | `gpu-h100-sxm` |
 | Preset | `1gpu-16vcpu-200gb` |
 | Disk | `250Gi` |
@@ -372,7 +369,7 @@ resources:
   gpu_count: 1
 
 docker:
-  image: ghcr.io/gd007/medisimplifier:train-latest
+  image: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
 
 env:
   HF_TOKEN: "${HF_TOKEN}"
@@ -402,7 +399,7 @@ resources:
   gpu_count: 1
 
 docker:
-  image: ghcr.io/gd007/medisimplifier:train-latest
+  image: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
 
 env:
   HF_TOKEN: "${HF_TOKEN}"
