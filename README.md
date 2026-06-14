@@ -160,7 +160,7 @@ Pipeline:
     Nebius Job: Evaluation (ROUGE-L, SARI, BERTScore, FK-Grade)
         |
         v
-    Nebius Endpoint: POST /simplify -> simplified text
+    Nebius Endpoint: POST /v1/completions -> simplified text (vLLM, OpenAI-compatible)
 
 ### Adapter Storage Flow
 
@@ -349,43 +349,53 @@ Our evaluation run:
 Via Nebius Console → AI Services → Endpoints → Create endpoint,
 or using the config in `jobs/endpoint_serve.yaml`.
 
-**Measured inference latency:** ~3-4s per request (p50: ~3.2s, p95: ~4.8s),
-greedy decoding, 512 max new tokens, H100 NVLink.
+**Measured inference latency:** ~2-3s per request (H100 NVLink, vLLM).
 
-The endpoint exposes:
-
-    POST http://<endpoint-ip>:8000/simplify
-    {"text": "Patient presented with acute MI..."}
-    → {"simplified": "The patient had a heart attack...",
-       "model": "aaditya/Llama3-OpenBioLLM-8B",
-       "adapter": "/mnt/adapters/full_training"}
+The endpoint uses vLLM serving with the merged LoRA model, exposing an
+OpenAI-compatible `/v1/completions` endpoint (see `jobs/endpoint_vllm.yaml`).
+Run `src/merge_adapter.py` first to merge and upload the model, then deploy
+the vLLM endpoint.
 
 ### 6. Call the live endpoint
 
-    curl -X POST http://<endpoint-ip>:8000/simplify \
+    curl -X POST http://<endpoint-ip>:8000/v1/completions \
       -H "Content-Type: application/json" \
-      -d '{"text": "Patient presented with acute myocardial infarction..."}'
+      -d '{
+        "model": "/mnt/adapters/merged_openbio",
+        "prompt": "Simplify: Patient presented with acute myocardial infarction...\n\nSimplified:",
+        "max_tokens": 200,
+        "temperature": 0
+      }'
 
-To redeploy: see `jobs/endpoint_serve.yaml` and step 5 above.
+To redeploy: see `jobs/endpoint_vllm.yaml` and step 5 above.
 
 ## Live Demo
 
-The endpoint is live on Nebius Serverless Endpoints:
+The model is served via **Nebius AI Endpoint** running vLLM
+(`vllm/vllm-openai:latest`) with the merged LoRA model.
 
-    curl -X POST http://89.169.123.166:8000/simplify \
+### OpenAI-compatible API
+
+    curl -X POST http://89.169.110.2:8000/v1/completions \
       -H "Content-Type: application/json" \
-      -d '{"text": "Patient presented with acute myocardial infarction and was administered thrombolytic therapy."}'
+      -d '{
+        "model": "/mnt/adapters/merged_openbio",
+        "prompt": "Simplify this medical text for a patient: Patient presented with acute myocardial infarction and was administered thrombolytic therapy.\n\nSimplified:",
+        "max_tokens": 200,
+        "temperature": 0
+      }'
 
-    Response:
+Response:
     {
-      "simplified": "The patient came in with a heart attack and received medicine to break up blood clots.",
-      "model": "aaditya/Llama3-OpenBioLLM-8B",
-      "adapter": "/mnt/adapters/full_training"
+      "choices": [{
+        "text": "Patient had a heart attack and received medicine to break up blood clots."
+      }]
     }
 
-> **Note:** This endpoint IP was live on 13 June 2026.
-> To redeploy: see Step 5 above. Expected cold-start: ~4 min.
-> Inference latency: ~3-4s per request (greedy decoding, 512 max tokens).
+**Endpoint:** http://89.169.110.2:8000
+**API:** OpenAI-compatible `/v1/completions`
+**Model:** Merged LoRA (OpenBioLLM-8B + MediSimplifier adapter)
+**Latency:** ~2-3s per request (H100 NVLink, vLLM)
 
 ## Qualitative Example
 
