@@ -36,6 +36,21 @@ def main():
     )
 
     print(f"Loading adapter: {args.adapter_path}")
+    import os
+    print(f"Contents of {args.adapter_path}:")
+    try:
+        files = os.listdir(args.adapter_path)
+        print(f"Files: {files}")
+    except Exception as e:
+        print(f"Error listing directory: {e}")
+
+    print(f"Contents of /mnt/adapters:")
+    try:
+        files = os.listdir('/mnt/adapters')
+        print(f"Files: {files}")
+    except Exception as e:
+        print(f"Error listing /mnt/adapters: {e}")
+
     model = PeftModel.from_pretrained(base, args.adapter_path)
 
     print("Merging adapter into base model...")
