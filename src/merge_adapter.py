@@ -40,9 +40,17 @@ def main():
     merged = model.merge_and_unload()
 
     print(f"Saving merged model to: {args.output_path}")
-    merged.save_pretrained(args.output_path)
-    tokenizer.save_pretrained(args.output_path)
+    merged.save_pretrained(args.output_path, safe_serialization=True)
+    print("Model saved successfully.")
 
+    print(f"Saving tokenizer to: {args.output_path}")
+    tokenizer.save_pretrained(args.output_path)
+    print("Tokenizer saved successfully.")
+
+    # Verify files exist
+    import os
+    files = os.listdir(args.output_path)
+    print(f"Files in output: {files}")
     print("Done! Merged model saved.")
 
 if __name__ == "__main__":
