@@ -67,6 +67,10 @@ def main():
     import subprocess as sp
     sp.run(['pip', 'install', 'boto3', '--quiet'], check=True)
     print("boto3 installed.")
+    key_id = os.getenv('AWS_ACCESS_KEY_ID', 'NOT SET')
+    secret = os.getenv('AWS_SECRET_ACCESS_KEY', 'NOT SET')
+    print(f"AWS_ACCESS_KEY_ID: {key_id[:10]}..." if key_id != 'NOT SET' else "AWS_ACCESS_KEY_ID: NOT SET")
+    print(f"AWS_SECRET_ACCESS_KEY: {'SET (length=' + str(len(secret)) + ')' if secret != 'NOT SET' else 'NOT SET'}")
     print(f"Uploading to bucket: {args.bucket}/{args.bucket_key}")
     import boto3
     from botocore.config import Config
