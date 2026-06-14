@@ -53,10 +53,13 @@ def main():
     import boto3
     from botocore.config import Config
 
+    import os
     s3 = boto3.client(
         's3',
         endpoint_url='https://storage.eu-north1.nebius.cloud',
         region_name='eu-north1',
+        aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+        aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
     )
 
     for f in files:
