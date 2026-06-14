@@ -49,6 +49,9 @@ def main():
     files = os.listdir(args.output_path)
     print(f"Files saved locally: {files}")
 
+    import subprocess as sp
+    sp.run(['pip', 'install', 'boto3', '--quiet'], check=True)
+    print("boto3 installed.")
     print(f"Uploading to bucket: {args.bucket}/{args.bucket_key}")
     import boto3
     from botocore.config import Config
