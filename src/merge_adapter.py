@@ -64,35 +64,35 @@ def main():
     files = os.listdir(args.output_path)
     print(f"Files saved locally: {files}")
 
-    import subprocess as sp
-    sp.run(['pip', 'install', 'boto3', '--quiet'], check=True)
-    print("boto3 installed.")
-    key_id = os.getenv('AWS_ACCESS_KEY_ID', 'NOT SET')
-    secret = os.getenv('AWS_SECRET_ACCESS_KEY', 'NOT SET')
-    print(f"AWS_ACCESS_KEY_ID: {key_id[:10]}..." if key_id != 'NOT SET' else "AWS_ACCESS_KEY_ID: NOT SET")
-    print(f"AWS_SECRET_ACCESS_KEY: {'SET (length=' + str(len(secret)) + ')' if secret != 'NOT SET' else 'NOT SET'}")
     print(f"Uploading to bucket: {args.bucket}/{args.bucket_key}")
-    import boto3
-    from botocore.config import Config
+    import subprocess as sp
 
-    import os
-    s3 = boto3.client(
-        's3',
-        endpoint_url='https://storage.eu-north1.nebius.cloud:443',
-        region_name='eu-north1',
-        aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-        aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
-        verify=True,
-    )
+    # Configure AWS CLI for Nebius
+    sp.run(['pip', 'install', 'awscli', '--quiet'], check=True)
+
+    key_id = os.getenv('AWS_ACCESS_KEY_ID')
+    secret = os.getenv('AWS_SECRET_ACCESS_KEY')
+
+    env_vars = os.environ.copy()
+    env_vars['AWS_ACCESS_KEY_ID'] = key_id
+    env_vars['AWS_SECRET_ACCESS_KEY'] = secret
+    env_vars['AWS_DEFAULT_REGION'] = 'eu-north1'
 
     for f in files:
         local_path = os.path.join(args.output_path, f)
-        key = f'{args.bucket_key}/{f}'
-        print(f"Uploading: {f} → s3://{args.bucket}/{key}")
-        s3.upload_file(local_path, args.bucket, key)
-        print(f"Uploaded: {f}")
+        s3_path = f's3://{args.bucket}/{args.bucket_key}/{f}'
+        print(f"Uploading: {f} → {s3_path}")
+        result = sp.run([
+            'aws', 's3', 'cp', local_path, s3_path,
+            '--endpoint-url', 'https://storage.eu-north1.nebius.cloud',
+        ], env=env_vars, capture_output=True, text=True)
+        if result.returncode == 0:
+            print(f"Uploaded: {f}")
+        else:
+            print(f"Error: {result.stderr}")
+            raise Exception(f"Failed to upload {f}: {result.stderr}")
 
-    print("Done! Merged model uploaded to bucket.")
+    print("Done! All files uploaded.")
 
 if __name__ == "__main__":
     main()
