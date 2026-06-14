@@ -15,7 +15,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="openbio")
     parser.add_argument("--adapter-path", default="/mnt/adapters/full_training")
-    parser.add_argument("--output-path", default="/mnt/adapters/merged_openbio")
+    parser.add_argument("--output-path", default="/output/merged_openbio")
     args = parser.parse_args()
 
     hf_path = MODELS[args.model]
