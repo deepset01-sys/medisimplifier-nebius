@@ -50,19 +50,21 @@ def main():
     print(f"Files saved locally: {files}")
 
     print(f"Uploading to bucket: {args.bucket}/{args.bucket_key}")
-    import subprocess
+    import boto3
+    from botocore.config import Config
+
+    s3 = boto3.client(
+        's3',
+        endpoint_url='https://storage.eu-north1.nebius.cloud',
+        region_name='eu-north1',
+    )
+
     for f in files:
         local_path = os.path.join(args.output_path, f)
-        result = subprocess.run([
-            'nebius', 'storage', 'object', 'put',
-            '--bucket-name', args.bucket,
-            '--key', f'{args.bucket_key}/{f}',
-            '--source-path', local_path
-        ], capture_output=True, text=True)
-        if result.returncode == 0:
-            print(f"Uploaded: {f}")
-        else:
-            print(f"Failed to upload {f}: {result.stderr}")
+        key = f'{args.bucket_key}/{f}'
+        print(f"Uploading: {f} → s3://{args.bucket}/{key}")
+        s3.upload_file(local_path, args.bucket, key)
+        print(f"Uploaded: {f}")
 
     print("Done! Merged model uploaded to bucket.")
 
