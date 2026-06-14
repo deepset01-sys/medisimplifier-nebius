@@ -59,10 +59,11 @@ def main():
     import os
     s3 = boto3.client(
         's3',
-        endpoint_url='https://storage.eu-north1.nebius.cloud',
+        endpoint_url='https://storage.eu-north1.nebius.cloud:443',
         region_name='eu-north1',
         aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
         aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+        verify=True,
     )
 
     for f in files:
