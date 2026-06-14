@@ -1,0 +1,34 @@
+name: medisimplifier-vllm
+description: "MediSimplifier vLLM inference endpoint — OpenAI-compatible /v1/chat/completions"
+
+docker:
+  image: vllm/vllm-openai:latest
+  command: python
+  args:
+    - "-m"
+    - "vllm.entrypoints.openai.api_server"
+    - "--model"
+    - "/mnt/adapters/merged_openbio"
+    - "--port"
+    - "8000"
+    - "--dtype"
+    - "float16"
+    - "--max-model-len"
+    - "4096"
+
+env:
+  HF_HOME: "/tmp/hf_cache"
+  PYTHONUNBUFFERED: "1"
+
+ports:
+  - 8000
+
+volumes:
+  - bucket: medisimplifier-adapters
+    mount: /mnt/adapters
+    mode: ro
+
+resources:
+  platform: gpu-h100-sxm
+  preset: 1gpu-16vcpu-200gb
+  disk_size: 250Gi
