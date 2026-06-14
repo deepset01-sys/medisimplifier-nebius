@@ -15,7 +15,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="openbio")
     parser.add_argument("--adapter-path", default="/mnt/adapters/full_training")
-    parser.add_argument("--output-path", default="/output/merged_openbio")
+    parser.add_argument("--output-path", default="/tmp/merged_openbio")
+    parser.add_argument("--bucket", default="medisimplifier-adapters")
+    parser.add_argument("--bucket-key", default="merged_openbio")
     args = parser.parse_args()
 
     hf_path = MODELS[args.model]
@@ -39,19 +41,30 @@ def main():
     print("Merging adapter into base model...")
     merged = model.merge_and_unload()
 
-    print(f"Saving merged model to: {args.output_path}")
+    print(f"Saving merged model to local disk: {args.output_path}")
     merged.save_pretrained(args.output_path, safe_serialization=True)
-    print("Model saved successfully.")
-
-    print(f"Saving tokenizer to: {args.output_path}")
     tokenizer.save_pretrained(args.output_path)
-    print("Tokenizer saved successfully.")
 
-    # Verify files exist
     import os
     files = os.listdir(args.output_path)
-    print(f"Files in output: {files}")
-    print("Done! Merged model saved.")
+    print(f"Files saved locally: {files}")
+
+    print(f"Uploading to bucket: {args.bucket}/{args.bucket_key}")
+    import subprocess
+    for f in files:
+        local_path = os.path.join(args.output_path, f)
+        result = subprocess.run([
+            'nebius', 'storage', 'object', 'put',
+            '--bucket-name', args.bucket,
+            '--key', f'{args.bucket_key}/{f}',
+            '--source-path', local_path
+        ], capture_output=True, text=True)
+        if result.returncode == 0:
+            print(f"Uploaded: {f}")
+        else:
+            print(f"Failed to upload {f}: {result.stderr}")
+
+    print("Done! Merged model uploaded to bucket.")
 
 if __name__ == "__main__":
     main()
