@@ -6,7 +6,7 @@ resources:
   gpu_count: 1
 
 docker:
-  image: cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v2
+  image: cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v3
 
 env:
   HF_TOKEN: "${HF_TOKEN}"
