@@ -86,7 +86,7 @@ The full evaluation pipeline was run on Nebius Serverless Jobs
 > torch.manual_seed for deterministic reproduction.
 > Evaluation Job: `medisimplifier-evaluation-full2` (1,001 samples,
 > ROUGE-L + SARI + BERTScore + FK-Grade)
-> Endpoint: `medisimplifier-serve-v5`, running at http://89.169.123.166:8000
+> Endpoint: `medisimplifier-serve-v5`, running at http://89.169.110.2:8000
 
 ## Visualizations
 
@@ -161,6 +161,30 @@ Pipeline:
         |
         v
     Nebius Endpoint: POST /v1/completions -> simplified text (vLLM, OpenAI-compatible)
+
+### Merge & Deploy Pipeline (vLLM)
+
+The LoRA adapter is merged into the base model before serving:
+
+1. Run `src/merge_adapter.py` to merge adapter into base model
+2. Upload merged model to Object Storage via `aws s3 sync`
+3. Deploy `jobs/endpoint_vllm.yaml` — vLLM loads model from bucket
+
+```bash
+# Step 1: Merge (run as Nebius Job)
+python src/merge_adapter.py \
+  --model openbio \
+  --adapter-path /mnt/adapters/full_training \
+  --output-path /tmp/merged_openbio
+
+# Step 2: Upload to bucket
+aws s3 sync /tmp/merged_openbio/ \
+  s3://medisimplifier-adapters/merged_openbio/ \
+  --endpoint-url https://storage.eu-north1.nebius.cloud
+
+# Step 3: Deploy vLLM Endpoint via Nebius Console
+# AI Services → Endpoints → Create → use jobs/endpoint_vllm.yaml config
+```
 
 ### Adapter Storage Flow
 
@@ -463,6 +487,13 @@ Built from `docker/Dockerfile.train`. To rebuild and push:
       -f docker/Dockerfile.train .
     docker push cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v3
 
+> **Note for judges:** The training image
+> `cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v3`
+> is scoped to our Nebius project. To build your own:
+> ```bash
+> docker build -t medisimplifier:train-v3 -f docker/Dockerfile.train .
+> ```
+
 ## Job & Endpoint Configs
 
 > These files document job parameters for reference.
@@ -539,7 +570,7 @@ timeout: 5h
 </details>
 
 <details>
-<summary>jobs/endpoint_serve.yaml</summary>
+<summary>jobs/endpoint_serve.yaml (FastAPI — legacy, replaced by vLLM)</summary>
 
 ```yaml
 name: medisimplifier-serve
@@ -570,6 +601,48 @@ volumes:
   - bucket: medisimplifier-adapters
     mount: /mnt/adapters
     mode: ro
+```
+
+</details>
+
+<details>
+<summary>jobs/endpoint_vllm.yaml (vLLM — active deployment)</summary>
+
+```yaml
+name: medisimplifier-vllm
+description: "MediSimplifier vLLM inference endpoint — OpenAI-compatible /v1/chat/completions"
+
+docker:
+  image: vllm/vllm-openai:latest
+  command: python
+  args:
+    - "-m"
+    - "vllm.entrypoints.openai.api_server"
+    - "--model"
+    - "/mnt/adapters/merged_openbio"
+    - "--port"
+    - "8000"
+    - "--dtype"
+    - "float16"
+    - "--max-model-len"
+    - "4096"
+
+env:
+  HF_HOME: "/tmp/hf_cache"
+  PYTHONUNBUFFERED: "1"
+
+ports:
+  - 8000
+
+volumes:
+  - bucket: medisimplifier-adapters
+    mount: /mnt/adapters
+    mode: ro
+
+resources:
+  platform: gpu-h100-sxm
+  preset: 1gpu-16vcpu-200gb
+  disk_size: 250Gi
 ```
 
 </details>
