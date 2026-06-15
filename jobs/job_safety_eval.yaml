@@ -1,0 +1,31 @@
+name: medisimplifier-safety-eval
+description: "Medical safety evaluation — scispaCy entity preservation + Llama-3.3-70B judge"
+
+docker:
+  image: chambul/medisimplifier:train-v4
+  command: python
+  args:
+    - "safety_eval.py"
+    - "--adapter-hf-repo"
+    - "GuyDor007/MediSimplifier-LoRA-Adapters"
+    - "--n-samples"
+    - "100"
+    - "--output-file"
+    - "/output/safety_results.json"
+    - "--seed"
+    - "42"
+
+env:
+  HF_HOME: "/tmp/hf_cache"
+  PYTHONUNBUFFERED: "1"
+  NEBIUS_API_KEY: "${NEBIUS_API_KEY}"
+
+volumes:
+  - bucket: medisimplifier-adapters
+    mount: /output
+    mode: rw
+
+resources:
+  platform: gpu-h100-sxm
+  preset: 1gpu-16vcpu-200gb
+  disk_size: 250Gi
