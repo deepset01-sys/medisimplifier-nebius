@@ -282,6 +282,10 @@ nebius ai job create \
   --timeout 5h
 ```
 
+> The `--volume` flag mounts the `medisimplifier-adapters` bucket
+> to `/output` so the trained adapter persists after the job ends.
+> Equivalent YAML field: `volumes[0].bucket/mount/mode`.
+
 > **Runtime setup:** Jobs use `chambul/medisimplifier:train-v4` (public Docker Hub),
 > built from `docker/Dockerfile.train` with all dependencies pre-installed and
 > all `src/` scripts baked in. No pip install or git clone at job startup.
