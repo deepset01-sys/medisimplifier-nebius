@@ -9,11 +9,18 @@ resources:
   subnet_id: ${NEBIUS_SUBNET_ID}
 
 docker:
-  image: cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v3
-  command: sh
+  image: chambul/medisimplifier:train-v3
+  command: python
   args:
-    - "-c"
-    - "pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 rouge-score textstat --quiet && pip install git+https://github.com/feralvam/easse.git --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/evaluate.py --model openbio --adapter-path /mnt/adapters/full_training --split test --output-dir /mnt/adapters/eval_results"
+    - "evaluate.py"
+    - "--model"
+    - "openbio"
+    - "--adapter-path"
+    - "/mnt/adapters/full_training"
+    - "--split"
+    - "test"
+    - "--output-dir"
+    - "/mnt/adapters/eval_results"
 
 env:
   HF_TOKEN: "${HF_TOKEN}"

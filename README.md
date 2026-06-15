@@ -262,9 +262,9 @@ nebius storage bucket create \
 nebius ai job create \
   --name medisimplifier-full-train \
   --parent-id ${NEBIUS_PROJECT_ID} \
-  --image cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v3 \
-  --container-command sh \
-  --args "-c 'pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 rouge-score textstat --quiet && pip install git+https://github.com/feralvam/easse.git --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 3 --rank 32 --modules all_attn --seed 42'" \
+  --image chambul/medisimplifier:train-v3 \
+  --container-command python \
+  --args "train.py --model openbio --epochs 3 --rank 32 --modules all_attn --seed 42" \
   --env HF_TOKEN=${HF_TOKEN} \
   --platform gpu-h100-sxm \
   --preset 1gpu-16vcpu-200gb \
@@ -274,10 +274,9 @@ nebius ai job create \
   --timeout 5h
 ```
 
-> **Runtime setup:** Jobs use a pre-built image from Nebius Container Registry
-> (`cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v3`),
-> built from `docker/Dockerfile.train`. All dependencies are pre-installed;
-> the pipeline code is cloned from this repository at job startup.
+> **Runtime setup:** Jobs use `chambul/medisimplifier:train-v3` (public Docker Hub),
+> built from `docker/Dockerfile.train` with all dependencies pre-installed and
+> all `src/` scripts baked in. No pip install or git clone at job startup.
 
 > Alternatively, submit via Nebius Console → AI Services → Jobs → Create job
 > using the config in `jobs/job_train.yaml`.
@@ -295,9 +294,9 @@ for RANK in 8 16 32; do
   nebius ai job create \
     --name medisimplifier-ablation-r${RANK} \
     --parent-id ${NEBIUS_PROJECT_ID} \
-    --image cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v3 \
-    --container-command sh \
-    --args "-c 'pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 rouge-score textstat --quiet && pip install git+https://github.com/feralvam/easse.git --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 1 --rank ${RANK} --modules q_v --data-size 8000 --seed 42'" \
+    --image chambul/medisimplifier:train-v3 \
+    --container-command python \
+    --args "train.py --model openbio --epochs 1 --rank ${RANK} --modules q_v --data-size 8000 --seed 42" \
     --env HF_TOKEN=${HF_TOKEN} \
     --platform gpu-h100-sxm \
     --preset 1gpu-16vcpu-200gb \
@@ -311,9 +310,9 @@ for MODULES in q_only q_v all_attn; do
   nebius ai job create \
     --name medisimplifier-ablation-${MODULES} \
     --parent-id ${NEBIUS_PROJECT_ID} \
-    --image cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v3 \
-    --container-command sh \
-    --args "-c 'pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 1 --rank 32 --modules ${MODULES} --data-size 8000 --seed 42'" \
+    --image chambul/medisimplifier:train-v3 \
+    --container-command python \
+    --args "train.py --model openbio --epochs 1 --rank 32 --modules ${MODULES} --data-size 8000 --seed 42" \
     --platform gpu-h100-sxm \
     --preset 1gpu-16vcpu-200gb \
     --disk-size 250Gi \
@@ -327,9 +326,9 @@ for DATA in 2000 4000 8000; do
   nebius ai job create \
     --name medisimplifier-ablation-data${DATA} \
     --parent-id ${NEBIUS_PROJECT_ID} \
-    --image cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v3 \
-    --container-command sh \
-    --args "-c 'pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 1 --rank 32 --modules all_attn --data-size ${DATA} --seed 42'" \
+    --image chambul/medisimplifier:train-v3 \
+    --container-command python \
+    --args "train.py --model openbio --epochs 1 --rank 32 --modules all_attn --data-size ${DATA} --seed 42" \
     --platform gpu-h100-sxm \
     --preset 1gpu-16vcpu-200gb \
     --disk-size 250Gi \
@@ -345,9 +344,9 @@ done
 nebius ai job create \
   --name medisimplifier-evaluate \
   --parent-id ${NEBIUS_PROJECT_ID} \
-  --image cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v3 \
-  --container-command sh \
-  --args "-c 'pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 rouge-score textstat --quiet && pip install git+https://github.com/feralvam/easse.git --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/evaluate.py --model openbio --adapter-path /mnt/adapters/full_training --split test --output-dir /mnt/adapters/eval_results'" \
+  --image chambul/medisimplifier:train-v3 \
+  --container-command python \
+  --args "evaluate.py --model openbio --adapter-path /mnt/adapters/full_training --split test --output-dir /mnt/adapters/eval_results" \
   --env HF_TOKEN=${HF_TOKEN} \
   --platform gpu-h100-sxm \
   --preset 1gpu-16vcpu-200gb \
@@ -459,7 +458,7 @@ All jobs use the `nebius ai job create` CLI. The training job parameters:
 
 | Parameter | Value |
 |-----------|-------|
-| Image | `cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v3` (deps installed at startup) |
+| Image | `chambul/medisimplifier:train-v3` (all deps pre-installed, public Docker Hub) |
 | Platform | `gpu-h100-sxm` |
 | Preset | `1gpu-16vcpu-200gb` |
 | Disk | `250Gi` |
@@ -515,11 +514,20 @@ resources:
   subnet_id: ${NEBIUS_SUBNET_ID}
 
 docker:
-  image: cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v3
-  command: sh
+  image: chambul/medisimplifier:train-v3
+  command: python
   args:
-    - "-c"
-    - "pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/train.py --model openbio --epochs 3 --rank 32 --modules all_attn"
+    - "train.py"
+    - "--model"
+    - "openbio"
+    - "--epochs"
+    - "3"
+    - "--rank"
+    - "32"
+    - "--modules"
+    - "all_attn"
+    - "--seed"
+    - "42"
 
 env:
   HF_TOKEN: "${HF_TOKEN}"
@@ -546,11 +554,18 @@ resources:
   subnet_id: ${NEBIUS_SUBNET_ID}
 
 docker:
-  image: cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v3
-  command: sh
+  image: chambul/medisimplifier:train-v3
+  command: python
   args:
-    - "-c"
-    - "pip install transformers==4.40.0 peft==0.10.0 datasets==2.18.0 trl==0.8.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 rouge-score textstat --quiet && pip install git+https://github.com/feralvam/easse.git --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/evaluate.py --model openbio --adapter-path /mnt/adapters/full_training --split test --output-dir /mnt/adapters/eval_results"
+    - "evaluate.py"
+    - "--model"
+    - "openbio"
+    - "--adapter-path"
+    - "/mnt/adapters/full_training"
+    - "--split"
+    - "test"
+    - "--output-dir"
+    - "/mnt/adapters/eval_results"
 
 env:
   HF_TOKEN: "${HF_TOKEN}"
@@ -581,11 +596,10 @@ resources:
   subnet_id: ${NEBIUS_SUBNET_ID}
 
 docker:
-  image: cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v3
-  command: sh
+  image: chambul/medisimplifier:train-v3
+  command: python
   args:
-    - "-c"
-    - "pip install transformers==4.40.0 peft==0.10.0 accelerate==0.28.0 bitsandbytes==0.43.0 sentencepiece==0.2.0 huggingface-hub==0.22.0 fastapi==0.110.0 uvicorn==0.29.0 --quiet && git clone https://github.com/deepset01-sys/medisimplifier-nebius.git /workspace && python /workspace/src/serve.py"
+    - "serve.py"
 
 env:
   HF_TOKEN: "${HF_TOKEN}"
