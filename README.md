@@ -262,7 +262,7 @@ nebius storage bucket create \
 nebius ai job create \
   --name medisimplifier-full-train \
   --parent-id ${NEBIUS_PROJECT_ID} \
-  --image chambul/medisimplifier:train-v3 \
+  --image chambul/medisimplifier:train-v4 \
   --container-command python \
   --args "train.py --model openbio --epochs 3 --rank 32 --modules all_attn --seed 42" \
   --env HF_TOKEN=${HF_TOKEN} \
@@ -274,7 +274,7 @@ nebius ai job create \
   --timeout 5h
 ```
 
-> **Runtime setup:** Jobs use `chambul/medisimplifier:train-v3` (public Docker Hub),
+> **Runtime setup:** Jobs use `chambul/medisimplifier:train-v4` (public Docker Hub),
 > built from `docker/Dockerfile.train` with all dependencies pre-installed and
 > all `src/` scripts baked in. No pip install or git clone at job startup.
 
@@ -294,7 +294,7 @@ for RANK in 8 16 32; do
   nebius ai job create \
     --name medisimplifier-ablation-r${RANK} \
     --parent-id ${NEBIUS_PROJECT_ID} \
-    --image chambul/medisimplifier:train-v3 \
+    --image chambul/medisimplifier:train-v4 \
     --container-command python \
     --args "train.py --model openbio --epochs 1 --rank ${RANK} --modules q_v --data-size 8000 --seed 42" \
     --env HF_TOKEN=${HF_TOKEN} \
@@ -310,7 +310,7 @@ for MODULES in q_only q_v all_attn; do
   nebius ai job create \
     --name medisimplifier-ablation-${MODULES} \
     --parent-id ${NEBIUS_PROJECT_ID} \
-    --image chambul/medisimplifier:train-v3 \
+    --image chambul/medisimplifier:train-v4 \
     --container-command python \
     --args "train.py --model openbio --epochs 1 --rank 32 --modules ${MODULES} --data-size 8000 --seed 42" \
     --platform gpu-h100-sxm \
@@ -326,7 +326,7 @@ for DATA in 2000 4000 8000; do
   nebius ai job create \
     --name medisimplifier-ablation-data${DATA} \
     --parent-id ${NEBIUS_PROJECT_ID} \
-    --image chambul/medisimplifier:train-v3 \
+    --image chambul/medisimplifier:train-v4 \
     --container-command python \
     --args "train.py --model openbio --epochs 1 --rank 32 --modules all_attn --data-size ${DATA} --seed 42" \
     --platform gpu-h100-sxm \
@@ -344,7 +344,7 @@ done
 nebius ai job create \
   --name medisimplifier-evaluate \
   --parent-id ${NEBIUS_PROJECT_ID} \
-  --image chambul/medisimplifier:train-v3 \
+  --image chambul/medisimplifier:train-v4 \
   --container-command python \
   --args "evaluate.py --model openbio --adapter-path /mnt/adapters/full_training --split test --output-dir /mnt/adapters/eval_results" \
   --env HF_TOKEN=${HF_TOKEN} \
@@ -458,7 +458,7 @@ All jobs use the `nebius ai job create` CLI. The training job parameters:
 
 | Parameter | Value |
 |-----------|-------|
-| Image | `chambul/medisimplifier:train-v3` (all deps pre-installed, public Docker Hub) |
+| Image | `chambul/medisimplifier:train-v4` (all deps pre-installed, public Docker Hub) |
 | Platform | `gpu-h100-sxm` |
 | Preset | `1gpu-16vcpu-200gb` |
 | Disk | `250Gi` |
@@ -480,16 +480,16 @@ The training image is available on two registries:
 
 **Docker Hub (public — for judges):**
 
-    docker pull chambul/medisimplifier:train-v3
+    docker pull chambul/medisimplifier:train-v4
 
 **Nebius Container Registry (used in job configs):**
 
-    cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v3
+    cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v4
 
 Built from `docker/Dockerfile.train`. To rebuild:
 
-    docker build -t chambul/medisimplifier:train-v3 -f docker/Dockerfile.train .
-    docker push chambul/medisimplifier:train-v3
+    docker build -t chambul/medisimplifier:train-v4 -f docker/Dockerfile.train .
+    docker push chambul/medisimplifier:train-v4
 
 ## Job & Endpoint Configs
 
@@ -514,7 +514,7 @@ resources:
   subnet_id: ${NEBIUS_SUBNET_ID}
 
 docker:
-  image: chambul/medisimplifier:train-v3
+  image: chambul/medisimplifier:train-v4
   command: python
   args:
     - "train.py"
@@ -554,7 +554,7 @@ resources:
   subnet_id: ${NEBIUS_SUBNET_ID}
 
 docker:
-  image: chambul/medisimplifier:train-v3
+  image: chambul/medisimplifier:train-v4
   command: python
   args:
     - "evaluate.py"
@@ -596,7 +596,7 @@ resources:
   subnet_id: ${NEBIUS_SUBNET_ID}
 
 docker:
-  image: chambul/medisimplifier:train-v3
+  image: chambul/medisimplifier:train-v4
   command: python
   args:
     - "serve.py"
