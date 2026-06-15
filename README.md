@@ -477,22 +477,20 @@ All jobs use the `nebius ai job create` CLI. The training job parameters:
 
 ### Container Image
 
-All jobs use a pre-built Docker image hosted on Nebius Container Registry:
+The training image is available on two registries:
+
+**Docker Hub (public — for judges):**
+
+    docker pull chambul/medisimplifier:train-v3
+
+**Nebius Container Registry (used in job configs):**
 
     cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v3
 
-Built from `docker/Dockerfile.train`. To rebuild and push:
+Built from `docker/Dockerfile.train`. To rebuild:
 
-    docker build -t cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v3 \
-      -f docker/Dockerfile.train .
-    docker push cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v3
-
-> **Note for judges:** The training image
-> `cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v3`
-> is scoped to our Nebius project. To build your own:
-> ```bash
-> docker build -t medisimplifier:train-v3 -f docker/Dockerfile.train .
-> ```
+    docker build -t chambul/medisimplifier:train-v3 -f docker/Dockerfile.train .
+    docker push chambul/medisimplifier:train-v3
 
 ## Job & Endpoint Configs
 
