@@ -186,6 +186,14 @@ aws s3 sync /tmp/merged_openbio/ \
 # AI Services → Endpoints → Create → use jobs/endpoint_vllm.yaml config
 ```
 
+> **Nebius S3 credentials required:**
+> ```bash
+> export AWS_ACCESS_KEY_ID=<your-nebius-access-key-aws-like-id>
+> export AWS_SECRET_ACCESS_KEY=<your-nebius-access-key-secret>
+> # Create keys at: IAM → Service Accounts → medisimplifier-sa → Access keys
+> # Endpoint: https://storage.eu-north1.nebius.cloud
+> ```
+
 ### Adapter Storage Flow
 
 Training jobs write the LoRA adapter to `/output/adapter` inside the job.
