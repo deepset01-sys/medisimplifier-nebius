@@ -182,16 +182,9 @@ def main():
         args.base_model, torch_dtype=torch.float16,
         device_map="auto", trust_remote_code=True)
 
-    if Path(args.adapter_path).exists():
-        adapter = args.adapter_path
-        subfolder = None
-    else:
-        adapter = "GuyDor007/MediSimplifier-LoRA-Adapters"
-        subfolder = "openbio"
-
-    print(f"Loading adapter: {adapter} (subfolder: {subfolder})")
-    model = PeftModel.from_pretrained(base, adapter,
-                                       subfolder=subfolder)
+    adapter = args.adapter_path
+    print(f"Loading adapter: {adapter}")
+    model = PeftModel.from_pretrained(base, adapter)
     model.eval()
     device = next(model.parameters()).device
 
