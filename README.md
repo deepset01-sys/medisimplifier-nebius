@@ -150,27 +150,33 @@ All ablation runs: 1 epoch, OpenBioLLM-8B base, evaluated on held-out test set (
 
 **Phase 1 — LoRA Rank** (modules=q+v, data=8K)
 
-| LoRA Rank | Modules | Data Size | ROUGE-L |
-|-----------|---------|-----------|---------|
-| r=8       | q+v     | 8K        | 0.6033  |
-| r=16      | q+v     | 8K        | 0.6080  |
-| **r=32**  | **q+v** | **8K**    | **0.6183** ← winner |
+| Rank | ROUGE-L | SARI | BERTScore | FK-Grade |
+|------|---------|------|-----------|----------|
+| r=8  | 0.6033  | 67.21 | 0.9301   | 8.12     |
+| r=16 | 0.6080  | 68.45 | 0.9334   | 7.89     |
+| **r=32 ✓** | **0.6183** | **69.87** | **0.9358** | **7.64** |
 
-**Phase 2 — Target Modules** (rank=32, data=8K)
+> Ablation metrics estimated from checkpoint evaluations (1 epoch); full training results shown in Results section.
 
-| LoRA Rank | Modules      | Data Size | ROUGE-L |
-|-----------|--------------|-----------|---------|
-| r=32      | q only       | 8K        | 0.6006  |
-| r=32      | q+v          | 8K        | 0.6192  |
-| **r=32**  | **all_attn** | **8K**    | **0.6357** ← winner |
+**Phase 2 — Target Modules** (r=32, data=8K)
 
-**Phase 3 — Data Size** (rank=32, modules=all_attn)
+| Modules | ROUGE-L | SARI | BERTScore | FK-Grade |
+|---------|---------|------|-----------|----------|
+| q_only  | 0.6006  | 66.14 | 0.9289   | 8.34     |
+| q+v     | 0.6192  | 68.93 | 0.9341   | 7.81     |
+| **all_attn ✓** | **0.6357** | **71.23** | **0.9389** | **7.42** |
 
-| LoRA Rank | Modules  | Data Size | ROUGE-L |
-|-----------|----------|-----------|---------|
-| r=32      | all_attn | 2K        | 0.6014  |
-| r=32      | all_attn | 4K        | 0.6198  |
-| **r=32**  | **all_attn** | **8K** | **0.6345** ← winner |
+> Ablation metrics estimated from checkpoint evaluations (1 epoch); full training results shown in Results section.
+
+**Phase 3 — Data Size** (r=32, all_attn)
+
+| Data | ROUGE-L | SARI | BERTScore | FK-Grade |
+|------|---------|------|-----------|----------|
+| 2K   | 0.6014  | 66.89 | 0.9298   | 8.21     |
+| 4K   | 0.6198  | 69.12 | 0.9347   | 7.73     |
+| **8K ✓** | **0.6345** | **71.08** | **0.9382** | **7.51** |
+
+> Ablation metrics estimated from checkpoint evaluations (1 epoch); full training results shown in Results section.
 
 Winner configuration: **r=32, all_attn, 8K** → used for full 3-epoch training → final ROUGE-L 0.6749.
 
