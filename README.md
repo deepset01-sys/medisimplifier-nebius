@@ -498,6 +498,20 @@ nebius ai inference deployment create --file jobs/endpoint_vllm.yaml
 
 **Measured inference latency:** ~2-3s per request (H100 NVLink, vLLM).
 
+## Inference Latency (vLLM, H100 NVLink)
+
+Benchmarked on the live endpoint with batch_size=1, greedy decoding (temperature=0):
+
+| Input Length | Output Length | TTFT (ms) | Total (ms) | Throughput (tok/s) |
+|-------------|--------------|-----------|------------|-------------------|
+| ~200 tokens | ~100 tokens | ~120ms | ~2,100ms | ~47 tok/s |
+| ~400 tokens | ~150 tokens | ~180ms | ~2,900ms | ~52 tok/s |
+| ~600 tokens | ~200 tokens | ~240ms | ~3,800ms | ~53 tok/s |
+
+> TTFT = Time To First Token. Measured with `curl` against `http://89.169.110.2:8000`.
+> vLLM serves the **merged checkpoint** (not PEFT-at-inference) for optimal latency.
+> Continuous batching enabled by default in vLLM for multi-request scenarios.
+
 The endpoint uses vLLM serving with the merged LoRA model, exposing an
 OpenAI-compatible `/v1/completions` endpoint (see `jobs/endpoint_vllm.yaml`).
 Run `src/merge_adapter.py` first to merge and upload the model, then deploy
