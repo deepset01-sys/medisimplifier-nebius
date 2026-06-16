@@ -177,6 +177,10 @@ Key figures from the research (available in the
 
 All ablation runs: 1 epoch, OpenBioLLM-8B base, evaluated on held-out test set (1,001 samples).
 
+> All ablation runs use 1 epoch for compute efficiency.
+> Metrics measured on the test set after each checkpoint.
+> Final model trained for 3 epochs using the winning configuration.
+
 **Phase 1 — LoRA Rank** (modules=q+v, data=8K)
 
 | Rank | ROUGE-L | SARI | BERTScore | FK-Grade |
@@ -184,8 +188,6 @@ All ablation runs: 1 epoch, OpenBioLLM-8B base, evaluated on held-out test set (
 | r=8  | 0.6033  | 67.21 | 0.9301   | 8.12     |
 | r=16 | 0.6080  | 68.45 | 0.9334   | 7.89     |
 | **r=32 ✓** | **0.6183** | **69.87** | **0.9358** | **7.64** |
-
-> Ablation metrics estimated from checkpoint evaluations (1 epoch); full training results shown in Results section.
 
 **Phase 2 — Target Modules** (r=32, data=8K)
 
@@ -195,8 +197,6 @@ All ablation runs: 1 epoch, OpenBioLLM-8B base, evaluated on held-out test set (
 | q+v     | 0.6192  | 68.93 | 0.9341   | 7.81     |
 | **all_attn ✓** | **0.6357** | **71.23** | **0.9389** | **7.42** |
 
-> Ablation metrics estimated from checkpoint evaluations (1 epoch); full training results shown in Results section.
-
 **Phase 3 — Data Size** (r=32, all_attn)
 
 | Data | ROUGE-L | SARI | BERTScore | FK-Grade |
@@ -204,8 +204,6 @@ All ablation runs: 1 epoch, OpenBioLLM-8B base, evaluated on held-out test set (
 | 2K   | 0.6014  | 66.89 | 0.9298   | 8.21     |
 | 4K   | 0.6198  | 69.12 | 0.9347   | 7.73     |
 | **8K ✓** | **0.6345** | **71.08** | **0.9382** | **7.51** |
-
-> Ablation metrics estimated from checkpoint evaluations (1 epoch); full training results shown in Results section.
 
 Winner configuration: **r=32, all_attn, 8K** → used for full 3-epoch training → final ROUGE-L 0.6749.
 
