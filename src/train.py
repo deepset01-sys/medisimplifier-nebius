@@ -215,6 +215,7 @@ def main():
         metric_for_best_model="eval_loss",
         greater_is_better=False,
         report_to="none",
+        save_safetensors=False,
     )
 
     trainer = SFTTrainer(
