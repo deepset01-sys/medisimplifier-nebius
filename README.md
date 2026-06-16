@@ -118,6 +118,18 @@ reproduced across all three models.
 > ROUGE-L + SARI + BERTScore + FK-Grade)
 > Endpoint: `medisimplifier-serve-v5`, running at http://89.169.110.2:8000
 
+## Evaluation Evidence
+
+All evaluation results are reproducible from public artifacts:
+
+- **Eval JSON outputs:** Available in `medisimplifier-adapters` bucket
+  - `mistral_eval/results.json` — Mistral-7B results
+  - `biomistral_eval/results.json` — BioMistral-7B results
+  - `safety_results.json` — Medical safety evaluation (100 samples)
+- **LoRA Adapters:** [GuyDor007/MediSimplifier-LoRA-Adapters](https://huggingface.co/GuyDor007/MediSimplifier-LoRA-Adapters)
+- **Live endpoint:** `http://89.169.110.2:8000` (active during judging window)
+- **Reproduce locally:** `bash scripts/reproduce.sh` or use Option B (HF adapters)
+
 ## Medical Safety Evaluation
 
 Beyond standard NLP metrics, we evaluated whether MediSimplifier preserves
@@ -289,10 +301,10 @@ Training Job                    Object Storage                  Eval/Serve Job
 |------|-----|------|------|
 | Ablation x9 parallel | H100 | ~20 min each | ~$15 |
 | OpenBioLLM-8B fine-tuning | H100 NVLink | ~70 min | ~$22 |
-| Mistral-7B fine-tuning | H100 NVLink | ~70 min | ~$7 |
-| BioMistral-7B fine-tuning | H100 NVLink | ~70 min | ~$7 |
+| Mistral-7B fine-tuning | H100 NVLink | ~70 min | ~$22 |
+| BioMistral-7B fine-tuning | H100 NVLink | ~70 min | ~$22 |
 | Evaluation | H100 NVLink | ~45 min | ~$5 |
-| Total | | | ~$56 |
+| Total | | | ~$70 |
 
 > 9 parallel jobs = same wall-clock time as 1 job (~20 min total).
 
@@ -755,7 +767,7 @@ resources:
 
 ```
 # MediSimplifier Dependencies
-# Tested on Python 3.9+ with CUDA 12.4
+# Tested on Python 3.11 · CUDA 12.1 (matches pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime)
 
 # Core ML
 torch>=2.0.0
