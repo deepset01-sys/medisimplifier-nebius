@@ -269,8 +269,8 @@ aws s3 sync /tmp/merged_openbio/ \
   s3://medisimplifier-adapters/merged_openbio/ \
   --endpoint-url https://storage.eu-north1.nebius.cloud
 
-# Step 3: Deploy vLLM Endpoint via Nebius Console
-# AI Services → Endpoints → Create → use jobs/endpoint_vllm.yaml config
+# Step 3: Deploy vLLM Endpoint via CLI
+nebius ai inference deployment create --file jobs/endpoint_vllm.yaml
 ```
 
 > **Nebius S3 credentials required:**
@@ -470,8 +470,31 @@ Our evaluation run:
 
 ### 5. Deploy live endpoint
 
-Via Nebius Console → AI Services → Endpoints → Create endpoint,
-using the config in `jobs/endpoint_vllm.yaml`.
+## Deploy Endpoint (CLI)
+
+```bash
+# Deploy vLLM endpoint via Nebius CLI
+nebius ai inference deployment create \
+  --parent-id ${NEBIUS_PROJECT_ID} \
+  --name medisimplifier-vllm \
+  --preset 1gpu-h100-sxm \
+  --model-path /mnt/adapters/merged_openbio \
+  --docker-image vllm/vllm-openai:latest \
+  --subnet-id ${NEBIUS_SUBNET_ID} \
+  --volume medisimplifier-adapters:/mnt/adapters:ro \
+  --env "MODEL_NAME=/mnt/adapters/merged_openbio"
+
+# Or use the YAML config:
+nebius ai inference deployment create --file jobs/endpoint_vllm.yaml
+```
+
+> Current live endpoint: `http://89.169.110.2:8000` (active during judging window)
+> Test it:
+> ```bash
+> curl http://89.169.110.2:8000/v1/completions \
+>   -H "Content-Type: application/json" \
+>   -d '{"model": "/mnt/adapters/merged_openbio", "prompt": "Simplify: The patient presented with acute myocardial infarction.", "max_tokens": 100, "temperature": 0}'
+> ```
 
 **Measured inference latency:** ~2-3s per request (H100 NVLink, vLLM).
 
