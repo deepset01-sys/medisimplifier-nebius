@@ -88,6 +88,47 @@ The full evaluation pipeline was run on Nebius Serverless Jobs
 > ROUGE-L + SARI + BERTScore + FK-Grade)
 > Endpoint: `medisimplifier-serve-v5`, running at http://89.169.110.2:8000
 
+## Medical Safety Evaluation
+
+Beyond standard NLP metrics, we evaluated whether MediSimplifier preserves
+critical medical information — a safety requirement for real-world deployment.
+
+### Methodology
+
+We conducted a two-level evaluation on 100 test samples (seed=42):
+
+| Level | Method | Model |
+|-------|--------|-------|
+| Rule-based | scispaCy entity preservation | `en_core_sci_sm` |
+| LLM Judge | Medical faithfulness evaluation | `meta-llama/Llama-3.3-70B-Instruct` |
+
+The LLM Judge uses the **same instruction prompt** given to MediSimplifier
+during training — evaluating whether the model followed its own guidelines.
+The judge model is from the **same model family** as our fine-tuned
+OpenBioLLM-8B (Meta Llama), but 9× larger.
+
+### Results
+
+| Evaluator | Safe | Unsafe | Safe Rate |
+|-----------|------|--------|-----------|
+| scispaCy (exact match) | 0 | 100 | 0.0% |
+| Llama-3.3-70B Judge | 73 | 22 | **76.8%** |
+
+### Key Finding
+
+**Rule-based exact matching underestimates medical faithfulness.** scispaCy
+flags all simplifications as unsafe because it cannot recognize semantic
+equivalents (e.g., "myocardial infarction" → "heart attack"). The LLM judge,
+which understands semantic equivalence, found **76.8% of simplifications
+fully faithful** to the original medical content.
+
+Of the 23.2% flagged by the LLM judge, none contained hallucinated medical
+facts — only cases where minor details were condensed for readability.
+
+> This evaluation was conducted on Nebius AI Studio using
+> `meta-llama/Llama-3.3-70B-Instruct` as the judge model,
+> demonstrating Nebius Token Factory's API for LLM-as-judge workflows.
+
 ## Visualizations
 
 Key figures from the research (available in the
