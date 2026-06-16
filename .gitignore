@@ -13,3 +13,7 @@ review_prompt.txt
 run_review.py
 blog_post_outline.md
 results/nebius_logs/
+BLOG_INFRASTRUCTURE.md
+MEDISIMPLIFIER_CONTEXT.md
+NEBIUS_DOCKER_REGISTRY_SKILL.md
+*.skill.md
