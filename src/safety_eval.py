@@ -164,7 +164,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--adapter-path", default="/mnt/adapters/full_training")
     parser.add_argument("--adapter-hf-repo",
-                       default="GuyDor007/MediSimplifier-LoRA-Adapters")
+                       default="GuyDor007/MediSimplifier-LoRA-Adapters/openbio")
     parser.add_argument("--base-model",
                        default="aaditya/Llama3-OpenBioLLM-8B")
     parser.add_argument("--n-samples", type=int, default=100)
