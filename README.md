@@ -97,20 +97,21 @@ fine-tuning, even if it starts from a weaker baseline.
 
 ### Nebius Reproduction Results
 
-The full evaluation pipeline was run on Nebius Serverless Jobs
-(H100 NVLink, 13 June 2026, 1,001 test samples):
+All three models fine-tuned and evaluated on Nebius H100 NVLink GPUs
+(vs. original H200 results). The ranking reversal finding is fully
+reproduced across all three models.
 
-| Metric | Original Research | Nebius Reproduction | Delta |
-|--------|-------------------|---------------------|-------|
-| ROUGE-L | 0.6749 | 0.6638 | -1.6% |
-| SARI | 74.64 | 73.49 | -1.5% |
-| BERTScore | 0.9498 | 0.9460 | -0.4% |
-| FK-Grade | 7.16 | 7.33 | +0.17 |
+| Model | Original ROUGE-L | Nebius ROUGE-L | Delta | SARI | BERTScore | FK-Grade |
+|-------|-----------------|----------------|-------|------|-----------|----------|
+| OpenBioLLM-8B | 0.6749 | 0.6638 | -1.6% | 73.49 | 0.9460 | 7.33 |
+| Mistral-7B-Instruct | 0.6491 | 0.6253 | -3.7% | 72.75 | 0.9418 | 6.14 |
+| BioMistral-7B-DARE | 0.6318 | 0.6004 | -5.0% | 71.97 | 0.9372 | 6.13 |
 
-> All four metrics reproduce within 1.6% of the original research,
-> confirming full pipeline reproducibility. Minor variance is explained
-> by floating-point non-determinism across GPU hardware (original:
-> H200 SXM, reproduction: H100 NVLink) and generation-time sampling.
+> **Key finding:** The ranking reversal is fully reproduced on Nebius H100 —
+> OpenBioLLM-8B (worst zero-shot) remains the best fine-tuned model across
+> both H200 (original) and H100 (Nebius) hardware. The 1.6–5.0% delta is
+> consistent with H200→H100 hardware variance.
+
 > Generation: greedy decoding (do_sample=False), seed=42 enforced via
 > torch.manual_seed for deterministic reproduction.
 > Evaluation Job: `medisimplifier-evaluation-full2` (1,001 samples,
@@ -287,9 +288,11 @@ Training Job                    Object Storage                  Eval/Serve Job
 | Step | GPU | Time | Cost |
 |------|-----|------|------|
 | Ablation x9 parallel | H100 | ~20 min each | ~$15 |
-| Full training | H100 NVLink | ~70 min | ~$22 |
+| OpenBioLLM-8B fine-tuning | H100 NVLink | ~70 min | ~$22 |
+| Mistral-7B fine-tuning | H100 NVLink | ~70 min | ~$7 |
+| BioMistral-7B fine-tuning | H100 NVLink | ~70 min | ~$7 |
 | Evaluation | H100 NVLink | ~45 min | ~$5 |
-| Total | | | ~$42 |
+| Total | | | ~$56 |
 
 > 9 parallel jobs = same wall-clock time as 1 job (~20 min total).
 
