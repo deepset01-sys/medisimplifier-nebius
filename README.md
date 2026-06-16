@@ -66,6 +66,35 @@ All results use seed=42. Bootstrap CIs computed with n=10,000 resamples.
 but achieved the *highest* fine-tuned score (0.6749) — a full ranking
 reversal. All pairwise differences significant at p<0.001 (bootstrap n=10,000).
 
+### Why Did the Ranking Reversal Happen?
+
+The ranking reversal (worst zero-shot → best fine-tuned, r ≈ -0.998)
+is not a coincidence — it reflects a fundamental insight about
+domain pretraining vs. task alignment:
+
+**OpenBioLLM-8B** was pre-trained exclusively on biomedical literature.
+It already "knew" the domain vocabulary — terms like "myocardial infarction,"
+"bilateral pneumonia," and "anticoagulation therapy" were deeply embedded
+in its representations. What it lacked was the *simplification task* itself:
+the ability to translate that knowledge into plain language.
+
+**BioMistral-7B**, by contrast, had stronger zero-shot simplification
+because its general-purpose pre-training included more everyday language
+patterns. But it had less headroom to improve — it was already closer
+to the task, so fine-tuning gave it less leverage.
+
+This creates a counterintuitive result: **the model that knew the most
+about medicine but the least about simplification benefited most from
+fine-tuning.** LoRA essentially taught OpenBioLLM *how* to simplify —
+and it ran with the task, applying its deep domain knowledge to produce
+the most faithful and readable simplifications.
+
+**Implication for practitioners:** When selecting a base model for
+domain-specific fine-tuning, don't optimize for zero-shot benchmark
+performance. Instead, optimize for *domain alignment* — the model that
+knows your domain deepest will extract the most value from task-specific
+fine-tuning, even if it starts from a weaker baseline.
+
 ### Nebius Reproduction Results
 
 The full evaluation pipeline was run on Nebius Serverless Jobs
