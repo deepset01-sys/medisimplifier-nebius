@@ -164,7 +164,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--adapter-path", default="/mnt/adapters/full_training")
     parser.add_argument("--adapter-hf-repo",
-                       default="GuyDor007/MediSimplifier-LoRA-Adapters/openbio")
+                       default="GuyDor007/MediSimplifier-LoRA-Adapters")
     parser.add_argument("--base-model",
                        default="aaditya/Llama3-OpenBioLLM-8B")
     parser.add_argument("--n-samples", type=int, default=100)
@@ -182,11 +182,16 @@ def main():
         args.base_model, torch_dtype=torch.float16,
         device_map="auto", trust_remote_code=True)
 
-    adapter = (args.adapter_path
-               if Path(args.adapter_path).exists()
-               else args.adapter_hf_repo)
-    print(f"Loading adapter: {adapter}")
-    model = PeftModel.from_pretrained(base, adapter)
+    if Path(args.adapter_path).exists():
+        adapter = args.adapter_path
+        subfolder = None
+    else:
+        adapter = "GuyDor007/MediSimplifier-LoRA-Adapters"
+        subfolder = "openbio"
+
+    print(f"Loading adapter: {adapter} (subfolder: {subfolder})")
+    model = PeftModel.from_pretrained(base, adapter,
+                                       subfolder=subfolder)
     model.eval()
     device = next(model.parameters()).device
 
