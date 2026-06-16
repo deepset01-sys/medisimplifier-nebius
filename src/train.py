@@ -222,6 +222,7 @@ def main():
         train_dataset=dataset["train"],
         eval_dataset=dataset["validation"],
         tokenizer=tokenizer,
+        dataset_text_field="text",
         args=training_args,
     )
 
