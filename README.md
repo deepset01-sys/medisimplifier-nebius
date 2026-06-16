@@ -471,7 +471,7 @@ Our evaluation run:
 ### 5. Deploy live endpoint
 
 Via Nebius Console → AI Services → Endpoints → Create endpoint,
-or using the config in `jobs/endpoint_serve.yaml`.
+using the config in `jobs/endpoint_vllm.yaml`.
 
 **Measured inference latency:** ~2-3s per request (H100 NVLink, vLLM).
 
@@ -542,7 +542,7 @@ Response:
     src/
       train.py          LoRA training — runs as Nebius Job
       evaluate.py       Metrics: ROUGE-L, SARI, BERTScore, FK-Grade
-      serve.py          FastAPI inference — runs as Nebius Endpoint
+      serve_vllm.py     vLLM inference server — runs as Nebius Endpoint
     docker/
       Dockerfile.train  Training image
       Dockerfile.serve  Serving image
@@ -550,7 +550,7 @@ Response:
       job_train.yaml       Full training job config
       job_ablation.yaml    Parametrized ablation job config
       job_evaluate.yaml    Evaluation job config
-      endpoint_serve.yaml  Endpoint deployment config
+      endpoint_vllm.yaml   vLLM endpoint deployment config
     requirements.txt
 
 ## Key Configuration
@@ -683,40 +683,8 @@ timeout: 5h
 
 </details>
 
-<details>
-<summary>jobs/endpoint_serve.yaml (FastAPI — legacy, replaced by vLLM)</summary>
-
-```yaml
-name: medisimplifier-serve
-description: "MediSimplifier inference endpoint — POST /simplify → simplified text"
-parent_id: ${NEBIUS_PROJECT_ID}
-
-resources:
-  platform: gpu-h100-sxm
-  preset: 1gpu-16vcpu-200gb
-  subnet_id: ${NEBIUS_SUBNET_ID}
-
-docker:
-  image: chambul/medisimplifier:train-v6
-  command: python
-  args:
-    - "serve.py"
-
-env:
-  HF_TOKEN: "${HF_TOKEN}"
-  HF_HOME: "/tmp/hf_cache"
-  PYTHONUNBUFFERED: "1"
-
-ports:
-  - 8000
-
-volumes:
-  - bucket: medisimplifier-adapters
-    mount: /mnt/adapters
-    mode: ro
-```
-
-</details>
+> Legacy FastAPI server removed. Production serving uses vLLM
+> (see `jobs/endpoint_vllm.yaml` and the Live Endpoint section).
 
 <details>
 <summary>jobs/endpoint_vllm.yaml (vLLM — active deployment)</summary>
