@@ -10,6 +10,7 @@ sentencepiece==0.2.0
 huggingface-hub==0.25.0
 numpy==1.26.0
 tqdm==4.66.0
+wandb==0.17.0
 rouge-score==0.1.2
 bert-score==0.3.13
 textstat==0.7.3

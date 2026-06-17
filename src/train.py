@@ -20,6 +20,7 @@ from transformers import (
 )
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training, TaskType
 from trl import SFTTrainer
+import wandb
 
 # ── Configuration ────────────────────────────────────────────────────────────
 
@@ -163,6 +164,25 @@ def main():
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
 
+    wandb.init(
+        project=os.getenv("WANDB_PROJECT", "medisimplifier"),
+        name=f"{args.model}-r{args.rank}-{args.modules}-{args.data_size}",
+        config={
+            "model": args.model,
+            "rank": args.rank,
+            "modules": args.modules,
+            "data_size": args.data_size,
+            "epochs": args.epochs,
+            "seed": args.seed,
+            "learning_rate": 2e-4,
+            "batch_size": 4,
+            "grad_accumulation": 4,
+            "rslora": True,
+            "lora_alpha": 64,
+        },
+        tags=["lora", "medical", "nebius", "h100"],
+    )
+
     import random
     import numpy as np
     random.seed(args.seed)
@@ -214,7 +234,7 @@ def main():
         load_best_model_at_end=True,
         metric_for_best_model="eval_loss",
         greater_is_better=False,
-        report_to="none",
+        report_to="wandb",
         save_safetensors=False,
     )
 
@@ -229,6 +249,7 @@ def main():
 
     print("Starting training...")
     trainer.train()
+    wandb.finish()
 
     output_path = Path(args.output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
