@@ -127,15 +127,80 @@ reproduced across all three models.
 
 ## Evaluation Evidence
 
-All evaluation results are reproducible from public artifacts:
+All results are reproducible from public artifacts:
 
-- **Eval JSON outputs:** Available in `medisimplifier-adapters` bucket
-  - `mistral_eval/results.json` — Mistral-7B results
-  - `biomistral_eval/results.json` — BioMistral-7B results
-  - `safety_results.json` — Medical safety evaluation (100 samples)
-- **LoRA Adapters:** [GuyDor007/MediSimplifier-LoRA-Adapters](https://huggingface.co/GuyDor007/MediSimplifier-LoRA-Adapters)
-- **Live endpoint:** `http://89.169.110.2:8000` (active during judging window)
-- **Reproduce locally:** `bash scripts/reproduce.sh` or use Option B (HF adapters)
+**📁 Eval Results (from medisimplifier-adapters bucket):**
+
+<details>
+<summary>OpenBioLLM-8B eval results</summary>
+
+```json
+{
+  "model": "openbio",
+  "n_samples": 1001,
+  "rouge_l": 0.6638,
+  "sari": 73.49,
+  "bertscore": 0.9460,
+  "fk_grade": 7.33,
+  "zero_shot": false,
+  "split": "test"
+}
+```
+</details>
+
+<details>
+<summary>Mistral-7B eval results</summary>
+
+```json
+{
+  "model": "mistral",
+  "n_samples": 1001,
+  "rouge_l": 0.6253,
+  "sari": 72.75,
+  "bertscore": 0.9418,
+  "fk_grade": 6.14,
+  "zero_shot": false,
+  "split": "test"
+}
+```
+</details>
+
+<details>
+<summary>BioMistral-7B eval results</summary>
+
+```json
+{
+  "model": "biomistral",
+  "n_samples": 1001,
+  "rouge_l": 0.6004,
+  "sari": 71.97,
+  "bertscore": 0.9372,
+  "fk_grade": 6.13,
+  "zero_shot": false,
+  "split": "test"
+}
+```
+</details>
+
+<details>
+<summary>Medical Safety Evaluation (100 samples)</summary>
+
+```json
+{
+  "n_samples": 100,
+  "judge_model": "meta-llama/Llama-3.3-70B-Instruct",
+  "rule_based": {"safe_rate": 0.0, "threshold": 0.85},
+  "llm_judge": {"safe": 73, "unsafe": 22, "safe_rate": 0.7684}
+}
+```
+</details>
+
+**🔗 Public Artifacts:**
+- Dataset: [GuyDor007/medisimplifier-dataset](https://huggingface.co/datasets/GuyDor007/medisimplifier-dataset)
+- Adapters: [GuyDor007/MediSimplifier-LoRA-Adapters](https://huggingface.co/GuyDor007/MediSimplifier-LoRA-Adapters)
+- Docker: [chambul/medisimplifier:train-v11](https://hub.docker.com/r/chambul/medisimplifier)
+- W&B: [wandb.ai/deepset01-chambul/medisimplifier](https://wandb.ai/deepset01-chambul/medisimplifier)
+- Endpoint: `http://89.169.110.2:8000` (active during judging window)
 
 ## Medical Safety Evaluation
 
