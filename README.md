@@ -47,6 +47,13 @@ while preserving all critical medical information.
 95% CIs from bootstrap (n=10,000). All pairwise ROUGE-L differences significant at p<0.001.
 All results use seed=42. Bootstrap CIs computed with n=10,000 resamples.
 
+**📊 Live Training Dashboard (Weights & Biases):**
+[wandb.ai/deepset01-chambul/medisimplifier](https://wandb.ai/deepset01-chambul/medisimplifier)
+
+> Training monitored via W&B on Nebius H100 NVLink.
+> OpenBioLLM-8B: train_loss 0.844→0.635 over 3 epochs (1,500 steps, seed=42).
+> Dashboard includes loss curves, eval metrics per epoch, gradient norms, and hyperparameters.
+
 > **Note on FK-Grade target:** The original research target was FK ≤ 6.0.
 > Best achieved: 6.91 (Mistral-7B). The gap of ~0.91 grade levels
 > reflects the inherent tension between medical accuracy preservation
@@ -232,6 +239,10 @@ Winner configuration: **r=32, all_attn, 8K** → used for full 3-epoch training 
 
 Nebius Serverless AI Jobs handle training and ablation.
 Nebius Serverless AI Endpoints serve live inference.
+
+> **Observability:** All training runs tracked with Weights & Biases —
+> loss curves, eval metrics, and hyperparameters logged directly from
+> Nebius Jobs via `WANDB_API_KEY` environment variable.
 
 Pipeline:
 
