@@ -2,7 +2,7 @@ name: medisimplifier-safety-eval
 description: "Medical safety evaluation — scispaCy entity preservation + Llama-3.3-70B judge"
 
 docker:
-  image: chambul/medisimplifier:train-v6
+  image: chambul/medisimplifier:train-v11
   command: python
   args:
     - "safety_eval.py"
