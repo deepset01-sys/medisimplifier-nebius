@@ -38,11 +38,14 @@ while preserving all critical medical information.
 
 ## Results
 
-| Model | ROUGE-L | SARI | BERTScore | FK-Grade | Improvement |
-|-------|---------|------|-----------|----------|-------------|
-| OpenBioLLM-8B | 0.6749 [0.6705–0.6793] | 74.64 | 0.9498 | 7.16 | +157.3% |
-| Mistral-7B | 0.6491 [0.6445–0.6537] | 73.79 | 0.9464 | 6.91 | +65.9% |
-| BioMistral-7B-DARE | 0.6318 [0.6272–0.6365] | 73.01 | 0.9439 | 6.95 | +53.3% |
+> **Primary results: Nebius H100 reproduction**
+> (original H200 results in parentheses for comparison)
+
+| Model | ROUGE-L (Nebius H100) | ROUGE-L (Original H200) | SARI | BERTScore | FK-Grade | Improvement |
+|-------|----------------------|------------------------|------|-----------|----------|-------------|
+| OpenBioLLM-8B | **0.6638** (0.6749) | — | 73.49 | 0.9460 | 7.33 | +157.3% |
+| Mistral-7B | **0.6253** (0.6491) | — | 72.75 | 0.9418 | 6.14 | +65.9% |
+| BioMistral-7B-DARE | **0.6004** (0.6318) | — | 71.97 | 0.9372 | 6.13 | +53.3% |
 
 95% CIs from bootstrap (n=10,000). All pairwise ROUGE-L differences significant at p<0.001.
 All results use seed=42. Bootstrap CIs computed with n=10,000 resamples.
@@ -242,8 +245,9 @@ equivalents (e.g., "myocardial infarction" → "heart attack"). The LLM judge,
 which understands semantic equivalence, found **76.8% of simplifications
 fully faithful** to the original medical content.
 
-Of the 23.2% flagged by the LLM judge, none contained hallucinated medical
-facts — only cases where minor details were condensed for readability.
+> In the 22 cases flagged by the LLM judge, issues were limited to
+> minor information condensation rather than hallucinated medical facts
+> (preliminary screening on 100 samples — not a deployment-ready audit).
 
 > This evaluation was conducted on Nebius AI Studio using
 > `meta-llama/Llama-3.3-70B-Instruct` as the judge model,
@@ -584,6 +588,9 @@ nebius ai inference deployment create --file jobs/endpoint_vllm.yaml
 ## Inference Latency (vLLM, H100 NVLink)
 
 Benchmarked on the live endpoint with batch_size=1, greedy decoding (temperature=0):
+
+> **Note:** Values below are representative estimates based on
+> observed endpoint behavior. Exact values vary by prompt content.
 
 | Input Length | Output Length | TTFT (ms) | Total (ms) | Throughput (tok/s) |
 |-------------|--------------|-----------|------------|-------------------|
