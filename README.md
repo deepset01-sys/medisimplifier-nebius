@@ -583,6 +583,19 @@ nebius ai inference deployment create --file jobs/endpoint_vllm.yaml
 
 **Measured inference latency:** ~2-3s per request (H100 NVLink, vLLM).
 
+### 6. Call the live endpoint
+
+    curl -X POST http://<endpoint-ip>:8000/v1/completions \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "/mnt/adapters/merged_openbio",
+        "prompt": "Simplify: Patient presented with acute myocardial infarction...\n\nSimplified:",
+        "max_tokens": 200,
+        "temperature": 0
+      }'
+
+To redeploy: see `jobs/endpoint_vllm.yaml` and step 5 above.
+
 ## Inference Latency (vLLM, H100 NVLink)
 
 Benchmarked on the live endpoint with batch_size=1, greedy decoding (temperature=0):
@@ -604,19 +617,6 @@ The endpoint uses vLLM serving with the merged LoRA model, exposing an
 OpenAI-compatible `/v1/completions` endpoint (see `jobs/endpoint_vllm.yaml`).
 Run `src/merge_adapter.py` first to merge and upload the model, then deploy
 the vLLM endpoint.
-
-### 6. Call the live endpoint
-
-    curl -X POST http://<endpoint-ip>:8000/v1/completions \
-      -H "Content-Type: application/json" \
-      -d '{
-        "model": "/mnt/adapters/merged_openbio",
-        "prompt": "Simplify: Patient presented with acute myocardial infarction...\n\nSimplified:",
-        "max_tokens": 200,
-        "temperature": 0
-      }'
-
-To redeploy: see `jobs/endpoint_vllm.yaml` and step 5 above.
 
 ## Qualitative Example
 
