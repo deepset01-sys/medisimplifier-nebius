@@ -1,5 +1,6 @@
 name: medisimplifier-vllm
 description: "MediSimplifier vLLM inference endpoint — OpenAI-compatible /v1/chat/completions"
+parent_id: ${NEBIUS_PROJECT_ID}
 
 docker:
   image: vllm/vllm-openai:latest
@@ -32,3 +33,4 @@ resources:
   platform: gpu-h100-sxm
   preset: 1gpu-16vcpu-200gb
   disk_size: 250Gi
+  subnet_id: ${NEBIUS_SUBNET_ID}
