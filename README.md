@@ -557,8 +557,6 @@ Our evaluation run:
 
 ### 5. Deploy live endpoint
 
-## Deploy Endpoint (CLI)
-
 ```bash
 # Deploy vLLM endpoint via Nebius CLI
 nebius ai inference deployment create \
@@ -620,34 +618,6 @@ the vLLM endpoint.
 
 To redeploy: see `jobs/endpoint_vllm.yaml` and step 5 above.
 
-## Live Demo
-
-The model is served via **Nebius AI Endpoint** running vLLM
-(`vllm/vllm-openai:latest`) with the merged LoRA model.
-
-### OpenAI-compatible API
-
-    curl -X POST http://89.169.110.2:8000/v1/completions \
-      -H "Content-Type: application/json" \
-      -d '{
-        "model": "/mnt/adapters/merged_openbio",
-        "prompt": "Simplify this medical text for a patient: Patient presented with acute myocardial infarction and was administered thrombolytic therapy.\n\nSimplified:",
-        "max_tokens": 200,
-        "temperature": 0
-      }'
-
-Response:
-    {
-      "choices": [{
-        "text": "Patient had a heart attack and received medicine to break up blood clots."
-      }]
-    }
-
-**Endpoint:** http://89.169.110.2:8000
-**API:** OpenAI-compatible `/v1/completions`
-**Model:** Merged LoRA (OpenBioLLM-8B + MediSimplifier adapter)
-**Latency:** ~2-3s per request (H100 NVLink, vLLM)
-
 ## Qualitative Example
 
 **Input (FK-Grade 16.2):**
@@ -697,7 +667,7 @@ All jobs use the `nebius ai job create` CLI. The training job parameters:
 | Batch size | 4 (grad_accum=4, effective=16) |
 | Learning rate | 2e-4 (cosine, warmup 3%) |
 | LoRA alpha (α) | 64 (= 2 × rank) |
-| rsLoRA | True |
+| rsLoRA | True — normalizes adapter updates by √rank, preventing gradient instability at higher ranks (r=32) and improving training stability over standard LoRA |
 | Dropout | 0.05 |
 | Trainable parameters | 27.3M (0.38% of total) |
 | Random seed | 42 |
