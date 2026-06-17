@@ -49,6 +49,7 @@ All results use seed=42. Bootstrap CIs computed with n=10,000 resamples.
 
 **📊 Live Training Dashboard (Weights & Biases):**
 [wandb.ai/deepset01-chambul/medisimplifier](https://wandb.ai/deepset01-chambul/medisimplifier)
+*(Project is public — no login required to view training curves)*
 
 > Training monitored via W&B on Nebius H100 NVLink.
 > OpenBioLLM-8B: train_loss 0.844→0.635 over 3 epochs (1,500 steps, seed=42).
@@ -228,6 +229,11 @@ OpenBioLLM-8B (Meta Llama), but 9× larger.
 | scispaCy (exact match) | 0 | 100 | 0.0% |
 | Llama-3.3-70B Judge | 73 | 22 | **76.8%** |
 
+> **Note:** The 0% rule-based safe rate is expected — scispaCy's
+> exact-match entity comparison cannot recognize semantic equivalents
+> (e.g., "heart attack" ≠ "myocardial infarction").
+> The LLM judge correctly identifies these as faithful simplifications.
+
 ### Key Finding
 
 **Rule-based exact matching underestimates medical faithfulness.** scispaCy
@@ -293,11 +299,12 @@ All ablation runs: 1 epoch, OpenBioLLM-8B base, evaluated on held-out test set (
 Winner configuration: **r=32, all_attn, 8K** → used for full 3-epoch training → final ROUGE-L 0.6749.
 
 > **Note on ablation overlap:** Phase 1 and Phase 2 share the r=32, q+v, 8K configuration.
-> The difference (0.6183 vs 0.6192) is seed-induced variance from independent job runs,
-> not a real performance difference. Both runs used seed=42 for model initialization but
-> independent job-level randomness (data shuffling order) accounts for the gap.
+> The difference (0.6183 vs 0.6192) is not a real performance difference.
+> Minor variance between overlapping configurations is attributable to
+> non-determinism in CUDA kernel execution and cuBLAS operations,
+> which can produce small differences even with a fixed seed=42.
 > Similarly, Phase 2 best (all_attn, 0.6357) vs Phase 3 all_attn at 8K (0.6345) reflects
-> the same seed-induced variance — both fix rank=32 and all_attn modules with 8K data.
+> the same CUDA non-determinism — both fix rank=32 and all_attn modules with 8K data.
 > Phase 3 fixes rank=32 and modules=all_attn while varying data size to isolate the data-size effect.
 
 ## How it runs on Nebius
@@ -435,7 +442,7 @@ nebius storage bucket create \
 nebius ai job create \
   --name medisimplifier-full-train \
   --parent-id ${NEBIUS_PROJECT_ID} \
-  --image chambul/medisimplifier:train-v6 \
+  --image chambul/medisimplifier:train-v11 \
   --container-command python \
   --args "train.py --model openbio --epochs 3 --rank 32 --modules all_attn --seed 42" \
   --env HF_TOKEN=${HF_TOKEN} \
@@ -451,7 +458,7 @@ nebius ai job create \
 > to `/output` so the trained adapter persists after the job ends.
 > Equivalent YAML field: `volumes[0].bucket/mount/mode`.
 
-> **Runtime setup:** Jobs use `chambul/medisimplifier:train-v6` (public Docker Hub),
+> **Runtime setup:** Jobs use `chambul/medisimplifier:train-v11` (public Docker Hub),
 > built from `docker/Dockerfile.train` with all dependencies pre-installed and
 > all `src/` scripts baked in. No pip install or git clone at job startup.
 
@@ -471,7 +478,7 @@ for RANK in 8 16 32; do
   nebius ai job create \
     --name medisimplifier-ablation-r${RANK} \
     --parent-id ${NEBIUS_PROJECT_ID} \
-    --image chambul/medisimplifier:train-v6 \
+    --image chambul/medisimplifier:train-v11 \
     --container-command python \
     --args "train.py --model openbio --epochs 1 --rank ${RANK} --modules q_v --data-size 8000 --seed 42" \
     --env HF_TOKEN=${HF_TOKEN} \
@@ -487,7 +494,7 @@ for MODULES in q_only q_v all_attn; do
   nebius ai job create \
     --name medisimplifier-ablation-${MODULES} \
     --parent-id ${NEBIUS_PROJECT_ID} \
-    --image chambul/medisimplifier:train-v6 \
+    --image chambul/medisimplifier:train-v11 \
     --container-command python \
     --args "train.py --model openbio --epochs 1 --rank 32 --modules ${MODULES} --data-size 8000 --seed 42" \
     --platform gpu-h100-sxm \
@@ -503,7 +510,7 @@ for DATA in 2000 4000 8000; do
   nebius ai job create \
     --name medisimplifier-ablation-data${DATA} \
     --parent-id ${NEBIUS_PROJECT_ID} \
-    --image chambul/medisimplifier:train-v6 \
+    --image chambul/medisimplifier:train-v11 \
     --container-command python \
     --args "train.py --model openbio --epochs 1 --rank 32 --modules all_attn --data-size ${DATA} --seed 42" \
     --platform gpu-h100-sxm \
@@ -521,7 +528,7 @@ done
 nebius ai job create \
   --name medisimplifier-evaluate \
   --parent-id ${NEBIUS_PROJECT_ID} \
-  --image chambul/medisimplifier:train-v6 \
+  --image chambul/medisimplifier:train-v11 \
   --container-command python \
   --args "evaluate.py --model openbio --adapter-path /mnt/adapters/full_training --split test --output-dir /mnt/adapters/eval_results" \
   --env HF_TOKEN=${HF_TOKEN} \
@@ -672,7 +679,7 @@ All jobs use the `nebius ai job create` CLI. The training job parameters:
 
 | Parameter | Value |
 |-----------|-------|
-| Image | `chambul/medisimplifier:train-v6` (all deps pre-installed, public Docker Hub) |
+| Image | `chambul/medisimplifier:train-v11` (all deps pre-installed, public Docker Hub) |
 | Platform | `gpu-h100-sxm` |
 | Preset | `1gpu-16vcpu-200gb` |
 | Disk | `250Gi` |
@@ -694,16 +701,16 @@ The training image is available on two registries:
 
 **Docker Hub (public — for judges):**
 
-    docker pull chambul/medisimplifier:train-v6
+    docker pull chambul/medisimplifier:train-v11
 
 **Nebius Container Registry (used in job configs):**
 
-    cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v6
+    cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v11
 
 Built from `docker/Dockerfile.train`. To rebuild:
 
-    docker build -t chambul/medisimplifier:train-v6 -f docker/Dockerfile.train .
-    docker push chambul/medisimplifier:train-v6
+    docker build -t chambul/medisimplifier:train-v11 -f docker/Dockerfile.train .
+    docker push chambul/medisimplifier:train-v11
 
 ## Job & Endpoint Configs
 
@@ -728,7 +735,7 @@ resources:
   subnet_id: ${NEBIUS_SUBNET_ID}
 
 docker:
-  image: chambul/medisimplifier:train-v6
+  image: chambul/medisimplifier:train-v11
   command: python
   args:
     - "train.py"
@@ -768,7 +775,7 @@ resources:
   subnet_id: ${NEBIUS_SUBNET_ID}
 
 docker:
-  image: chambul/medisimplifier:train-v6
+  image: chambul/medisimplifier:train-v11
   command: python
   args:
     - "evaluate.py"
