@@ -841,42 +841,28 @@ resources:
 <summary>requirements.txt (click to expand)</summary>
 
 ```
-# MediSimplifier Dependencies
-# Tested on Python 3.11 · CUDA 12.1 (matches pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime)
-
-# Core ML
-torch>=2.0.0
-transformers>=4.36.0
-datasets>=2.14.0
-accelerate>=0.24.0
-peft>=0.7.0
-bitsandbytes>=0.41.0
-
-# Evaluation Metrics
-evaluate>=0.4.0
-rouge-score>=0.1.2
-bert-score>=0.3.13
-textstat>=0.7.3
-sacrebleu>=2.3.0
-
-# SARI metric (install from GitHub)
-# pip install git+https://github.com/feralvam/easse.git
-
-# Data Processing
-pandas>=2.0.0
-numpy>=1.24.0
-
-# Visualization
-matplotlib>=3.7.0
-seaborn>=0.12.0
-
-# Utilities
-tqdm>=4.65.0
-typing_extensions>=4.10.0
-
-# Jupyter
-jupyter>=1.0.0
-ipywidgets>=8.0.0
+# Python 3.11 · CUDA 12.1 (matches pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime)
+torch==2.1.0
+transformers==4.45.0
+peft==0.14.0
+datasets==2.18.0
+trl==0.8.6
+accelerate==0.28.0
+bitsandbytes==0.43.0
+sentencepiece==0.2.0
+huggingface-hub==0.25.0
+numpy==1.26.0
+tqdm==4.66.0
+wandb==0.17.0
+rouge-score==0.1.2
+bert-score==0.3.13
+textstat==0.7.3
+scispacy==0.5.4
+https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.4/en_core_sci_sm-0.5.4.tar.gz
+fastapi==0.110.0
+uvicorn==0.29.0
+boto3==1.34.0
+easse @ git+https://github.com/feralvam/easse.git@6a4352ec299ed03fda8ee45445ca43d9c7673e89
 ```
 
 </details>
