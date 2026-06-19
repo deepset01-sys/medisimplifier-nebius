@@ -1,5 +1,5 @@
 name: medisimplifier-vllm
-description: "MediSimplifier vLLM inference endpoint — OpenAI-compatible /v1/chat/completions"
+description: "MediSimplifier vLLM inference endpoint — OpenAI-compatible /v1/completions"
 parent_id: ${NEBIUS_PROJECT_ID}
 
 docker:

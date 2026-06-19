@@ -43,9 +43,9 @@ while preserving all critical medical information.
 
 | Model | ROUGE-L (Nebius H100) | ROUGE-L (Original H200) | SARI | BERTScore | FK-Grade | Improvement |
 |-------|----------------------|------------------------|------|-----------|----------|-------------|
-| OpenBioLLM-8B | **0.6638** (0.6749) | — | 73.49 | 0.9460 | 7.33 | +157.3% |
-| Mistral-7B | **0.6253** (0.6491) | — | 72.75 | 0.9418 | 6.14 | +65.9% |
-| BioMistral-7B-DARE | **0.6004** (0.6318) | — | 71.97 | 0.9372 | 6.13 | +53.3% |
+| OpenBioLLM-8B | **0.6638** | 0.6749 | 73.49 | 0.9460 | 7.33 | +157.3% |
+| Mistral-7B | **0.6253** | 0.6491 | 72.75 | 0.9418 | 6.14 | +65.9% |
+| BioMistral-7B-DARE | **0.6004** | 0.6318 | 71.97 | 0.9372 | 6.13 | +53.3% |
 
 95% CIs from bootstrap (n=10,000). All pairwise ROUGE-L differences significant at p<0.001.
 All results use seed=42. Bootstrap CIs computed with n=10,000 resamples.
@@ -59,8 +59,9 @@ All results use seed=42. Bootstrap CIs computed with n=10,000 resamples.
 > Dashboard includes loss curves, eval metrics per epoch, gradient norms, and hyperparameters.
 
 > **Note on FK-Grade target:** The original research target was FK ≤ 6.0.
-> Best achieved: 6.91 (Mistral-7B). The gap of ~0.91 grade levels
-> reflects the inherent tension between medical accuracy preservation
+> Best achieved on H200: 6.91 (Mistral-7B, original run). Nebius H100 reproduction: Mistral 6.14, BioMistral 6.13.
+> The difference reflects H200→H100 hardware variance (non-deterministic CUDA ops).
+> The gap from the 6.0 target reflects the inherent tension between medical accuracy preservation
 > and maximum simplification.
 
 ## Baseline vs Fine-Tuned Results
@@ -310,6 +311,10 @@ Winner configuration: **r=32, all_attn, 8K** → used for full 3-epoch training 
 > Similarly, Phase 2 best (all_attn, 0.6357) vs Phase 3 all_attn at 8K (0.6345) reflects
 > the same CUDA non-determinism — both fix rank=32 and all_attn modules with 8K data.
 > Phase 3 fixes rank=32 and modules=all_attn while varying data size to isolate the data-size effect.
+
+> **Limitation:** Number of training epochs (3) was not independently ablated — the full training
+> run uses 3 epochs while ablation jobs use 1 epoch. The 1→3 epoch improvement
+> (ROUGE-L ~0.636→0.675) is observed but not isolated as a controlled variable.
 
 ## How it runs on Nebius
 
@@ -788,7 +793,7 @@ timeout: 5h
 
 ```yaml
 name: medisimplifier-vllm
-description: "MediSimplifier vLLM inference endpoint — OpenAI-compatible /v1/chat/completions"
+description: "MediSimplifier vLLM inference endpoint — OpenAI-compatible /v1/completions"
 
 docker:
   image: vllm/vllm-openai:latest
@@ -873,13 +878,18 @@ ipywidgets>=8.0.0
 
 ## Dataset and models
 
+> **Note on HuggingFace accounts:** Dataset and LoRA adapters are published under `GuyDor007`
+> (Guy Dor, co-author of the original Technion research project). The Nebius submission repo,
+> Docker images, and W&B dashboard are under `deepset01-sys` / `chambul` (Shmulik Avraham).
+> Both accounts belong to the same two-person team.
+
 | Resource | Link |
 |----------|------|
 | Dataset | GuyDor007/medisimplifier-dataset — 10K samples, public |
 | Models | GuyDor007/MediSimplifier-LoRA-Adapters — 3 adapters, public |
 
-Dataset: Asclepius-Synthetic-Clinical-Notes (public, anonymized synthetic notes).
-No real patient data. HCLS compliant.
+Dataset: [Asclepius-Synthetic](https://huggingface.co/datasets/starmpcc/Asclepius-Synthetic) (Apache 2.0, HCLS compliant).
+Anonymized synthetic clinical notes. No real patient data.
 
 ## License
 
