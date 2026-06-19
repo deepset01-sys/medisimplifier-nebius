@@ -11,6 +11,8 @@
 > - **Nebius pipeline:** [deepset01-sys/medisimplifier-nebius](https://github.com/deepset01-sys/medisimplifier-nebius) —
 >   this repository: serverless Jobs + Endpoints on Nebius
 
+**📝 Blog Post:** [Medical Text Simplification with LoRA on Nebius Serverless: A Builder's Journey](https://medium.com/@deepset01/medical-text-simplification-with-lora-on-nebius-serverless-a-builders-journey-13a9e44c92a4)
+
 > Nebius Serverless AI Builders Challenge submission.
 > Reproducible LoRA fine-tuning pipeline for medical text simplification,
 > running entirely on Nebius Serverless AI Jobs and Endpoints.
