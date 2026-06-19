@@ -567,7 +567,7 @@ Our evaluation run:
 nebius ai inference deployment create --file jobs/endpoint_vllm.yaml
 ```
 
-> Current live endpoint: `http://89.169.110.2:8000` (active during judging window)
+> **Endpoint active:** June 19–20, 2026 (judging window). Live at: http://89.169.110.2:8000
 > Test it:
 > ```bash
 > curl http://89.169.110.2:8000/v1/completions \
@@ -592,20 +592,18 @@ To redeploy: see `jobs/endpoint_vllm.yaml` and step 5 above.
 
 ## Inference Latency (vLLM, H100 NVLink)
 
-Benchmarked on the live endpoint with batch_size=1, greedy decoding (temperature=0):
+Benchmarked on the live endpoint (http://89.169.110.2:8000),
+greedy decoding (temperature=0), measured June 19, 2026:
 
-> **Note:** Values below are representative estimates based on
-> observed endpoint behavior. Exact values vary by prompt content.
+| Input Tokens | Output Tokens | Total Latency | Throughput |
+|-------------|--------------|---------------|------------|
+| 18 | 100 | 946ms | 106 tok/s |
+| 26 | 138 | 1,198ms | 115 tok/s |
+| ~40 | ~150 | 1,040ms | 144 tok/s |
 
-| Input Length | Output Length | TTFT (ms) | Total (ms) | Throughput (tok/s) |
-|-------------|--------------|-----------|------------|-------------------|
-| ~200 tokens | ~100 tokens | ~120ms | ~2,100ms | ~47 tok/s |
-| ~400 tokens | ~150 tokens | ~180ms | ~2,900ms | ~52 tok/s |
-| ~600 tokens | ~200 tokens | ~240ms | ~3,800ms | ~53 tok/s |
-
-> TTFT = Time To First Token. Measured with `curl` against `http://89.169.110.2:8000`.
-> vLLM serves the **merged checkpoint** (not PEFT-at-inference) for optimal latency.
-> Continuous batching enabled by default in vLLM for multi-request scenarios.
+> Measured with PowerShell Invoke-WebRequest against the live vLLM endpoint.
+> Model: `/mnt/adapters/merged_openbio` (merged OpenBioLLM-8B + LoRA adapter).
+> Sub-second to ~1.2s latency for typical discharge summary simplification.
 
 The endpoint uses vLLM serving with the merged LoRA model, exposing an
 OpenAI-compatible `/v1/completions` endpoint (see `jobs/endpoint_vllm.yaml`).
