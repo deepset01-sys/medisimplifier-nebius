@@ -5,6 +5,12 @@
 [![HuggingFace Dataset](https://img.shields.io/badge/HF-Dataset-blue)](https://huggingface.co/datasets/GuyDor007/medisimplifier-dataset)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green)](LICENSE)
 
+> **Nebius Serverless AI Builders Challenge submission** —
+> end-to-end LoRA fine-tuning pipeline built on Nebius Jobs,
+> Endpoints, and Object Storage. Original research repo:
+> [gd007/MediSimplifier](https://github.com/gd007/MediSimplifier)
+> (same two-person team, Technion DS25).
+
 > **Repository structure:**
 > - **Research & results:** [gd007/MediSimplifier](https://github.com/gd007/MediSimplifier) —
 >   original Technion course project with notebooks, IEEE paper, and all results
