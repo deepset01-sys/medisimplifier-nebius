@@ -31,7 +31,7 @@ while preserving all critical medical information.
 | Optimal LoRA rank | r=32 outperforms r=4-8 recommended by Hu et al. 2021 |
 | Optimal modules | all_attn (Q+K+V+O) outperforms standard Q+V |
 | Ranking reversal | Worst zero-shot model becomes best fine-tuned (+157%) |
-| Readability | FK-Grade 14.5 → 6.91, all differences p<0.001 |
+| Readability | FK-Grade 14.5 → 6.91 (Mistral-7B, original H200); Nebius H100: Mistral 6.14, BioMistral 6.13 |
 | Data efficiency | 4K samples achieves 97% of 8K performance |
 | Baseline-improvement correlation | r ≈ -0.998 — lower zero-shot = higher gain |
 | Total compute | 18 ablation runs + 3 full training runs, ~7.5 GPU hours |
@@ -59,7 +59,9 @@ All results use seed=42. Bootstrap CIs computed with n=10,000 resamples.
 > Dashboard includes loss curves, eval metrics per epoch, gradient norms, and hyperparameters.
 
 > **Note on FK-Grade target:** The original research target was FK ≤ 6.0.
-> Best achieved on H200: 6.91 (Mistral-7B, original run). Nebius H100 reproduction: Mistral 6.14, BioMistral 6.13.
+> Best achieved on H200: 6.91 (Mistral-7B, original run).
+> OpenBioLLM-8B achieved 7.16 on original H200 hardware.
+> Nebius H100 reproduction: Mistral 6.14, BioMistral 6.13.
 > The difference reflects H200→H100 hardware variance (non-deterministic CUDA ops).
 > The gap from the 6.0 target reflects the inherent tension between medical accuracy preservation
 > and maximum simplification.
@@ -349,6 +351,9 @@ The LoRA adapter is merged into the base model before serving:
 2. Upload merged model to Object Storage via `aws s3 sync`
 3. Deploy `jobs/endpoint_vllm.yaml` — vLLM loads model from bucket
 
+> `merge_adapter.py` is invoked as a Nebius Job (see `jobs/job_merge.yaml`) — not locally.
+> It reads from `/mnt/adapters/full_training` and writes the merged model to `/mnt/adapters/merged_openbio`.
+
 ```bash
 # Step 1: Merge (run as Nebius Job)
 python src/merge_adapter.py \
@@ -494,6 +499,7 @@ for RANK in 8 16 32; do
     --platform gpu-h100-sxm \
     --preset 1gpu-16vcpu-200gb \
     --disk-size 250Gi \
+    --volume medisimplifier-adapters:/output:rw \
     --subnet-id ${NEBIUS_SUBNET_ID} \
     --timeout 2h
 done
@@ -509,6 +515,7 @@ for MODULES in q_only q_v all_attn; do
     --platform gpu-h100-sxm \
     --preset 1gpu-16vcpu-200gb \
     --disk-size 250Gi \
+    --volume medisimplifier-adapters:/output:rw \
     --subnet-id ${NEBIUS_SUBNET_ID} \
     --env HF_TOKEN=${HF_TOKEN} \
     --timeout 2h
@@ -525,6 +532,7 @@ for DATA in 2000 4000 8000; do
     --platform gpu-h100-sxm \
     --preset 1gpu-16vcpu-200gb \
     --disk-size 250Gi \
+    --volume medisimplifier-adapters:/output:rw \
     --subnet-id ${NEBIUS_SUBNET_ID} \
     --env HF_TOKEN=${HF_TOKEN} \
     --timeout 2h
