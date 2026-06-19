@@ -43,14 +43,17 @@ while preserving all critical medical information.
 > **Primary results: Nebius H100 reproduction**
 > (original H200 results in parentheses for comparison)
 
-| Model | ROUGE-L (Nebius H100) | ROUGE-L (Original H200) | SARI | BERTScore | FK-Grade | Improvement |
-|-------|----------------------|------------------------|------|-----------|----------|-------------|
-| OpenBioLLM-8B | **0.6638** | 0.6749 | 73.49 | 0.9460 | 7.33 | +157.3% |
-| Mistral-7B | **0.6253** | 0.6491 | 72.75 | 0.9418 | 6.14 | +65.9% |
-| BioMistral-7B-DARE | **0.6004** | 0.6318 | 71.97 | 0.9372 | 6.13 | +53.3% |
+| Model | ROUGE-L (Nebius H100) | ROUGE-L (Original H200) | Delta | SARI | BERTScore | FK-Grade | Improvement |
+|-------|----------------------|------------------------|-------|------|-----------|----------|-------------|
+| OpenBioLLM-8B | **0.6638** | 0.6749 | −1.6% | 73.49 | 0.9460 | 7.33 | +157.3% |
+| Mistral-7B | **0.6253** | 0.6491 | −3.7% | 72.75 | 0.9418 | 6.14 | +65.9% |
+| BioMistral-7B-DARE | **0.6004** | 0.6318 | −5.0% | 71.97 | 0.9372 | 6.13 | +53.3% |
 
 95% CIs from bootstrap (n=10,000). All pairwise ROUGE-L differences significant at p<0.001.
 All results use seed=42. Bootstrap CIs computed with n=10,000 resamples.
+
+> Key finding: ranking reversal fully reproduced on Nebius H100.
+> Evaluation: 1,001 test samples, greedy decoding, seed=42.
 
 **📊 Live Training Dashboard (Weights & Biases):**
 [wandb.ai/deepset01-chambul/medisimplifier](https://wandb.ai/deepset01-chambul/medisimplifier)
@@ -110,29 +113,6 @@ domain-specific fine-tuning, don't optimize for zero-shot benchmark
 performance. Instead, optimize for *domain alignment* — the model that
 knows your domain deepest will extract the most value from task-specific
 fine-tuning, even if it starts from a weaker baseline.
-
-### Nebius Reproduction Results
-
-All three models fine-tuned and evaluated on Nebius H100 NVLink GPUs
-(vs. original H200 results). The ranking reversal finding is fully
-reproduced across all three models.
-
-| Model | Original ROUGE-L | Nebius ROUGE-L | Delta | SARI | BERTScore | FK-Grade |
-|-------|-----------------|----------------|-------|------|-----------|----------|
-| OpenBioLLM-8B | 0.6749 | 0.6638 | -1.6% | 73.49 | 0.9460 | 7.33 |
-| Mistral-7B-Instruct | 0.6491 | 0.6253 | -3.7% | 72.75 | 0.9418 | 6.14 |
-| BioMistral-7B-DARE | 0.6318 | 0.6004 | -5.0% | 71.97 | 0.9372 | 6.13 |
-
-> **Key finding:** The ranking reversal is fully reproduced on Nebius H100 —
-> OpenBioLLM-8B (worst zero-shot) remains the best fine-tuned model across
-> both H200 (original) and H100 (Nebius) hardware. The 1.6–5.0% delta is
-> consistent with H200→H100 hardware variance.
-
-> Generation: greedy decoding (do_sample=False), seed=42 enforced via
-> torch.manual_seed for deterministic reproduction.
-> Evaluation Job: `medisimplifier-evaluation-full2` (1,001 samples,
-> ROUGE-L + SARI + BERTScore + FK-Grade)
-> Endpoint: `medisimplifier-serve-v5`, running at http://89.169.110.2:8000
 
 ## Evaluation Evidence
 
