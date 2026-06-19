@@ -368,7 +368,7 @@ aws s3 sync /tmp/merged_openbio/ \
   --endpoint-url https://storage.eu-north1.nebius.cloud
 
 # Step 3: Deploy vLLM Endpoint via CLI
-nebius ai inference deployment create --file jobs/endpoint_vllm.yaml
+nebius ai endpoint create --file jobs/endpoint_vllm.yaml
 ```
 
 > **Nebius S3 credentials required:**
@@ -579,7 +579,7 @@ Our evaluation run:
 
 ```bash
 # Deploy using YAML config:
-nebius ai inference deployment create --file jobs/endpoint_vllm.yaml
+nebius ai endpoint create --file jobs/endpoint_vllm.yaml
 ```
 
 > **Endpoint active during judging window (June 2026).** Live at: http://89.169.110.2:8000
