@@ -482,6 +482,9 @@ nebius ai job create \
   --timeout 5h
 ```
 
+> **CLI verified:** All `nebius ai job create` flags above
+> are confirmed against Nebius CLI v0.12.229 on June 19, 2026.
+
 > The `--volume` flag mounts the `medisimplifier-adapters` bucket
 > to `/output` so the trained adapter persists after the job ends.
 > Equivalent YAML field: `volumes[0].bucket/mount/mode`.
