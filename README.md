@@ -73,6 +73,23 @@ All results use seed=42. Bootstrap CIs computed with n=10,000 resamples.
 > The gap from the 6.0 target reflects the inherent tension between medical accuracy preservation
 > and maximum simplification.
 
+### Reproduced on Nebius H100 NVLink
+
+All three models were fully trained and evaluated on Nebius
+Serverless Jobs (H100 NVLink), reproducing the original
+Technion research findings:
+
+| Model | Original ROUGE-L (H200) | Nebius ROUGE-L (H100) | Delta |
+|-------|------------------------|----------------------|-------|
+| OpenBioLLM-8B | 0.6749 | 0.6638 | −1.6% |
+| Mistral-7B-Instruct | 0.6491 | 0.6253 | −3.7% |
+| BioMistral-7B-DARE | 0.6318 | 0.6004 | −5.0% |
+
+> The ranking reversal finding holds across both hardware
+> generations — confirming it is not a hardware artifact.
+> Training monitored via [W&B dashboard](https://wandb.ai/deepset01-chambul/medisimplifier) *(public, no login required)*.
+> Evaluation: 1,001 test samples, greedy decoding, seed=42.
+
 ## Baseline vs Fine-Tuned Results
 
 ### Zero-Shot Baseline (no fine-tuning, 1,001 test samples)
