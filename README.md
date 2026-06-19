@@ -5,17 +5,11 @@
 [![HuggingFace Dataset](https://img.shields.io/badge/HF-Dataset-blue)](https://huggingface.co/datasets/GuyDor007/medisimplifier-dataset)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green)](LICENSE)
 
-> **Nebius Serverless AI Builders Challenge submission** —
-> end-to-end LoRA fine-tuning pipeline built on Nebius Jobs,
-> Endpoints, and Object Storage. Original research repo:
-> [gd007/MediSimplifier](https://github.com/gd007/MediSimplifier)
-> (same two-person team, Technion DS25).
-
-> **Repository structure:**
-> - **Research & results:** [gd007/MediSimplifier](https://github.com/gd007/MediSimplifier) —
->   original Technion course project with notebooks, IEEE paper, and all results
-> - **Nebius pipeline:** [deepset01-sys/medisimplifier-nebius](https://github.com/deepset01-sys/medisimplifier-nebius) —
->   this repository: serverless Jobs + Endpoints on Nebius
+> **Nebius Serverless AI Builders Challenge submission by Shmulik Avraham.**
+> Built on top of [MediSimplifier](https://github.com/gd007/MediSimplifier) —
+> a Technion DS25 graduation project by Shmulik Avraham & Guy Dor.
+> The Nebius pipeline, serving layer, safety evaluation, and MLOps
+> infrastructure were built independently for this challenge.
 
 **📝 Blog Post:** [Medical Text Simplification with LoRA on Nebius Serverless: A Builder's Journey](https://medium.com/@deepset01/medical-text-simplification-with-lora-on-nebius-serverless-a-builders-journey-13a9e44c92a4)
 
@@ -39,6 +33,25 @@ while preserving all critical medical information.
 | Data efficiency | 4K samples achieves 97% of 8K performance |
 | Baseline-improvement correlation | r ≈ -0.998 — lower zero-shot = higher gain |
 | Total compute | 18 ablation runs + 3 full training runs, ~10 GPU hours (~7h wall-clock; ablation jobs run in parallel) |
+
+## What Nebius Added
+
+The original Technion project was training-only (H200, no serving, no pipeline).
+This submission extends it with a full MLOps lifecycle on Nebius:
+
+| | Technion original (Guy Dor & Shmulik Avraham) | This Nebius submission (Shmulik Avraham) |
+|--|----------------------------------------------|------------------------------------------|
+| Training | ✅ H200, single run | ✅ Reproduced on H100 — validated |
+| Parallel ablation | ❌ | ✅ 9 jobs × 20 min simultaneously |
+| Production serving | ❌ | ✅ vLLM Endpoint — OpenAI-compatible API |
+| Safety evaluation | ❌ | ✅ LLM-as-judge via Token Factory |
+| MLOps pipeline | ❌ | ✅ Object Storage — stateless jobs, persistent adapters |
+| Hardware validation | ❌ | ✅ H200 → H100 reproduction, δ 1.6–5.0% |
+
+> **Jobs** = training / ablation / evaluation (stateless, pay-per-second).
+> **Endpoint** = inference serving (live, OpenAI-compatible API).
+> The ranking reversal finding reproduces on Nebius H100 within 1.6–5.0%
+> of the original — confirming it is not a hardware artifact.
 
 ## Results
 
