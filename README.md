@@ -36,7 +36,7 @@ while preserving all critical medical information.
 | Readability | FK-Grade 14.5 → 6.91 (Mistral-7B, original H200); Nebius H100: Mistral 6.14, BioMistral 6.13 |
 | Data efficiency | 4K samples achieves 97% of 8K performance |
 | Baseline-improvement correlation | r ≈ -0.998 — lower zero-shot = higher gain |
-| Total compute | 18 ablation runs + 3 full training runs, ~7.5 GPU hours |
+| Total compute | 18 ablation runs + 3 full training runs, ~10 GPU hours (~7h wall-clock; ablation jobs run in parallel) |
 
 ## Results
 
@@ -541,6 +541,10 @@ for DATA in 2000 4000 8000; do
 done
 ```
 
+> **Note:** Jobs are submitted in parallel via the CLI loop.
+> Actual parallel scheduling depends on account quota.
+> In our runs, all 9 jobs started within 2 minutes of submission.
+
 ### 4. Evaluate
 
 ```bash
@@ -573,18 +577,7 @@ Our evaluation run:
 ### 5. Deploy live endpoint
 
 ```bash
-# Deploy vLLM endpoint via Nebius CLI
-nebius ai inference deployment create \
-  --parent-id ${NEBIUS_PROJECT_ID} \
-  --name medisimplifier-vllm \
-  --preset 1gpu-h100-sxm \
-  --model-path /mnt/adapters/merged_openbio \
-  --docker-image vllm/vllm-openai:latest \
-  --subnet-id ${NEBIUS_SUBNET_ID} \
-  --volume medisimplifier-adapters:/mnt/adapters:ro \
-  --env "MODEL_NAME=/mnt/adapters/merged_openbio"
-
-# Or use the YAML config:
+# Deploy using YAML config:
 nebius ai inference deployment create --file jobs/endpoint_vllm.yaml
 ```
 
@@ -804,6 +797,7 @@ timeout: 5h
 ```yaml
 name: medisimplifier-vllm
 description: "MediSimplifier vLLM inference endpoint — OpenAI-compatible /v1/completions"
+parent_id: ${NEBIUS_PROJECT_ID}
 
 docker:
   image: vllm/vllm-openai:latest
@@ -836,6 +830,7 @@ resources:
   platform: gpu-h100-sxm
   preset: 1gpu-16vcpu-200gb
   disk_size: 250Gi
+  subnet_id: ${NEBIUS_SUBNET_ID}
 ```
 
 </details>
