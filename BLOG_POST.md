@@ -31,7 +31,7 @@ quality at a fraction of the cost.
 - No cluster management — submit a job, get a result, pay only for what you use
 - Parallel job execution — run 9 ablation experiments simultaneously instead of sequentially
 - H100 NVLink available on demand — no reservation, no queue, no cold start penalty
-- Total pipeline cost: ~$42 for 18 ablation runs + full training + evaluation
+- Total pipeline cost: ~$70 for 9 ablation runs + 3 full training runs + 3 evaluations
 
 **The dataset:** 10,000 (input, simplified output) pairs from Asclepius Synthetic
 Clinical Notes — public, anonymized, no real patient data.
@@ -179,6 +179,20 @@ floating-point non-determinism across H200 vs H100 hardware.
 
 > Evaluation Job: `medisimplifier-evaluation-spec` (1,001 test samples)
 
+## Nebius H100 Reproduction
+
+All three models were fully reproduced on Nebius H100 NVLink GPUs:
+
+| Model | Original ROUGE-L (H200) | Nebius ROUGE-L (H100) | Delta |
+|-------|------------------------|----------------------|-------|
+| OpenBioLLM-8B | 0.6749 | 0.6638 | −1.6% |
+| Mistral-7B | 0.6491 | 0.6253 | −3.7% |
+| BioMistral-7B-DARE | 0.6318 | 0.6004 | −5.0% |
+
+The ranking reversal holds across both hardware generations.
+Training runs tracked live via our public [W&B dashboard](https://wandb.ai/deepset01-chambul/medisimplifier)
+*(no login required)*.
+
 ---
 
 ## 6. Results and What's Next
@@ -192,7 +206,14 @@ floating-point non-determinism across H200 vs H100 hardware.
 | BERTScore | 0.637 | 0.9498 | +49.1% |
 | FK-Grade | 12.53 | 7.16 | −5.37 grades |
 
-All pairwise ROUGE-L differences significant at p<0.001 (bootstrap n=10,000).
+All pairwise ROUGE-L differences significant at p<0.001
+(bootstrap CIs over 1,001 test items at seed=42).
+
+**Medical safety evaluation:** We ran a two-level safety check on 100 model outputs.
+A rule-based scispaCy entity matcher screened for medical term preservation.
+A Llama-3.3-70B judge (running on Nebius AI Studio Token Factory) evaluated
+factual faithfulness: 76.8% of outputs were rated fully safe, with the remaining
+23.2% flagged for minor information condensation — not hallucination.
 
 **Honest caveat:** We targeted FK ≤ 6.0. Best achieved: 6.91 (Mistral-7B).
 The ~0.91 grade gap reflects an inherent tension — pushing further toward simpler
@@ -213,3 +234,10 @@ The $42 total compute cost is the headline. The ranking reversal is the story.
 - *Research: [gd007/MediSimplifier](https://github.com/gd007/MediSimplifier)*
 - *Dataset: [GuyDor007/medisimplifier-dataset](https://huggingface.co/datasets/GuyDor007/medisimplifier-dataset)*
 - *Adapters: [GuyDor007/MediSimplifier-LoRA-Adapters](https://huggingface.co/GuyDor007/MediSimplifier-LoRA-Adapters)*
+
+---
+
+*Built for the [Nebius Serverless AI Builders Challenge](https://nebius.com).
+Try it, fork it, or just steal the ranking-reversal insight for your next fine-tuning project.*
+
+*#NebiusServerlessChallenge #LLM #MedicalAI #LoRA #OpenSource*
