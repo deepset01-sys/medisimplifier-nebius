@@ -1,3 +1,7 @@
+# Note: This YAML is for reference only.
+# Use the CLI command above to deploy the endpoint.
+# nebius ai endpoint create does not support --file flag.
+
 name: medisimplifier-vllm
 description: "MediSimplifier vLLM inference endpoint — OpenAI-compatible /v1/completions"
 parent_id: ${NEBIUS_PROJECT_ID}

@@ -368,7 +368,18 @@ aws s3 sync /tmp/merged_openbio/ \
   --endpoint-url https://storage.eu-north1.nebius.cloud
 
 # Step 3: Deploy vLLM Endpoint via CLI
-nebius ai endpoint create --file jobs/endpoint_vllm.yaml
+nebius ai endpoint create \
+  --name medisimplifier-vllm \
+  --parent-id ${NEBIUS_PROJECT_ID} \
+  --image vllm/vllm-openai:latest \
+  --args "-m vllm.entrypoints.openai.api_server --model /mnt/adapters/merged_openbio --port 8000 --dtype float16 --max-model-len 4096" \
+  --container-port 8000 \
+  --platform gpu-h100-sxm \
+  --preset 1gpu-16vcpu-200gb \
+  --subnet-id ${NEBIUS_SUBNET_ID} \
+  --volume medisimplifier-adapters:/mnt/adapters:ro \
+  --env HF_HOME=/tmp/hf_cache \
+  --public
 ```
 
 > **Nebius S3 credentials required:**
@@ -578,8 +589,18 @@ Our evaluation run:
 ### 5. Deploy live endpoint
 
 ```bash
-# Deploy using YAML config:
-nebius ai endpoint create --file jobs/endpoint_vllm.yaml
+nebius ai endpoint create \
+  --name medisimplifier-vllm \
+  --parent-id ${NEBIUS_PROJECT_ID} \
+  --image vllm/vllm-openai:latest \
+  --args "-m vllm.entrypoints.openai.api_server --model /mnt/adapters/merged_openbio --port 8000 --dtype float16 --max-model-len 4096" \
+  --container-port 8000 \
+  --platform gpu-h100-sxm \
+  --preset 1gpu-16vcpu-200gb \
+  --subnet-id ${NEBIUS_SUBNET_ID} \
+  --volume medisimplifier-adapters:/mnt/adapters:ro \
+  --env HF_HOME=/tmp/hf_cache \
+  --public
 ```
 
 > **Endpoint active during judging window (June 2026).** Live at: http://89.169.110.2:8000
