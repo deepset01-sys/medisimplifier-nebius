@@ -19,10 +19,6 @@
 
 **📝 Blog Post:** [Medical Text Simplification with LoRA on Nebius Serverless: A Builder's Journey](https://medium.com/@deepset01/medical-text-simplification-with-lora-on-nebius-serverless-a-builders-journey-13a9e44c92a4)
 
-> Nebius Serverless AI Builders Challenge submission.
-> Reproducible LoRA fine-tuning pipeline for medical text simplification,
-> running entirely on Nebius Serverless AI Jobs and Endpoints.
-
 ## What this project does
 
 Medical discharge summaries are written at college reading level (FK-Grade 14.5).
@@ -388,8 +384,10 @@ Training Job                    Object Storage                  Eval/Serve Job
 | OpenBioLLM-8B fine-tuning | H100 NVLink | ~70 min | ~$22 |
 | Mistral-7B fine-tuning | H100 NVLink | ~70 min | ~$22 |
 | BioMistral-7B fine-tuning | H100 NVLink | ~70 min | ~$22 |
-| Evaluation | H100 NVLink | ~45 min | ~$5 |
-| Total | | | ~$70 |
+| Evaluation x3 | H100 NVLink | ~45 min each | ~$5 |
+| Safety eval | H100 NVLink | ~30 min | ~$3 |
+| Merge + misc | H100 NVLink | — | ~$2 |
+| Total | | | ~$91 |
 
 > 9 parallel jobs = same wall-clock time as 1 job (~20 min total).
 
@@ -567,7 +565,7 @@ Our evaluation run:
 nebius ai inference deployment create --file jobs/endpoint_vllm.yaml
 ```
 
-> **Endpoint active:** June 19–20, 2026 (judging window). Live at: http://89.169.110.2:8000
+> **Endpoint active during judging window (June 2026).** Live at: http://89.169.110.2:8000
 > Test it:
 > ```bash
 > curl http://89.169.110.2:8000/v1/completions \
@@ -593,7 +591,7 @@ To redeploy: see `jobs/endpoint_vllm.yaml` and step 5 above.
 ## Inference Latency (vLLM, H100 NVLink)
 
 Benchmarked on the live endpoint (http://89.169.110.2:8000),
-greedy decoding (temperature=0), measured June 19, 2026:
+greedy decoding (temperature=0), measured during judging window (June 2026):
 
 | Input Tokens | Output Tokens | Total Latency | Throughput |
 |-------------|--------------|---------------|------------|
@@ -639,6 +637,7 @@ the vLLM endpoint.
       job_train.yaml       Full training job config
       job_ablation.yaml    Parametrized ablation job config
       job_evaluate.yaml    Evaluation job config
+      job_merge.yaml       Adapter merge job config
       endpoint_vllm.yaml   vLLM endpoint deployment config
     requirements.txt
 
