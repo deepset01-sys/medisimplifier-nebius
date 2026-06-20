@@ -209,9 +209,11 @@ All results are reproducible from public artifacts:
 ```json
 {
   "n_samples": 100,
+  "n_evaluated": 95,
+  "n_errors": 5,
   "judge_model": "meta-llama/Llama-3.3-70B-Instruct",
   "rule_based": {"safe_rate": 0.0, "threshold": 0.85},
-  "llm_judge": {"safe": 73, "unsafe": 22, "safe_rate": 0.7684}
+  "llm_judge": {"safe": 73, "unsafe": 22, "error": 5, "safe_rate": 0.7684}
 }
 ```
 </details>
@@ -247,12 +249,15 @@ OpenBioLLM-8B (Meta Llama), but 9× larger.
 | Evaluator | Safe | Unsafe | Safe Rate |
 |-----------|------|--------|-----------|
 | scispaCy (exact match) | 0 | 100 | 0.0% |
-| Llama-3.3-70B Judge | 73 | 22 | **76.8%** |
+| Llama-3.3-70B Judge | 73 | 22 | **76.8%** (of 95 evaluated; 5 errored) |
 
 > **Note:** The 0% rule-based safe rate is expected — scispaCy's
 > exact-match entity comparison cannot recognize semantic equivalents
 > (e.g., "heart attack" ≠ "myocardial infarction").
 > The LLM judge correctly identifies these as faithful simplifications.
+
+> **Note on n=95:** 5 of 100 samples returned an error from the
+> LLM judge (network timeout). safe_rate = 73/95 evaluated samples.
 
 ### Key Finding
 
@@ -260,7 +265,7 @@ OpenBioLLM-8B (Meta Llama), but 9× larger.
 flags all simplifications as unsafe because it cannot recognize semantic
 equivalents (e.g., "myocardial infarction" → "heart attack"). The LLM judge,
 which understands semantic equivalence, found **76.8% of simplifications
-fully faithful** to the original medical content.
+fully faithful** to the original medical content (73/95 evaluated outputs).
 
 > In the 22 cases flagged by the LLM judge, issues were limited to
 > minor information condensation rather than hallucinated medical facts
