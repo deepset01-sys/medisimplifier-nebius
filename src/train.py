@@ -185,9 +185,11 @@ def main():
 
     import random
     import numpy as np
+    from transformers import set_seed as transformers_set_seed
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
+    transformers_set_seed(args.seed)
 
     # Resolve module configs for ablation
     MODULE_MAP = {
@@ -244,6 +246,7 @@ def main():
         eval_dataset=dataset["validation"],
         tokenizer=tokenizer,
         dataset_text_field="text",
+        max_seq_length=TRAINING_CONFIG.get("max_seq_length", 2048),
         args=training_args,
     )
 

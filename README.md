@@ -668,6 +668,12 @@ nebius ai endpoint create \
   --public
 ```
 
+> **Important:** After creating the endpoint, wait ~10–15 minutes
+> for the model to load from HuggingFace before sending requests.
+> To check if ready: `curl http://<your-ip>:8000/v1/models`
+> When you see `chambul/MediSimplifier-OpenBioLLM-merged` listed,
+> the endpoint is ready.
+
 > No training required — the merged model loads directly from HuggingFace.
 > Endpoint tested live — curl response:
 > ```json

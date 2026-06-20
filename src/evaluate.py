@@ -1,6 +1,9 @@
 import sys
 import types
 
+# torchaudio is imported by some HuggingFace internals but not needed
+# for text evaluation. This stub prevents ImportError on environments
+# where torchaudio is not installed (e.g., Nebius Jobs with torch-only image).
 _torchaudio = types.ModuleType('torchaudio')
 _torchaudio.__version__ = '0.0.0'
 _torchaudio.__spec__ = types.SimpleNamespace(
