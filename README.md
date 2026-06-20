@@ -28,8 +28,8 @@ while preserving all critical medical information.
 |---------|--------|
 | Optimal LoRA rank | r=32 outperforms r=4-8 recommended by Hu et al. 2021 |
 | Optimal modules | all_attn (Q+K+V+O) outperforms standard Q+V |
-| Ranking reversal | Worst zero-shot model becomes best fine-tuned (+157%) |
-| Readability | FK-Grade 14.5 → 6.91 (Mistral-7B, original H200); Nebius H100: Mistral 6.14, BioMistral 6.13 |
+| Ranking reversal | Worst zero-shot model becomes best fine-tuned (+153.1% on Nebius H100) |
+| Readability | FK-Grade 14.5 → 6.91 (Mistral-7B, original H200); Nebius H100: OpenBioLLM 7.33, Mistral 6.14, BioMistral 6.13 |
 | Data efficiency | 4K samples achieves 97% of 8K performance |
 | Baseline-improvement correlation | r ≈ -0.998 — lower zero-shot = higher gain |
 | Total compute | 18 ablation runs + 3 full training runs, ~10 GPU hours (~7h wall-clock; ablation jobs run in parallel) |
@@ -60,9 +60,9 @@ This submission extends it with a full MLOps lifecycle on Nebius:
 
 | Model | ROUGE-L (Nebius H100) | ROUGE-L (Original H200) | Delta | SARI | BERTScore | FK-Grade | Improvement |
 |-------|----------------------|------------------------|-------|------|-----------|----------|-------------|
-| OpenBioLLM-8B | **0.6638** | 0.6749 | −1.6% | 73.49 | 0.9460 | 7.33 | +157.3% |
-| Mistral-7B | **0.6253** | 0.6491 | −3.7% | 72.75 | 0.9418 | 6.14 | +65.9% |
-| BioMistral-7B-DARE | **0.6004** | 0.6318 | −5.0% | 71.97 | 0.9372 | 6.13 | +53.3% |
+| OpenBioLLM-8B | **0.6638** | 0.6749 | −1.6% | 73.49 | 0.9460 | 7.33 | +153.1% |
+| Mistral-7B | **0.6253** | 0.6491 | −3.7% | 72.75 | 0.9418 | 6.14 | +59.8% |
+| BioMistral-7B-DARE | **0.6004** | 0.6318 | −5.0% | 71.97 | 0.9372 | 6.13 | +45.7% |
 
 95% CIs from bootstrap (n=10,000). All pairwise ROUGE-L differences significant at p<0.001.
 All results use seed=42. Bootstrap CIs computed with n=10,000 resamples.
@@ -81,7 +81,7 @@ All results use seed=42. Bootstrap CIs computed with n=10,000 resamples.
 > **Note on FK-Grade target:** The original research target was FK ≤ 6.0.
 > Best achieved on H200: 6.91 (Mistral-7B, original run).
 > OpenBioLLM-8B achieved 7.16 on original H200 hardware.
-> Nebius H100 reproduction: Mistral 6.14, BioMistral 6.13.
+> Nebius H100 reproduction: OpenBioLLM 7.33, Mistral 6.14, BioMistral 6.13.
 > The difference reflects H200→H100 hardware variance (non-deterministic CUDA ops).
 > The gap from the 6.0 target reflects the inherent tension between medical accuracy preservation
 > and maximum simplification.
@@ -95,7 +95,7 @@ Technion research findings:
 | Model | Original ROUGE-L (H200) | Nebius ROUGE-L (H100) | Delta |
 |-------|------------------------|----------------------|-------|
 | OpenBioLLM-8B | 0.6749 | 0.6638 | −1.6% |
-| Mistral-7B-Instruct | 0.6491 | 0.6253 | −3.7% |
+| Mistral-7B | 0.6491 | 0.6253 | −3.7% |
 | BioMistral-7B-DARE | 0.6318 | 0.6004 | −5.0% |
 
 > The ranking reversal finding holds across both hardware
@@ -114,7 +114,7 @@ Technion research findings:
 | BioMistral-7B-DARE | 0.4120 | 51.91 | 0.743 | 9.52 |
 
 **Key finding:** OpenBioLLM-8B had the *lowest* zero-shot score (0.2623)
-but achieved the *highest* fine-tuned score (0.6749) — a full ranking
+but achieved the *highest* fine-tuned score (0.6749 on original H200 hardware; 0.6638 on Nebius H100) — a full ranking
 reversal. All pairwise differences significant at p<0.001 (bootstrap n=10,000).
 
 ### Why Did the Ranking Reversal Happen?
@@ -909,7 +909,7 @@ easse @ git+https://github.com/feralvam/easse.git@6a4352ec299ed03fda8ee45445ca43
 > **Note on HuggingFace accounts:** Dataset and LoRA adapters are published under `GuyDor007`
 > (Guy Dor, co-author of the original Technion research project). The Nebius submission repo,
 > Docker images, and W&B dashboard are under `deepset01-sys` / `chambul` (Shmulik Avraham).
-> Both accounts belong to the same two-person team.
+> GuyDor007 is Guy Dor (Technion co-author on the original project). This Nebius submission was built independently by Shmulik Avraham.
 
 | Resource | Link |
 |----------|------|
