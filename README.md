@@ -316,21 +316,6 @@ fully faithful** to the original medical content (73/95 evaluated outputs).
 > minor information condensation — no hallucinated medical facts
 > were detected. Not intended for production medical use.
 
-## Visualizations
-
-Key figures from the research (available in the
-[original repository](https://github.com/gd007/MediSimplifier/tree/main/results/figures)):
-
-| Figure | Description |
-|--------|-------------|
-| `ranking_reversal.png` | Full ranking reversal — worst zero-shot → best fine-tuned |
-| `ablation_study_summary.png` | All 3 ablation phases in one chart |
-| `confidence_intervals.png` | 95% bootstrap CIs for all models |
-| `baseline_vs_finetuned_metrics.png` | Before/after across all 4 metrics |
-| `significance_matrix.png` | Pairwise statistical significance |
-| `error_analysis_dashboard.png` | Qualitative error analysis |
-| `model_performance_heatmap.png` | Full metrics heatmap |
-
 ## Ablation Study Results
 
 All ablation runs: 1 epoch, OpenBioLLM-8B base, evaluated on held-out test set (1,001 samples).
