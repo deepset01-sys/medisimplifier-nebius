@@ -31,8 +31,8 @@ while preserving all critical medical information.
 | Ranking reversal | Worst zero-shot model becomes best fine-tuned (+153.1% on Nebius H100) |
 | Readability | FK-Grade 14.5 → 6.91 (Mistral-7B, original H200); Nebius H100: OpenBioLLM 7.33, Mistral 6.14, BioMistral 6.13 |
 | Data efficiency | 4K samples achieves 97% of 8K performance |
-| Baseline-improvement correlation | r ≈ -0.998 — lower zero-shot = higher gain |
-| Total compute | 18 ablation runs + 3 full training runs, ~10 GPU hours (~7h wall-clock; ablation jobs run in parallel) |
+| Baseline-improvement correlation | monotonic — lower zero-shot → higher gain (n=3 models) |
+| Total compute | 9 ablation runs + 3 full training runs, ~10 GPU hours (~7h wall-clock; ablation jobs run in parallel) |
 
 ## What Nebius Added
 
@@ -119,7 +119,7 @@ reversal. All pairwise differences significant at p<0.001 (bootstrap n=10,000).
 
 ### Why Did the Ranking Reversal Happen?
 
-The ranking reversal (worst zero-shot → best fine-tuned, r ≈ -0.998)
+The ranking reversal (worst zero-shot → best fine-tuned) is monotonic across all 3 models — lower zero-shot score correlates with higher fine-tuning gain.
 is not a coincidence — it reflects a fundamental insight about
 domain pretraining vs. task alignment:
 
@@ -641,10 +641,14 @@ nebius ai endpoint create \
 
 ### 6. Call the live endpoint
 
+> **Note:** Replace `<endpoint-ip>` with the IP from your
+> `nebius ai endpoint create` output (Step 5).
+> The model name must match exactly: `chambul/MediSimplifier-OpenBioLLM-merged`
+
     curl -X POST http://<endpoint-ip>:8000/v1/completions \
       -H "Content-Type: application/json" \
       -d '{
-        "model": "/mnt/adapters/merged_openbio",
+        "model": "chambul/MediSimplifier-OpenBioLLM-merged",
         "prompt": "Simplify: Patient presented with acute myocardial infarction...\n\nSimplified:",
         "max_tokens": 200,
         "temperature": 0
