@@ -72,8 +72,8 @@ This submission extends it with a full MLOps lifecycle on Nebius:
 | Mistral-7B | **0.6253** | 0.6491 | −3.7% | 72.75 | 0.9418 | 6.14 | +59.8% |
 | BioMistral-7B-DARE | **0.6004** | 0.6318 | −5.0% | 71.97 | 0.9372 | 6.13 | +45.7% |
 
-95% CIs from bootstrap (n=10,000). All pairwise ROUGE-L differences significant at p<0.001.
-All results use seed=42. Bootstrap CIs computed with n=10,000 resamples.
+95% CIs from bootstrap (n=10,000). All pairwise ROUGE-L differences large relative to estimated CUDA variance (~0.001–0.002 ROUGE-L).
+All results use seed=42.
 
 > Improvement % = (Nebius H100 fine-tuned − zero-shot) / zero-shot.
 > OpenBioLLM: (0.6638 − 0.2623) / 0.2623 = +153.1%
@@ -97,22 +97,8 @@ All results use seed=42. Bootstrap CIs computed with n=10,000 resamples.
 > The gap from the 6.0 target reflects the inherent tension between medical accuracy preservation
 > and maximum simplification.
 
-### Reproduced on Nebius H100 NVLink
-
-All three models were fully trained and evaluated on Nebius
-Serverless Jobs (H100 NVLink), reproducing the original
-Technion research findings:
-
-| Model | Original ROUGE-L (H200) | Nebius ROUGE-L (H100) | Delta |
-|-------|------------------------|----------------------|-------|
-| OpenBioLLM-8B | 0.6749 | 0.6638 | −1.6% |
-| Mistral-7B | 0.6491 | 0.6253 | −3.7% |
-| BioMistral-7B-DARE | 0.6318 | 0.6004 | −5.0% |
-
-> The ranking reversal finding holds across both hardware
-> generations — confirming it is not a hardware artifact.
-> Training monitored via [W&B dashboard](https://wandb.ai/deepset01-chambul/medisimplifier) *(public, no login required)*.
-> Evaluation: 1,001 test samples, greedy decoding, seed=42.
+> The ranking reversal holds across both hardware generations —
+> see Delta column above (H200→H100 variance: 1.6–5.0%).
 
 ## Baseline vs Fine-Tuned Results
 
@@ -126,7 +112,7 @@ Technion research findings:
 
 **Key finding:** OpenBioLLM-8B had the *lowest* zero-shot score (0.2623)
 but achieved the *highest* fine-tuned score (0.6749 on original H200 hardware; 0.6638 on Nebius H100) — a full ranking
-reversal. All pairwise differences significant at p<0.001 (bootstrap n=10,000).
+reversal. All pairwise differences large relative to estimated CUDA variance (~0.001–0.002 ROUGE-L).
 
 ### Why Did the Ranking Reversal Happen?
 
@@ -262,12 +248,12 @@ All results are committed to this repository for durable verification:
 
 ## Medical Safety Evaluation (Preliminary)
 
-Beyond standard NLP metrics, we evaluated whether MediSimplifier preserves
+Beyond standard NLP metrics, I evaluated whether MediSimplifier preserves
 critical medical information — a safety requirement for real-world deployment.
 
 ### Methodology
 
-We conducted a two-level evaluation on 100 test samples (seed=42):
+I conducted a two-level evaluation on 100 test samples (seed=42):
 
 | Level | Method | Model |
 |-------|--------|-------|
@@ -348,7 +334,7 @@ All ablation runs: 1 epoch, OpenBioLLM-8B base, evaluated on held-out test set (
 | 4K   | 0.6198  | 69.12 | 0.9347   | 7.73     |
 | **8K ✓** | **0.6345** | **71.08** | **0.9382** | **7.51** |
 
-Winner configuration: **r=32, all_attn, 8K** → used for full 3-epoch training → final ROUGE-L 0.6749.
+Winner configuration: **r=32, all_attn, 8K** → used for full 3-epoch training → final ROUGE-L **0.6638** (Nebius H100; 0.6749 on original H200).
 
 > **Note on ablation overlap:** Phase 1 and Phase 2 share the r=32, q+v, 8K configuration (0.6183 vs 0.6192),
 > and Phase 2/Phase 3 share r=32, all_attn, 8K (0.6357 vs 0.6345). These are not real performance differences.
@@ -393,7 +379,7 @@ Pipeline:
 | Setup time | 0 min | 10–30 min | Hours |
 | Cost when idle | $0 | Full rate | Full rate |
 | Parallel jobs | Instant | Manual | Complex |
-| 9 ablations | 20 min, ~$15 | 3 hours | Setup overhead |
+| 9 ablations | 20 min, ~$9 | 3 hours | Setup overhead |
 | Best for | Experimentation | Long training | Production serving |
 
 > Serverless Jobs eliminated cluster management overhead that
@@ -700,7 +686,7 @@ nebius ai endpoint create \
 > ```json
 > {"choices":[{"text":"The patient had a heart attack and was given blood-thinning medicine..."}]}
 > ```
-> Latency: ~946ms–1,198ms, throughput: 106–144 tok/s (H100 NVLink).
+> See [Inference Latency](#inference-latency-vllm-h100-nlink) below for benchmarks.
 
 ### 6. Call the live endpoint
 
@@ -736,8 +722,7 @@ greedy decoding (temperature=0), measured during judging window:
 
 The endpoint uses vLLM serving with the merged LoRA model, exposing an
 OpenAI-compatible `/v1/completions` endpoint (see `jobs/endpoint_vllm.yaml`).
-Run `src/merge_adapter.py` first to merge and upload the model, then deploy
-the vLLM endpoint.
+The merged model is publicly available on HuggingFace — see Step 5 above. For custom adapter deployment, see the Merge & Deploy Pipeline section.
 
 ## Qualitative Example
 
@@ -766,11 +751,12 @@ the vLLM endpoint.
       Dockerfile.train  Training image
       Dockerfile.serve  Serving image
     jobs/
-      job_train.yaml       Full training job config
-      job_ablation.yaml    Parametrized ablation job config
-      job_evaluate.yaml    Evaluation job config
-      job_merge.yaml       Adapter merge job config
-      endpoint_vllm.yaml   vLLM endpoint deployment config
+      job_train.yaml         Full training job config
+      job_ablation.yaml      Parametrized ablation job config
+      job_evaluate.yaml      Evaluation job config
+      job_safety_eval.yaml   Safety evaluation job config
+      job_ablation_run.sh    Ablation submission shell script
+      endpoint_vllm.yaml     vLLM endpoint deployment config
     requirements.txt
 
 ## Key Configuration
@@ -809,9 +795,7 @@ peft_config = LoraConfig(
     use_rslora=True,      # rank-stabilized LoRA
 )
 
-# Prompt template — identical at train and inference time
-def format_prompt(text: str) -> str:
-    return f"Simplify: {text}\n\nSimplified:"
+# Prompt format: see src/train.py format_sample() for full CHATML/Mistral template
 ```
 
 ### Container Image
@@ -990,6 +974,8 @@ bert-score==0.3.13
 textstat==0.7.3
 scispacy==0.5.4
 https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.4/en_core_sci_sm-0.5.4.tar.gz
+# FastAPI/uvicorn retained for Dockerfile base compatibility
+# Production serving uses vLLM (see endpoint_vllm.yaml)
 fastapi==0.110.0
 uvicorn==0.29.0
 boto3==1.34.0
