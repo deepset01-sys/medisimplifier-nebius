@@ -237,6 +237,10 @@ curl http://89.169.110.2:8000/v1/completions \
   }'
 ```
 
+The merged model is publicly available — deploy your own endpoint
+on Nebius in 5 minutes, no training required:
+[chambul/MediSimplifier-OpenBioLLM-merged](https://huggingface.co/chambul/MediSimplifier-OpenBioLLM-merged)
+
 *(Endpoint active June 29–30, 2026 for judging window)*
 
 **Medical safety evaluation:**
