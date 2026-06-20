@@ -22,6 +22,14 @@ MediSimplifier fine-tunes open-source LLMs using LoRA to automatically simplify
 these documents to 7th-grade reading level — ~50% readability reduction —
 while preserving all critical medical information.
 
+> **What's new in this Nebius submission vs the Technion project:**
+> The ranking-reversal and LoRA rank findings were first observed
+> in the original Technion research. New contributions here are:
+> the **Nebius MLOps pipeline** (parallel ablation, stateless jobs,
+> bucket persistence), **H100 hardware reproduction** (δ 1.6–5.0%),
+> **vLLM production serving**, and **LLM-as-judge safety evaluation**
+> via Token Factory. See [What Nebius Added](#what-nebius-added) for details.
+
 **Key findings (challenging the conventional recommendation of r=4-8 (Hu et al. 2021)):**
 
 | Finding | Result |
