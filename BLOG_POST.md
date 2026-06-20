@@ -35,7 +35,7 @@ quality at a fraction of the cost.
 
 We needed to run 9 ablation experiments (3 ranks × 3 module configs × 3 data sizes)
 before committing to a full training run. On a single GPU, that's 3 hours of sequential
-waiting. With Nebius Serverless Jobs, we submitted all 9 in parallel:
+waiting. With Nebius Serverless Jobs, I submitted all 9 in parallel:
 
 ```bash
 for RANK in 8 16 32; do
@@ -60,6 +60,13 @@ Training Job → /output/adapter → medisimplifier-adapters bucket
 Eval Job ← /mnt/adapters/full_training ←─┘
 No manual copying. No lost checkpoints. Jobs are stateless; the bucket is the state.
 
+One thing worth clarifying: Nebius has two distinct primitives.
+Jobs (`nebius ai job create`) are stateless — they start, do work,
+and finish. I used them for training, ablation, evaluation, and safety eval.
+Endpoints (`nebius ai endpoint create`) are persistent serving layers —
+they stay up and answer requests. I used one for the live vLLM demo.
+The original Technion project had neither. Nebius gave me both.
+
 **The pipeline in full:**
 HuggingFace Dataset (10K samples, Asclepius Synthetic)
 ↓
@@ -73,7 +80,7 @@ Nebius Job: Safety eval — scispaCy + Llama-3.3-70B via Token Factory
 ↓
 Nebius Endpoint: vLLM serving merged adapter, OpenAI-compatible API
 
-Total cost: ~$70. Total wall-clock time from first job to live endpoint: ~2 days.
+Total cost: ~$91. Total wall-clock time from first job to live endpoint: ~2 days.
 
 ---
 
@@ -99,14 +106,14 @@ save_safetensors=False
 model.save_pretrained(output_path, safe_serialization=False)
 ```
 
-We lost about 4 hours to this across the three models. The lesson: test your
+I lost about 4 hours to this across the three models. The lesson: test your
 save path on a 1-step job before a 70-minute training run.
 
 **Bug 2: The PEFT/TRL version dance**
 TypeError: SFTTrainer.init() got an unexpected keyword argument 'processing_class'
 
 The `trl` library renamed `tokenizer` to `processing_class` in one version, then
-back again. We ended up pinning every dependency to exact versions in requirements.txt
+back again. I ended up pinning every dependency to exact versions in requirements.txt
 — `peft==0.14.0`, `transformers==4.45.0`, `trl==0.8.6` — and building that into
 the Docker image. Once the image was stable, every job was reproducible.
 
@@ -122,7 +129,7 @@ Pin everything.
 
 **Decision: Build a Docker image first**
 
-After the first few failed jobs, we made a decision that changed everything:
+After the first few failed jobs, I made a decision that changed everything:
 stop pip-installing at job start time, and bake all dependencies into a Docker
 image pushed to both Docker Hub and Nebius Container Registry.
 
@@ -138,7 +145,7 @@ Cold start went from ~8 minutes (pip install on every job) to ~45 seconds
 
 **The moment the first job worked**
 
-After three days of debugging, we submitted `medisimplifier-full-training` and
+After three days of debugging, I submitted `medisimplifier-full-training` and
 watched the logs stream in Nebius Console:
 Train: 7999 | Val: 999 | Test: 1001
 Starting training...
@@ -166,7 +173,7 @@ Before running a single fine-tuning job, we measured zero-shot performance.
 BioMistral-7B-DARE came out on top (ROUGE-L 0.4120). OpenBioLLM-8B was last (0.2623).
 Conventional wisdom: start with the best zero-shot model and make it better.
 
-Then we fine-tuned. Here's what happened:
+Then I fine-tuned. Here's what happened:
 
 | Model | Zero-Shot ROUGE-L | Fine-Tuned ROUGE-L | Improvement |
 |-------|-------------------|--------------------|-------------|
@@ -260,12 +267,17 @@ not hallucination — the right failure mode for a simplification task.
   is a poor trade.
 - Pin every dependency. In a containerized job environment, version drift is silent death.
 
-**The $70 question:**
+**The $91 question:**
 The full pipeline — 9 ablation jobs + 3 full training runs + 3 evals + safety eval
-+ endpoint deployment — cost ~$70 on Nebius H100. That's less than one hour
++ endpoint deployment — cost ~$91 on Nebius H100. That's less than one hour
 of a machine learning engineer's time. The compute is not the bottleneck anymore.
 
 ---
+
+*A note on attribution: MediSimplifier started as a Technion DS25
+graduation project, co-authored with Guy Dor. The Nebius pipeline,
+serving layer, safety evaluation, and MLOps infrastructure in this
+submission were built independently for this challenge.*
 
 *All code, data, and adapters are public:*
 - *Pipeline: [deepset01-sys/medisimplifier-nebius](https://github.com/deepset01-sys/medisimplifier-nebius)*
