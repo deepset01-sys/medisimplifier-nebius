@@ -164,12 +164,18 @@ All results are committed to this repository for durable verification:
 |------|---------|
 | [full_train_logs.json.gz](results/nebius_logs/full_train_logs.json.gz) | Full OpenBioLLM-8B training — H100, train_loss 0.844→0.635 |
 | [endpoint_vllm_logs.json.gz](results/nebius_logs/endpoint_vllm_logs.json.gz) | vLLM endpoint startup + requests, vmapp_id: aiendpoint-e00ef3br6r14grvhhd |
-| [r32_all_8kdata.json.gz](results/nebius_logs/r32_all_8kdata.json.gz) | Best ablation config — r=32, all_attn, 8K |
 | [adapters_logs.json.gz](results/nebius_logs/adapters_logs.json.gz) | Merge adapter job |
-| + 6 more ablation logs | r8, r16, r32 variants |
+| [r32_all_8kdata.json.gz](results/nebius_logs/r32_all_8kdata.json.gz) | Ablation: r=32, all_attn, 8K data — ROUGE-L 0.6345 |
+| [r32_all_4kdata_logs.json.gz](results/nebius_logs/r32_all_4kdata_logs.json.gz) | Ablation: r=32, all_attn, 4K data — ROUGE-L 0.6198 |
+| [r32_all_attention_logs.json.gz](results/nebius_logs/r32_all_attention_logs.json.gz) | Ablation: r=32, all_attn modules |
+| [r32_qv_logs.json.gz](results/nebius_logs/r32_qv_logs.json.gz) | Ablation: r=32, q+v modules — ROUGE-L 0.6192 |
+| [r32_qonly_logs.json.gz](results/nebius_logs/r32_qonly_logs.json.gz) | Ablation: r=32, q only — ROUGE-L 0.6006 |
+| [r16_qv_logs.json.gz](results/nebius_logs/r16_qv_logs.json.gz) | Ablation: r=16, q+v — ROUGE-L 0.6080 |
+| [r8_qv_logs.json.gz](results/nebius_logs/r8_qv_logs.json.gz) | Ablation: r=8, q+v — ROUGE-L 0.6033 |
 
 > All logs contain Nebius job IDs (aijob-* / aiendpoint-*),
 > GPU info (NVIDIA H100 80GB HBM3), and timestamps.
+> Proving the full pipeline ran on Nebius infrastructure.
 
 **📁 Eval Results (from medisimplifier-adapters bucket):**
 
