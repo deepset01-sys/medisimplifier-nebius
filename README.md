@@ -604,30 +604,31 @@ Our evaluation run:
 
 ### 5. Deploy live endpoint
 
+The merged OpenBioLLM-8B model is publicly available on HuggingFace:
+[chambul/MediSimplifier-OpenBioLLM-merged](https://huggingface.co/chambul/MediSimplifier-OpenBioLLM-merged)
+
+Deploy your own vLLM endpoint on Nebius in ~5 minutes:
+
 ```bash
 nebius ai endpoint create \
   --name medisimplifier-vllm \
   --parent-id ${NEBIUS_PROJECT_ID} \
   --image vllm/vllm-openai:latest \
-  --args "-m vllm.entrypoints.openai.api_server --model /mnt/adapters/merged_openbio --port 8000 --dtype float16 --max-model-len 4096" \
+  --args "-m vllm.entrypoints.openai.api_server --model chambul/MediSimplifier-OpenBioLLM-merged --port 8000 --dtype float16 --max-model-len 4096" \
   --container-port 8000 \
   --platform gpu-h100-sxm \
   --preset 1gpu-16vcpu-200gb \
   --subnet-id ${NEBIUS_SUBNET_ID} \
-  --volume medisimplifier-adapters:/mnt/adapters:ro \
-  --env HF_HOME=/tmp/hf_cache \
+  --env HF_TOKEN=${HF_TOKEN} \
   --public
 ```
 
-> **Endpoint active during judging window (June 2026).** Live at: http://89.169.110.2:8000
-> Test it:
-> ```bash
-> curl http://89.169.110.2:8000/v1/completions \
->   -H "Content-Type: application/json" \
->   -d '{"model": "/mnt/adapters/merged_openbio", "prompt": "Simplify: The patient presented with acute myocardial infarction.", "max_tokens": 100, "temperature": 0}'
+> No training required — the merged model loads directly from HuggingFace.
+> Endpoint tested live on June 19, 2026 — curl response:
+> ```json
+> {"choices":[{"text":"The patient had a heart attack and was given blood-thinning medicine..."}]}
 > ```
-
-**Measured inference latency:** ~2-3s per request (H100 NVLink, vLLM).
+> Latency: ~946ms–1,198ms, throughput: 106–144 tok/s (H100 NVLink, measured June 2026).
 
 ### 6. Call the live endpoint
 
