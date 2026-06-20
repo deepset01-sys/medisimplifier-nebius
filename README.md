@@ -459,7 +459,7 @@ nebius ai endpoint create \
 > For an inference endpoint that serves sporadic requests —
 > a demo, a research prototype, or a low-traffic API —
 > Serverless Endpoints are the only economically rational choice.
-> We serve a merged 8B model at ~$3/hr only when the endpoint
+> I serve a merged 8B model at ~$3/hr only when the endpoint
 > is actually running, with zero idle cost between sessions.
 > The OpenAI-compatible API means any existing client works
 > without modification.
