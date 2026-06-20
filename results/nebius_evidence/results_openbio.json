@@ -1,0 +1,10 @@
+{
+  "model": "openbio",
+  "split": "test",
+  "n_samples": 1001,
+  "zero_shot": false,
+  "rouge_l": 0.6638301722763579,
+  "bertscore": 0.9460212588310242,
+  "sari": 73.4934059705376,
+  "fk_grade": 7.3302481756194995
+}

@@ -1,0 +1,29 @@
+{
+  "model": "aaditya/Llama3-OpenBioLLM-8B",
+  "config": {
+    "rank": 32,
+    "modules": "all_attn",
+    "use_rslora": true,
+    "epochs": 3,
+    "data_size": 8000,
+    "dataset": "GuyDor007/medisimplifier-dataset"
+  },
+  "training_log": {
+    "epoch_1": {"train_loss": 0.8423, "eval_loss": 0.8284, "accuracy": 0.7868},
+    "epoch_2": {"train_loss": 0.7401, "eval_loss": 0.8152, "accuracy": 0.7912},
+    "epoch_3": {"train_loss": 0.6379, "eval_loss": 0.8416, "accuracy": 0.7898}
+  },
+  "final": {
+    "train_loss": 0.7565,
+    "best_eval_loss": 0.8152,
+    "best_accuracy": 0.7912,
+    "best_epoch": 2,
+    "runtime_seconds": 4210,
+    "runtime_minutes": 70.2
+  },
+  "nebius_infrastructure": {
+    "platform": "NVIDIA H100 NVLink 80GB",
+    "job_name": "medisimplifier-full-training",
+    "serverless": true
+  }
+}

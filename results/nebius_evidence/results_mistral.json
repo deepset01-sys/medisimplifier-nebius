@@ -1,0 +1,10 @@
+{
+  "model": "mistral",
+  "split": "test",
+  "n_samples": 1001,
+  "zero_shot": false,
+  "rouge_l": 0.6252817197442753,
+  "bertscore": 0.9417641162872314,
+  "sari": 72.7494461939556,
+  "fk_grade": 6.13996003996004
+}

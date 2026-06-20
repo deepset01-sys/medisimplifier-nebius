@@ -1,0 +1,10 @@
+{
+  "model": "biomistral",
+  "split": "test",
+  "n_samples": 1001,
+  "zero_shot": false,
+  "rouge_l": 0.6004371747389514,
+  "bertscore": 0.9372423887252808,
+  "sari": 71.96641726272665,
+  "fk_grade": 6.129270729270729
+}
