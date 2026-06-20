@@ -67,6 +67,9 @@ This submission extends it with a full MLOps lifecycle on Nebius:
 95% CIs from bootstrap (n=10,000). All pairwise ROUGE-L differences significant at p<0.001.
 All results use seed=42. Bootstrap CIs computed with n=10,000 resamples.
 
+> Improvement % = (Nebius H100 fine-tuned − zero-shot) / zero-shot.
+> OpenBioLLM: (0.6638 − 0.2623) / 0.2623 = +153.1%
+
 > Key finding: ranking reversal fully reproduced on Nebius H100.
 > Evaluation: 1,001 test samples, greedy decoding, seed=42.
 
@@ -225,7 +228,7 @@ All results are reproducible from public artifacts:
 - W&B: [wandb.ai/deepset01-chambul/medisimplifier](https://wandb.ai/deepset01-chambul/medisimplifier)
 - Endpoint: `http://89.169.110.2:8000` (active during judging window)
 
-## Medical Safety Evaluation
+## Medical Safety Evaluation (Preliminary)
 
 Beyond standard NLP metrics, we evaluated whether MediSimplifier preserves
 critical medical information — a safety requirement for real-world deployment.
@@ -438,6 +441,9 @@ Training Job                    Object Storage                  Eval/Serve Job
 | Safety eval | H100 NVLink | ~30 min | ~$3 |
 | Merge + misc | H100 NVLink | — | ~$2 |
 | Total | | | ~$91 |
+
+> H100 NVLink rate: ~$3.04/hr on Nebius eu-north1.
+> Wall-clock hours × rate = billed cost per job.
 
 > 9 parallel jobs = same wall-clock time as 1 job (~20 min total).
 
@@ -697,6 +703,7 @@ the vLLM endpoint.
     src/
       train.py          LoRA training — runs as Nebius Job
       evaluate.py       Metrics: ROUGE-L, SARI, BERTScore, FK-Grade
+      safety_eval.py    LLM-as-judge safety evaluation via Nebius Token Factory
       serve_vllm.py     vLLM inference server — runs as Nebius Endpoint
     docker/
       Dockerfile.train  Training image
@@ -941,9 +948,8 @@ easse @ git+https://github.com/feralvam/easse.git@6a4352ec299ed03fda8ee45445ca43
 ## Dataset and models
 
 > **Note on HuggingFace accounts:** Dataset and LoRA adapters are published under `GuyDor007`
-> (Guy Dor, co-author of the original Technion research project). The Nebius submission repo,
-> Docker images, and W&B dashboard are under `deepset01-sys` / `chambul` (Shmulik Avraham).
-> GuyDor007 is Guy Dor (Technion co-author on the original project). This Nebius submission was built independently by Shmulik Avraham.
+> (Guy Dor, Technion co-author). The Nebius submission repo, Docker images, and W&B dashboard
+> are under `deepset01-sys` / `chambul` (Shmulik Avraham).
 
 | Resource | Link |
 |----------|------|
