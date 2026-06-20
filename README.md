@@ -461,19 +461,21 @@ Training Job                    Object Storage                  Eval/Serve Job
 
 ### Hardware and cost
 
-| Step | GPU | Time | Cost |
-|------|-----|------|------|
-| Ablation x9 parallel | H100 | ~20 min each | ~$15 |
-| OpenBioLLM-8B fine-tuning | H100 NVLink | ~70 min | ~$22 |
-| Mistral-7B fine-tuning | H100 NVLink | ~70 min | ~$22 |
-| BioMistral-7B fine-tuning | H100 NVLink | ~70 min | ~$22 |
-| Evaluation x3 | H100 NVLink | ~45 min each | ~$7 |
-| Safety eval | H100 NVLink | ~30 min | ~$3 |
+| Step | GPU | Wall-clock time | Approx. compute cost |
+|------|-----|----------------|---------------------|
+| Ablation ×9 (parallel) | H100 NVLink | ~20 min total | ~$9 |
+| OpenBioLLM-8B training | H100 NVLink | ~70 min | ~$4 |
+| Mistral-7B training | H100 NVLink | ~70 min | ~$4 |
+| BioMistral-7B training | H100 NVLink | ~70 min | ~$4 |
+| Evaluation ×3 | H100 NVLink | ~45 min each | ~$7 |
+| Safety evaluation | H100 NVLink | ~30 min | ~$2 |
 | Merge + misc | H100 NVLink | — | ~$2 |
-| Total | | | ~$91 |
+| **Compute subtotal** | | | **~$32** |
 
 > H100 NVLink rate: ~$3.04/hr on Nebius eu-north1.
-> Wall-clock hours × rate = billed cost per job.
+> Compute subtotal: ~$32. Total project spend including
+> storage, failed runs, and iteration: **~$91**.
+> All costs incurred on Nebius Serverless — no reserved instances.
 
 > 9 parallel jobs = same wall-clock time as 1 job (~20 min total).
 
