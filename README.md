@@ -378,10 +378,10 @@ The LoRA adapter is merged into the base model before serving:
 python src/merge_adapter.py \
   --model openbio \
   --adapter-path /mnt/adapters/full_training \
-  --output-path /tmp/merged_openbio
+  --output-path /mnt/adapters/merged_openbio
 
 # Step 2: Upload to bucket
-aws s3 sync /tmp/merged_openbio/ \
+aws s3 sync /mnt/adapters/merged_openbio/ \
   s3://medisimplifier-adapters/merged_openbio/ \
   --endpoint-url https://storage.eu-north1.nebius.cloud
 
@@ -501,7 +501,7 @@ nebius ai job create \
 ```
 
 > **CLI verified:** All `nebius ai job create` flags above
-> are confirmed against Nebius CLI v0.12.229 on June 19, 2026.
+> are confirmed against Nebius CLI v0.12.229.
 
 > The `--volume` flag mounts the `medisimplifier-adapters` bucket
 > to `/output` so the trained adapter persists after the job ends.
@@ -840,6 +840,7 @@ timeout: 5h
 ```yaml
 name: medisimplifier-vllm
 description: "MediSimplifier vLLM inference endpoint — OpenAI-compatible /v1/completions"
+public: true
 parent_id: ${NEBIUS_PROJECT_ID}
 
 docker:
