@@ -14,7 +14,7 @@ docker:
     - "-m"
     - "vllm.entrypoints.openai.api_server"
     - "--model"
-    - "/mnt/adapters/merged_openbio"
+    - "chambul/MediSimplifier-OpenBioLLM-merged"
     - "--port"
     - "8000"
     - "--dtype"
@@ -24,15 +24,11 @@ docker:
 
 env:
   HF_HOME: "/tmp/hf_cache"
+  HF_TOKEN: "${HF_TOKEN}"
   PYTHONUNBUFFERED: "1"
 
 ports:
   - 8000
-
-volumes:
-  - bucket: medisimplifier-adapters
-    mount: /mnt/adapters
-    mode: ro
 
 resources:
   platform: gpu-h100-sxm

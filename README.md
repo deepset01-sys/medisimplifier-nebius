@@ -123,8 +123,6 @@ reversal. All pairwise differences significant at p<0.001 (bootstrap n=10,000).
 ### Why Did the Ranking Reversal Happen?
 
 The ranking reversal (worst zero-shot → best fine-tuned) is monotonic across all 3 models — lower zero-shot score correlates with higher fine-tuning gain.
-is not a coincidence — it reflects a fundamental insight about
-domain pretraining vs. task alignment:
 
 **OpenBioLLM-8B** was pre-trained exclusively on biomedical literature.
 It already "knew" the domain vocabulary — terms like "myocardial infarction,"
@@ -382,7 +380,7 @@ Pipeline:
 > Serverless Jobs eliminated cluster management overhead that
 > typically slows ML experimentation. Each job is stateless —
 > the bucket is the only persistent state between runs.
-> We submitted all 9 ablation jobs simultaneously and had
+> I submitted all 9 ablation jobs simultaneously and had
 > results in 20 minutes instead of 3 hours sequentially.
 
 ### Merge & Deploy Pipeline (vLLM)
@@ -395,6 +393,11 @@ The LoRA adapter is merged into the base model before serving:
 
 > `merge_adapter.py` is invoked as a Nebius Job (see `jobs/job_merge.yaml`) — not locally.
 > It reads from `/mnt/adapters/full_training` and writes the merged model to `/mnt/adapters/merged_openbio`.
+
+> **Note:** This describes the internal production pipeline
+> (bucket-mounted adapter). Judges reproducing the endpoint
+> should use Step 5 instead — it loads directly from HuggingFace
+> with no bucket credentials required.
 
 ```bash
 # Step 1: Merge (run as Nebius Job)
@@ -464,7 +467,7 @@ Training Job                    Object Storage                  Eval/Serve Job
 | OpenBioLLM-8B fine-tuning | H100 NVLink | ~70 min | ~$22 |
 | Mistral-7B fine-tuning | H100 NVLink | ~70 min | ~$22 |
 | BioMistral-7B fine-tuning | H100 NVLink | ~70 min | ~$22 |
-| Evaluation x3 | H100 NVLink | ~45 min each | ~$5 |
+| Evaluation x3 | H100 NVLink | ~45 min each | ~$7 |
 | Safety eval | H100 NVLink | ~30 min | ~$3 |
 | Merge + misc | H100 NVLink | — | ~$2 |
 | Total | | | ~$91 |
@@ -701,7 +704,7 @@ greedy decoding (temperature=0), measured during judging window:
 | ~40 | ~150 | 1,040ms | 144 tok/s |
 
 > Measured with PowerShell Invoke-WebRequest against the live vLLM endpoint.
-> Model: `/mnt/adapters/merged_openbio` (merged OpenBioLLM-8B + LoRA adapter).
+> Model: `chambul/MediSimplifier-OpenBioLLM-merged` (merged OpenBioLLM-8B + LoRA adapter, served via vLLM).
 > Sub-second to ~1.2s latency for typical discharge summary simplification.
 
 The endpoint uses vLLM serving with the merged LoRA model, exposing an
@@ -911,7 +914,7 @@ docker:
     - "-m"
     - "vllm.entrypoints.openai.api_server"
     - "--model"
-    - "/mnt/adapters/merged_openbio"
+    - "chambul/MediSimplifier-OpenBioLLM-merged"
     - "--port"
     - "8000"
     - "--dtype"
@@ -921,15 +924,11 @@ docker:
 
 env:
   HF_HOME: "/tmp/hf_cache"
+  HF_TOKEN: "${HF_TOKEN}"
   PYTHONUNBUFFERED: "1"
 
 ports:
   - 8000
-
-volumes:
-  - bucket: medisimplifier-adapters
-    mount: /mnt/adapters
-    mode: ro
 
 resources:
   platform: gpu-h100-sxm
