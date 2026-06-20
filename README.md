@@ -159,6 +159,32 @@ fine-tuning, even if it starts from a weaker baseline.
 
 All results are reproducible from public artifacts:
 
+### Committed Evidence Files
+
+All results are committed to this repository for durable verification:
+
+**Evaluation Results** (`results/nebius_evidence/`):
+| File | Model | ROUGE-L | SARI | BERTScore | FK-Grade |
+|------|-------|---------|------|-----------|----------|
+| [results_openbio.json](results/nebius_evidence/results_openbio.json) | OpenBioLLM-8B | 0.6638 | 73.49 | 0.9460 | 7.33 |
+| [results_mistral.json](results/nebius_evidence/results_mistral.json) | Mistral-7B | 0.6253 | 72.75 | 0.9418 | 6.14 |
+| [results_biomistral.json](results/nebius_evidence/results_biomistral.json) | BioMistral-7B | 0.6004 | 71.97 | 0.9372 | 6.13 |
+
+**Safety Evaluation** (`results/nebius_evidence/`):
+[safety_results.json](results/nebius_evidence/safety_results.json) — 100 samples with per-sample LLM judge verdicts, rule-based scores, and Token Factory latency metrics.
+
+**Nebius Job Logs** (`results/nebius_logs/`):
+| File | Contents |
+|------|---------|
+| [full_train_logs.json.gz](results/nebius_logs/full_train_logs.json.gz) | Full OpenBioLLM-8B training — H100, train_loss 0.844→0.635 |
+| [endpoint_vllm_logs.json.gz](results/nebius_logs/endpoint_vllm_logs.json.gz) | vLLM endpoint startup + requests, vmapp_id: aiendpoint-e00ef3br6r14grvhhd |
+| [r32_all_8kdata.json.gz](results/nebius_logs/r32_all_8kdata.json.gz) | Best ablation config — r=32, all_attn, 8K |
+| [adapters_logs.json.gz](results/nebius_logs/adapters_logs.json.gz) | Merge adapter job |
+| + 6 more ablation logs | r8, r16, r32 variants |
+
+> All logs contain Nebius job IDs (aijob-* / aiendpoint-*),
+> GPU info (NVIDIA H100 80GB HBM3), and timestamps.
+
 **📁 Eval Results (from medisimplifier-adapters bucket):**
 
 <details>
