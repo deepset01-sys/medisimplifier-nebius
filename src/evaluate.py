@@ -45,7 +45,7 @@ MODELS = {
 
 TASK_INSTRUCTION = """Simplify the following medical discharge summary in plain language for patients with no medical background.
 Guidelines:
-- Replace medical jargon with everyday words (e.g., "hypertension" -> "high blood pressure")
+- Replace medical jargon with everyday words (e.g., "hypertension" → "high blood pressure")
 - Keep all important information (diagnoses, medications, follow-up instructions)
 - Use short, clear sentences (aim for 15-20 words per sentence)
 - Aim for a 6th-grade reading level
