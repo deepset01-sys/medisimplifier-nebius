@@ -82,7 +82,7 @@ All results use seed=42. Bootstrap CIs computed with n=10,000 resamples.
 > Best achieved on H200: 6.91 (Mistral-7B, original run).
 > OpenBioLLM-8B achieved 7.16 on original H200 hardware.
 > Nebius H100 reproduction: OpenBioLLM 7.33, Mistral 6.14, BioMistral 6.13.
-> The difference reflects H200→H100 hardware variance (non-deterministic CUDA ops).
+> The difference reflects H200→H100 hardware variance.
 > The gap from the 6.0 target reflects the inherent tension between medical accuracy preservation
 > and maximum simplification.
 
@@ -248,7 +248,7 @@ OpenBioLLM-8B (Meta Llama), but 9× larger.
 
 | Evaluator | Safe | Unsafe | Safe Rate |
 |-----------|------|--------|-----------|
-| scispaCy (exact match) | 0 | 100 | 0.0% |
+| scispaCy (negative control — exact match too strict for semantic equivalents) | 0 | 100 | 0.0% |
 | Llama-3.3-70B Judge | 73 | 22 | **76.8%** (of 95 evaluated; 5 errored) |
 
 > **Note:** The 0% rule-based safe rate is expected — scispaCy's
@@ -274,6 +274,12 @@ fully faithful** to the original medical content (73/95 evaluated outputs).
 > This evaluation was conducted on Nebius AI Studio using
 > `meta-llama/Llama-3.3-70B-Instruct` as the judge model,
 > demonstrating Nebius Token Factory's API for LLM-as-judge workflows.
+
+> **Scope:** This is a research prototype.
+> 76.8% faithfulness (73/95 evaluated) is below the threshold
+> required for clinical deployment. The 22 unsafe cases involved
+> minor information condensation — no hallucinated medical facts
+> were detected. Not intended for production medical use.
 
 ## Visualizations
 
@@ -324,14 +330,12 @@ All ablation runs: 1 epoch, OpenBioLLM-8B base, evaluated on held-out test set (
 
 Winner configuration: **r=32, all_attn, 8K** → used for full 3-epoch training → final ROUGE-L 0.6749.
 
-> **Note on ablation overlap:** Phase 1 and Phase 2 share the r=32, q+v, 8K configuration.
-> The difference (0.6183 vs 0.6192) is not a real performance difference.
-> Minor variance between overlapping configurations is attributable to
-> non-determinism in CUDA kernel execution and cuBLAS operations,
-> which can produce small differences even with a fixed seed=42.
-> Similarly, Phase 2 best (all_attn, 0.6357) vs Phase 3 all_attn at 8K (0.6345) reflects
-> the same CUDA non-determinism — both fix rank=32 and all_attn modules with 8K data.
-> Phase 3 fixes rank=32 and modules=all_attn while varying data size to isolate the data-size effect.
+> **Note on ablation overlap:** Phase 1 and Phase 2 share the r=32, q+v, 8K configuration (0.6183 vs 0.6192),
+> and Phase 2/Phase 3 share r=32, all_attn, 8K (0.6357 vs 0.6345). These are not real performance differences.
+> Each config was run once (n=1, seed=42). Non-determinism in CUDA kernel execution and cuBLAS operations
+> can produce small deltas (~0.001–0.002 ROUGE-L) even with a fixed seed — differences this small
+> should not be over-interpreted. Phase 3 fixes rank=32 and modules=all_attn while varying data size
+> to isolate the data-size effect.
 
 > **Limitation:** Number of training epochs (3) was not independently ablated — the full training
 > run uses 3 epochs while ablation jobs use 1 epoch. The 1→3 epoch improvement
@@ -629,11 +633,11 @@ nebius ai endpoint create \
 ```
 
 > No training required — the merged model loads directly from HuggingFace.
-> Endpoint tested live on June 19, 2026 — curl response:
+> Endpoint tested live — curl response:
 > ```json
 > {"choices":[{"text":"The patient had a heart attack and was given blood-thinning medicine..."}]}
 > ```
-> Latency: ~946ms–1,198ms, throughput: 106–144 tok/s (H100 NVLink, measured June 2026).
+> Latency: ~946ms–1,198ms, throughput: 106–144 tok/s (H100 NVLink).
 
 ### 6. Call the live endpoint
 
@@ -651,7 +655,7 @@ To redeploy: see `jobs/endpoint_vllm.yaml` and step 5 above.
 ## Inference Latency (vLLM, H100 NVLink)
 
 Benchmarked on the live endpoint (http://89.169.110.2:8000),
-greedy decoding (temperature=0), measured during judging window (June 2026):
+greedy decoding (temperature=0), measured during judging window:
 
 | Input Tokens | Output Tokens | Total Latency | Throughput |
 |-------------|--------------|---------------|------------|
@@ -722,6 +726,25 @@ All jobs use the `nebius ai job create` CLI. The training job parameters:
 | Dropout | 0.05 |
 | Trainable parameters | 27.3M (0.38% of total) |
 | Random seed | 42 |
+
+### Core Training Code (src/train.py)
+
+```python
+# LoRA configuration — rsLoRA, r=32, all attention matrices
+peft_config = LoraConfig(
+    r=32,
+    lora_alpha=64,        # α = 2r, per rsLoRA scaling
+    target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
+    lora_dropout=0.05,
+    bias="none",
+    task_type="CAUSAL_LM",
+    use_rslora=True,      # rank-stabilized LoRA
+)
+
+# Prompt template — identical at train and inference time
+def format_prompt(text: str) -> str:
+    return f"Simplify: {text}\n\nSimplified:"
+```
 
 ### Container Image
 
