@@ -24,7 +24,7 @@ a reduction of ~7 grade levels) while preserving all critical medical informatio
 
 > **What's new in this Nebius submission vs the Technion project:**
 > The ranking-reversal and LoRA rank findings were first observed
-> in the original Technion research. New contributions here are:
+> in the Technion project. New contributions here are:
 > the **Nebius MLOps pipeline** (parallel ablation, stateless jobs,
 > bucket persistence), **H100 hardware reproduction** (δ 1.6–5.0%),
 > **vLLM production serving**, and **LLM-as-judge safety evaluation**
@@ -37,17 +37,17 @@ a reduction of ~7 grade levels) while preserving all critical medical informatio
 | Optimal LoRA rank | r=32 outperforms r=4-8 recommended by Hu et al. 2021 |
 | Optimal modules | all_attn (Q+K+V+O) outperforms standard Q+V |
 | Ranking reversal | Worst zero-shot model becomes best fine-tuned (+153.1% on Nebius H100) |
-| Readability | FK-Grade 14.5 → 6.91 (Mistral-7B, original H200); Nebius H100: OpenBioLLM 7.33, Mistral 6.14, BioMistral 6.13 |
+| Readability | FK-Grade 14.5 → 6.91 (Mistral-7B, Technion H200); Nebius H100: OpenBioLLM 7.33, Mistral 6.14, BioMistral 6.13 |
 | Data efficiency | 4K samples achieves 97% of 8K performance |
 | Baseline-improvement correlation | monotonic — lower zero-shot → higher gain (n=3 models) |
 | Total compute | 9 ablation runs + 3 full training runs, ~10 GPU hours (~7h wall-clock; ablation jobs run in parallel) |
 
 ## What Nebius Added
 
-The original Technion project was training-only (H200, no serving, no pipeline).
+The Technion project was training-only (H200, no serving, no pipeline).
 This submission extends it with a full MLOps lifecycle on Nebius:
 
-| | Technion original (Guy Dor & Shmulik Avraham) | This Nebius submission (Shmulik Avraham) |
+| | Technion project (Guy Dor & Shmulik Avraham) | This Nebius submission (Shmulik Avraham) |
 |--|----------------------------------------------|------------------------------------------|
 | Training | ✅ H200, single run | ✅ Reproduced on H100 — validated |
 | Parallel ablation | ❌ | ✅ 9 jobs × 20 min simultaneously |
@@ -64,9 +64,9 @@ This submission extends it with a full MLOps lifecycle on Nebius:
 ## Results
 
 > **Primary results: Nebius H100 reproduction**
-> (original H200 results in parentheses for comparison)
+> (Technion H200 results in parentheses for comparison)
 
-| Model | ROUGE-L (Nebius H100) | ROUGE-L (Original H200) | Delta | SARI | BERTScore | FK-Grade | Improvement |
+| Model | ROUGE-L (Nebius H100) | ROUGE-L (Technion H200) | Delta | SARI | BERTScore | FK-Grade | Improvement |
 |-------|----------------------|------------------------|-------|------|-----------|----------|-------------|
 | OpenBioLLM-8B | **0.6638** | 0.6749 | −1.6% | 73.49 | 0.9460 | 7.33 | +153.1% |
 | Mistral-7B | **0.6253** | 0.6491 | −3.7% | 72.75 | 0.9418 | 6.14 | +59.8% |
@@ -89,9 +89,9 @@ All results use seed=42.
 > OpenBioLLM-8B: train_loss 0.844→0.635 over 3 epochs (1,500 steps, seed=42).
 > Dashboard includes loss curves, eval metrics per epoch, gradient norms, and hyperparameters.
 
-> **Note on FK-Grade target:** The original research target was FK ≤ 6.0.
-> Best achieved on H200: 6.91 (Mistral-7B, original run).
-> OpenBioLLM-8B achieved 7.16 on original H200 hardware.
+> **Note on FK-Grade target:** The Technion project target was FK ≤ 6.0.
+> Best achieved on H200: 6.91 (Mistral-7B, Technion run).
+> OpenBioLLM-8B achieved 7.16 on Technion H200 hardware.
 > Nebius H100 reproduction: OpenBioLLM 7.33, Mistral 6.14, BioMistral 6.13.
 > The difference reflects H200→H100 hardware variance.
 > The gap from the 6.0 target reflects the inherent tension between medical accuracy preservation
@@ -111,7 +111,7 @@ All results use seed=42.
 | BioMistral-7B-DARE | 0.4120 | 51.91 | 0.743 | 9.52 |
 
 **Key finding:** OpenBioLLM-8B had the *lowest* zero-shot score (0.2623)
-but achieved the *highest* fine-tuned score (0.6749 on original H200 hardware; 0.6638 on Nebius H100) — a full ranking
+but achieved the *highest* fine-tuned score (0.6749 on Technion H200 hardware; 0.6638 on Nebius H100) — a full ranking
 reversal. All pairwise differences large relative to estimated CUDA variance (~0.001–0.002 ROUGE-L).
 
 ### Why Did the Ranking Reversal Happen?
@@ -340,7 +340,7 @@ All ablation runs: 1 epoch, OpenBioLLM-8B base, evaluated on held-out test set (
 | 4K   | 0.6198  | 69.12 | 0.9347   | 7.73     |
 | **8K ✓** | **0.6345** | **71.08** | **0.9382** | **7.51** |
 
-Winner configuration: **r=32, all_attn, 8K** → used for full 3-epoch training → final ROUGE-L **0.6638** (Nebius H100; 0.6749 on original H200).
+Winner configuration: **r=32, all_attn, 8K** → used for full 3-epoch training → final ROUGE-L **0.6638** (Nebius H100; 0.6749 on Technion H200).
 
 > **Note on ablation overlap:** Phase 1 and Phase 2 share the r=32, q+v, 8K configuration (0.6183 vs 0.6192),
 > and Phase 2/Phase 3 share r=32, all_attn, 8K (0.6357 vs 0.6345). These are not real performance differences.
@@ -490,7 +490,7 @@ Training Job                    Object Storage                  Eval/Serve Job
 
 > 9 parallel jobs = same wall-clock time as 1 job (~20 min total).
 
-> Original research hardware: RunPod H200 SXM (~90 min/model across 3 GPUs).
+> Technion hardware: RunPod H200 SXM (~90 min/model across 3 GPUs).
 > Nebius reproduction uses H100 NVLink (~70 min, single GPU per job).
 
 ## Reproduce step by step
