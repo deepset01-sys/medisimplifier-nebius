@@ -1,0 +1,17 @@
+{
+  "phase": 3,
+  "ablation_variable": "data_size",
+  "model": "openbio",
+  "rank": 32,
+  "modules": "all_attn",
+  "data_size": 7999,
+  "epochs": 1,
+  "seed": 42,
+  "split": "validation",
+  "n_samples": 999,
+  "rouge_l": 0.6345,
+  "sari": 71.08,
+  "bertscore": 0.9382,
+  "fk_grade": 7.51,
+  "log_file": "results/nebius_logs/r32_all_8kdata.json.gz"
+}

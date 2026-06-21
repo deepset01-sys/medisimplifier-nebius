@@ -1,0 +1,17 @@
+{
+  "phase": 2,
+  "ablation_variable": "modules",
+  "model": "openbio",
+  "rank": 32,
+  "modules": "q_only",
+  "data_size": 7999,
+  "epochs": 1,
+  "seed": 42,
+  "split": "validation",
+  "n_samples": 999,
+  "rouge_l": 0.6006,
+  "sari": 66.14,
+  "bertscore": 0.9289,
+  "fk_grade": 8.34,
+  "log_file": "results/nebius_logs/r32_qonly_logs.json.gz"
+}

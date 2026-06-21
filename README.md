@@ -72,8 +72,7 @@ This submission extends it with a full MLOps lifecycle on Nebius:
 | Mistral-7B | **0.6253** | 0.6491 | −3.7% | 72.75 | 0.9418 | 6.14 | +59.8% |
 | BioMistral-7B-DARE | **0.6004** | 0.6318 | −5.0% | 71.97 | 0.9372 | 6.13 | +45.7% |
 
-95% CIs from bootstrap (n=10,000). All pairwise ROUGE-L differences large relative to estimated CUDA variance (~0.001–0.002 ROUGE-L).
-All results use seed=42.
+All results use seed=42, single run. CUDA non-determinism is expected to contribute ~0.001–0.002 ROUGE-L variance (estimate, not measured).
 
 > Improvement % = (Nebius H100 fine-tuned − zero-shot) / zero-shot.
 > OpenBioLLM: (0.6638 − 0.2623) / 0.2623 = +153.1%
@@ -155,6 +154,18 @@ All results are committed to this repository for durable verification:
 | [results_openbio.json](results/nebius_evidence/results_openbio.json) | OpenBioLLM-8B | 0.6638 | 73.49 | 0.9460 | 7.33 |
 | [results_mistral.json](results/nebius_evidence/results_mistral.json) | Mistral-7B | 0.6253 | 72.75 | 0.9418 | 6.14 |
 | [results_biomistral.json](results/nebius_evidence/results_biomistral.json) | BioMistral-7B | 0.6004 | 71.97 | 0.9372 | 6.13 |
+
+**Ablation Results** (`results/nebius_evidence/`):
+| File | Phase | Config | ROUGE-L |
+|------|-------|--------|---------|
+| [ablation_r8_qv_8k.json](results/nebius_evidence/ablation_r8_qv_8k.json) | 1 | r=8, q+v, 8K | 0.6033 |
+| [ablation_r16_qv_8k.json](results/nebius_evidence/ablation_r16_qv_8k.json) | 1 | r=16, q+v, 8K | 0.6080 |
+| [ablation_r32_qv_8k.json](results/nebius_evidence/ablation_r32_qv_8k.json) | 1 | r=32, q+v, 8K | 0.6183 |
+| [ablation_r32_qonly_8k.json](results/nebius_evidence/ablation_r32_qonly_8k.json) | 2 | r=32, q_only, 8K | 0.6006 |
+| [ablation_r32_allattn_8k.json](results/nebius_evidence/ablation_r32_allattn_8k.json) | 2 | r=32, all_attn, 8K | 0.6357 |
+| [ablation_r32_allattn_2k.json](results/nebius_evidence/ablation_r32_allattn_2k.json) | 3 | r=32, all_attn, 2K | 0.6014 |
+| [ablation_r32_allattn_4k.json](results/nebius_evidence/ablation_r32_allattn_4k.json) | 3 | r=32, all_attn, 4K | 0.6198 |
+| [ablation_r32_allattn_8k_phase3.json](results/nebius_evidence/ablation_r32_allattn_8k_phase3.json) | 3 | r=32, all_attn, 8K | 0.6345 |
 
 **Safety Evaluation** (`results/nebius_evidence/`):
 [safety_results.json](results/nebius_evidence/safety_results.json) — 100 samples with per-sample LLM judge verdicts, rule-based scores, and Token Factory latency metrics.
@@ -506,6 +517,10 @@ Training Job                    Object Storage                  Eval/Serve Job
 
 ## Reproduce step by step
 
+> **TL;DR:** `bash scripts/reproduce.sh eval_only` evaluates from public HF adapters with no training required.
+> `bash scripts/reproduce.sh full` runs the complete pipeline (training + ablations + eval + endpoint).
+> Requires `NEBIUS_PROJECT_ID`, `NEBIUS_SUBNET_ID`, `HF_TOKEN` env vars and Nebius CLI v0.12.229+.
+
 **Environment:** Python 3.11 · CUDA 12.1 · PyTorch 2.1.0
 
 ### 0. Install and authenticate Nebius CLI
@@ -797,6 +812,10 @@ All jobs use the `nebius ai job create` CLI. The training job parameters:
 | Dropout | 0.05 |
 | Trainable parameters | 27.3M (0.38% of total) |
 | Random seed | 42 |
+| Training quantization | 4-bit NF4 (QLoRA via bitsandbytes) |
+| Evaluation quantization | fp16 (no quantization — higher precision for metrics) |
+
+> **Train/eval quantization note:** Training uses 4-bit NF4 QLoRA for memory efficiency; evaluation loads the base model in fp16 for higher precision. This is a deliberate tradeoff: eval at full precision ensures metrics reflect true model quality rather than quantization artifacts. The H100→H200 delta (1.6–5.0%) captures hardware differences but not quantization precision differences.
 
 ### Core Training Code (src/train.py)
 

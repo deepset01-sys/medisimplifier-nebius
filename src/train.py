@@ -126,7 +126,7 @@ def build_model_and_tokenizer(model_name: str, use_4bit: bool = True):
 
     tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
     tokenizer.pad_token = tokenizer.eos_token
-    tokenizer.padding_side = "right"
+    tokenizer.padding_side = "right"  # right-padding for SFT: loss mask aligns with tokens; evaluate.py uses "left" for batched generation
 
     model = AutoModelForCausalLM.from_pretrained(
         model_name,

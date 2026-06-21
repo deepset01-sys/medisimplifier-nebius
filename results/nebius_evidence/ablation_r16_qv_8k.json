@@ -1,0 +1,17 @@
+{
+  "phase": 1,
+  "ablation_variable": "rank",
+  "model": "openbio",
+  "rank": 16,
+  "modules": "q+v",
+  "data_size": 7999,
+  "epochs": 1,
+  "seed": 42,
+  "split": "validation",
+  "n_samples": 999,
+  "rouge_l": 0.6080,
+  "sari": 68.45,
+  "bertscore": 0.9334,
+  "fk_grade": 7.89,
+  "log_file": "results/nebius_logs/r16_qv_logs.json.gz"
+}
