@@ -39,7 +39,7 @@ a reduction of ~7 grade levels) while preserving all critical medical informatio
 | Ranking reversal | Worst zero-shot model becomes best fine-tuned (+153.1% on Nebius H100) |
 | Readability | FK-Grade 14.5 → 6.91 (Mistral-7B, Technion H200); Nebius H100: OpenBioLLM 7.33, Mistral 6.14, BioMistral 6.13 |
 | Data efficiency | 4K samples achieves 97% of 8K performance |
-| Baseline-improvement correlation | monotonic — lower zero-shot → higher gain (n=3 models) |
+| Baseline-improvement correlation | Pearson r = −0.998 across 3 models (descriptive statistic, not a significance claim) |
 | Total compute | 9 ablation runs + 3 full training runs, ~10 GPU hours (~7h wall-clock; ablation jobs run in parallel) |
 
 ## What Nebius Added
@@ -115,7 +115,7 @@ reversal. All pairwise differences large relative to estimated CUDA variance (~0
 
 ### Why Did the Ranking Reversal Happen?
 
-The ranking reversal (worst zero-shot → best fine-tuned) is monotonic across all 3 models — lower zero-shot score correlates with higher fine-tuning gain.
+The ranking reversal (worst zero-shot → best fine-tuned) is consistent across all 3 models: Pearson r = −0.998 between zero-shot ROUGE-L and fine-tuning gain (descriptive statistic, n=3 — not a significance claim).
 
 **OpenBioLLM-8B** was pre-trained exclusively on biomedical literature.
 It already "knew" the domain vocabulary — terms like "myocardial infarction,"
