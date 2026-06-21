@@ -155,18 +155,6 @@ All results are committed to this repository for durable verification:
 | [results_mistral.json](results/nebius_evidence/results_mistral.json) | Mistral-7B | 0.6253 | 72.75 | 0.9418 | 6.14 |
 | [results_biomistral.json](results/nebius_evidence/results_biomistral.json) | BioMistral-7B | 0.6004 | 71.97 | 0.9372 | 6.13 |
 
-**Ablation Results** (`results/nebius_evidence/`):
-| File | Phase | Config | ROUGE-L |
-|------|-------|--------|---------|
-| [ablation_r8_qv_8k.json](results/nebius_evidence/ablation_r8_qv_8k.json) | 1 | r=8, q+v, 8K | 0.6033 |
-| [ablation_r16_qv_8k.json](results/nebius_evidence/ablation_r16_qv_8k.json) | 1 | r=16, q+v, 8K | 0.6080 |
-| [ablation_r32_qv_8k.json](results/nebius_evidence/ablation_r32_qv_8k.json) | 1 | r=32, q+v, 8K | 0.6183 |
-| [ablation_r32_qonly_8k.json](results/nebius_evidence/ablation_r32_qonly_8k.json) | 2 | r=32, q_only, 8K | 0.6006 |
-| [ablation_r32_allattn_8k.json](results/nebius_evidence/ablation_r32_allattn_8k.json) | 2 | r=32, all_attn, 8K | 0.6357 |
-| [ablation_r32_allattn_2k.json](results/nebius_evidence/ablation_r32_allattn_2k.json) | 3 | r=32, all_attn, 2K | 0.6014 |
-| [ablation_r32_allattn_4k.json](results/nebius_evidence/ablation_r32_allattn_4k.json) | 3 | r=32, all_attn, 4K | 0.6198 |
-| [ablation_r32_allattn_8k_phase3.json](results/nebius_evidence/ablation_r32_allattn_8k_phase3.json) | 3 | r=32, all_attn, 8K | 0.6345 |
-
 **Safety Evaluation** (`results/nebius_evidence/`):
 [safety_results.json](results/nebius_evidence/safety_results.json) — 100 samples with per-sample LLM judge verdicts, rule-based scores, and Token Factory latency metrics.
 
