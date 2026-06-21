@@ -138,7 +138,7 @@ def compute_rouge_l(predictions, references):
         scorer.score(ref, pred)["rougeL"].fmeasure
         for pred, ref in zip(predictions, references)
     ]
-    return float(np.mean(scores))
+    return float(np.mean(scores)), [float(s) for s in scores]
 
 
 def compute_bertscore(predictions, references):
@@ -221,7 +221,7 @@ def main():
 
     # ── Metrics ────────────────────────────────────────────────
     print("Computing ROUGE-L...")
-    rouge = compute_rouge_l(predictions, references)
+    rouge, rouge_per_sample = compute_rouge_l(predictions, references)
 
     print("Computing FK-Grade...")
     fk = compute_fk_grade(predictions)
@@ -242,6 +242,7 @@ def main():
         "n_samples":  len(predictions),
         "zero_shot":  args.zero_shot,
         "rouge_l":    rouge,
+        "rouge_l_per_sample": rouge_per_sample,
         "bertscore":  bertscore_val,
         "sari":       sari_val,
         "fk_grade":   fk,
