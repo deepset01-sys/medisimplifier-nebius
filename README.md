@@ -451,7 +451,7 @@ nebius ai endpoint create \
 > For an inference endpoint that serves sporadic requests —
 > a demo, a research prototype, or a low-traffic API —
 > Serverless Endpoints are the only economically rational choice.
-> I serve a merged 8B model at ~$3/hr only when the endpoint
+> I serve a merged 8B model at ~$3.85/hr only when the endpoint
 > is actually running, with zero idle cost between sessions.
 > The OpenAI-compatible API means any existing client works
 > without modification.
@@ -474,14 +474,14 @@ Training Job                    Object Storage                  Eval/Serve Job
 
 | Step | GPU | Wall-clock time | Approx. compute cost |
 |------|-----|----------------|---------------------|
-| Ablation ×9 (parallel) | H100 NVLink | ~20 min total | ~$9 |
-| OpenBioLLM-8B training | H100 NVLink | ~70 min | ~$4 |
-| Mistral-7B training | H100 NVLink | ~70 min | ~$4 |
-| BioMistral-7B training | H100 NVLink | ~70 min | ~$4 |
-| Evaluation ×3 | H100 NVLink | ~45 min each | ~$7 |
+| Ablation ×9 (parallel) | H100 NVLink | ~20 min total | ~$12 |
+| OpenBioLLM-8B training | H100 NVLink | ~70 min | ~$4.50 |
+| Mistral-7B training | H100 NVLink | ~70 min | ~$4.50 |
+| BioMistral-7B training | H100 NVLink | ~70 min | ~$4.50 |
+| Evaluation ×3 | H100 NVLink | ~45 min each | ~$9 |
 | Safety evaluation | H100 NVLink | ~30 min | ~$2 |
 | Merge + misc | H100 NVLink | — | ~$2 |
-| **Core pipeline subtotal** | | | **~$30** |
+| **Core pipeline subtotal** | | | **~$34** |
 
 **Cost breakdown (actual Nebius billing):**
 
@@ -495,8 +495,8 @@ Training Job                    Object Storage                  Eval/Serve Job
 | **Total Nebius spend** | | **$169.09** |
 
 > H100 NVLink rate: ~$3.85/hr on Nebius eu-north1.
-> Core pipeline compute (ablation + training + eval + safety + merge): ~$30.
-> Remaining ~$139 covers failed runs during debugging, endpoint serving,
+> Core pipeline compute (ablation + training + eval + safety + merge): ~$34.
+> Remaining ~$135 covers failed runs during debugging, endpoint serving,
 > Build VM, and iteration — all on Nebius Serverless, no reserved instances.
 
 > 9 parallel jobs = same wall-clock time as 1 job (~20 min total).
