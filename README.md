@@ -19,8 +19,8 @@ Medical discharge summaries are written at college reading level (FK-Grade 14.5)
 Only 12% of American adults have sufficient health literacy to understand them.
 
 MediSimplifier fine-tunes open-source LLMs using LoRA to automatically simplify
-these documents to 7th-grade reading level — ~50% readability reduction —
-while preserving all critical medical information.
+these documents to 7th-grade reading level (FK-Grade 14.5 → ~7,
+a reduction of ~7 grade levels) while preserving all critical medical information.
 
 > **What's new in this Nebius submission vs the Technion project:**
 > The ranking-reversal and LoRA rank findings were first observed
