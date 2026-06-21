@@ -116,6 +116,10 @@ def generate_predictions(model, tokenizer, dataset, model_format, batch_size=4):
                 pad_token_id=tokenizer.eos_token_id,
             )
         for j, output in enumerate(outputs):
+            # With left-padding, all rows in the batch share the same padded length.
+            # New tokens are appended at the right, so slicing output[input_len:]
+            # correctly isolates the generated tokens. This relies on uniform
+            # padded length across the batch — guaranteed by the tokenizer call above.
             input_len = inputs["input_ids"][j].shape[0]
             generated = output[input_len:]
             pred = tokenizer.decode(generated, skip_special_tokens=True).strip()

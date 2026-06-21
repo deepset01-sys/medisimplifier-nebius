@@ -593,7 +593,7 @@ for RANK in 8 16 32; do
     --parent-id ${NEBIUS_PROJECT_ID} \
     --image chambul/medisimplifier:train-v11 \
     --container-command python \
-    --args "train.py --model openbio --epochs 1 --rank ${RANK} --modules q_v --data-size 8000 --seed 42" \
+    --args "train.py --model openbio --epochs 1 --rank ${RANK} --modules q_v --data-size 7999 --seed 42" \
     --env HF_TOKEN=${HF_TOKEN} \
     --platform gpu-h100-sxm \
     --preset 1gpu-16vcpu-200gb \
@@ -610,7 +610,7 @@ for MODULES in q_only q_v all_attn; do
     --parent-id ${NEBIUS_PROJECT_ID} \
     --image chambul/medisimplifier:train-v11 \
     --container-command python \
-    --args "train.py --model openbio --epochs 1 --rank 32 --modules ${MODULES} --data-size 8000 --seed 42" \
+    --args "train.py --model openbio --epochs 1 --rank 32 --modules ${MODULES} --data-size 7999 --seed 42" \
     --platform gpu-h100-sxm \
     --preset 1gpu-16vcpu-200gb \
     --disk-size 250Gi \
