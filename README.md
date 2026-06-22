@@ -483,22 +483,23 @@ Training Job                    Object Storage                  Eval/Serve Job
 | Evaluation ×3 | H100 NVLink | ~45 min each | ~$9 |
 | Safety evaluation | H100 NVLink | ~30 min | ~$2 |
 | Merge + misc | H100 NVLink | — | ~$2 |
-| **Core pipeline subtotal** | | | **~$34** |
+| Bootstrap CI eval ×3 (parallel) | H100 NVLink | ~45 min total | ~$9 |
+| **Core pipeline subtotal** | | | **~$43** |
 
 **Cost breakdown (actual Nebius billing):**
 
 | Resource | Usage | Cost |
 |----------|-------|------|
-| NVIDIA H100 NVLink | 41.69 GPU hours | $160.50 |
-| CPU (AMD EPYC Genoa) | 161.59 vCPU hours | $1.94 |
-| RAM | 646.36 GiB hours | $2.07 |
-| Network SSD disk | 46,237.62 GiB hours | $4.50 |
+| NVIDIA H100 NVLink | 48.41 GPU hours | $186.39 |
+| CPU (AMD EPYC Genoa) | 166.24 vCPU hours | $1.99 |
+| RAM | 664.95 GiB hours | $2.13 |
+| Network SSD disk | 50,087.83 GiB hours | $4.87 |
 | Object Storage | medisimplifier-adapters bucket | $0.08 |
-| **Total Nebius spend** | | **$169.09** |
+| **Total Nebius spend** | | **$195.47** |
 
 > H100 NVLink rate: ~$3.85/hr on Nebius eu-north1.
-> Core pipeline compute (ablation + training + eval + safety + merge): ~$34.
-> Remaining ~$135 covers failed runs during debugging, endpoint serving,
+> Core pipeline compute (ablation + training + eval + safety + merge + bootstrap CI): ~$43.
+> Remaining ~$152 covers failed runs during debugging, endpoint serving,
 > Build VM, and iteration — all on Nebius Serverless, no reserved instances.
 
 > 9 parallel jobs = same wall-clock time as 1 job (~20 min total).
