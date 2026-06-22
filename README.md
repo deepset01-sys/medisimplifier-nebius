@@ -250,9 +250,9 @@ All results are committed to this repository for durable verification:
 **🔗 Public Artifacts:**
 - Dataset: [GuyDor007/medisimplifier-dataset](https://huggingface.co/datasets/GuyDor007/medisimplifier-dataset)
 - Adapters: [GuyDor007/MediSimplifier-LoRA-Adapters](https://huggingface.co/GuyDor007/MediSimplifier-LoRA-Adapters)
-- Docker: [chambul/medisimplifier:train-v11](https://hub.docker.com/r/chambul/medisimplifier)
+- Docker: [chambul/medisimplifier:train-v12](https://hub.docker.com/r/chambul/medisimplifier)
 - W&B: [wandb.ai/deepset01-chambul/medisimplifier](https://wandb.ai/deepset01-chambul/medisimplifier)
-- Endpoint: `http://89.169.110.2:8000` (active during judging window)
+- Endpoint: Deploy your own in ~5 minutes — see [Step 5](#5-deploy-live-endpoint) above
 
 ## Medical Safety Evaluation (Preliminary)
 
@@ -731,8 +731,8 @@ To redeploy: see `jobs/endpoint_vllm.yaml` and step 5 above.
 
 ## Inference Latency (vLLM, H100 NVLink)
 
-Benchmarked on the live endpoint (http://89.169.110.2:8000),
-greedy decoding (temperature=0), measured during judging window:
+Benchmarked on a live Nebius H100 vLLM endpoint during development,
+greedy decoding (temperature=0):
 
 | Input Tokens | Output Tokens | Total Latency | Throughput |
 |-------------|--------------|---------------|------------|
