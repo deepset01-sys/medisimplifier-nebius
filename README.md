@@ -111,7 +111,7 @@ All results use seed=42, single run. CUDA non-determinism is expected to contrib
 
 **Key finding:** OpenBioLLM-8B had the *lowest* zero-shot score (0.2623)
 but achieved the *highest* fine-tuned score (0.6749 on Technion H200 hardware; 0.6638 on Nebius H100) — a full ranking
-reversal. All pairwise differences large relative to estimated CUDA variance (~0.001–0.002 ROUGE-L).
+reversal. All pairwise differences statistically significant: 95% CIs do not overlap across all 3 models (bootstrap n=10,000, n=1,001 test samples each).
 
 ### Why Did the Ranking Reversal Happen?
 
