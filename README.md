@@ -152,9 +152,11 @@ All results are committed to this repository for durable verification:
 | File | Model | ROUGE-L | 95% CI | SARI | BERTScore | FK-Grade |
 |------|-------|---------|--------|------|-----------|----------|
 | [results_openbio.json](results/nebius_evidence/results_openbio.json) | OpenBioLLM-8B | 0.6638 | 0.660–0.668 | 73.49 | 0.9460 | 7.33 |
-| [results_mistral.json](results/nebius_evidence/results_mistral.json) | Mistral-7B | 0.6253 | — | 72.75 | 0.9418 | 6.14 |
-| [results_biomistral.json](results/nebius_evidence/results_biomistral.json) | BioMistral-7B | 0.6004 | — | 71.97 | 0.9372 | 6.13 |
+| [results_mistral.json](results/nebius_evidence/results_mistral.json) | Mistral-7B | 0.6253 | 0.620–0.630 | 72.75 | 0.9418 | 6.14 |
+| [results_biomistral.json](results/nebius_evidence/results_biomistral.json) | BioMistral-7B | 0.6004 | 0.595–0.605 | 71.97 | 0.9372 | 6.13 |
 | [bootstrap_input.json](results/nebius_evidence/bootstrap_input.json) | OpenBioLLM-8B | Per-sample ROUGE-L scores (n=1,001) — source for 95% CI bootstrap (n=10,000 resamples) | | | |
+| [eval_persamples_mistral.json](results/nebius_evidence/eval_persamples_mistral.json) | Mistral-7B | Per-sample ROUGE-L scores (n=1,001) — source for 95% CI bootstrap (n=10,000 resamples) | | | |
+| [eval_persamples_biomistral.json](results/nebius_evidence/eval_persamples_biomistral.json) | BioMistral-7B | Per-sample ROUGE-L scores (n=1,001) — source for 95% CI bootstrap (n=10,000 resamples) | | | |
 
 **Safety Evaluation** (`results/nebius_evidence/`):
 [safety_results.json](results/nebius_evidence/safety_results.json) — 100 samples with per-sample LLM judge verdicts, rule-based scores, and Token Factory latency metrics.
