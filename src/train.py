@@ -256,7 +256,7 @@ def main():
 
     output_path = Path(args.output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
-    model.save_pretrained(output_path)
+    model.save_pretrained(output_path, safe_serialization=False)
     tokenizer.save_pretrained(output_path)
     print(f"\nAdapter saved to: {output_path}")
 
