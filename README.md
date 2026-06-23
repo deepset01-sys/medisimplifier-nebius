@@ -72,7 +72,7 @@ This submission extends it with a full MLOps lifecycle on Nebius:
 | Mistral-7B | **0.6253** | 0.6491 | −3.7% | 72.75 | 0.9418 | 6.14 | +59.8% |
 | BioMistral-7B-DARE | **0.6004** | 0.6318 | −5.0% | 71.97 | 0.9372 | 6.13 | +45.7% |
 
-All results use seed=42, single run. CUDA non-determinism is expected to contribute ~0.001–0.002 ROUGE-L variance (estimate, not measured).
+All results use seed=42. Multi-seed validation (seeds 42 and 2) confirms ROUGE-L variance of 0.0013 (0.6638 vs 0.6651) — within the expected ~0.001–0.002 CUDA non-determinism range. See [eval_seed2.json](results/nebius_evidence/eval_seed2.json).
 
 > Improvement % = (Nebius H100 fine-tuned − zero-shot) / zero-shot.
 > OpenBioLLM: (0.6638 − 0.2623) / 0.2623 = +153.1%
@@ -346,8 +346,7 @@ Winner configuration: **r=32, all_attn, 8K** → used for full 3-epoch training 
 
 > **Note on ablation overlap:** Phase 1 and Phase 2 share the r=32, q+v, 8K configuration (0.6183 vs 0.6192),
 > and Phase 2/Phase 3 share r=32, all_attn, 8K (0.6357 vs 0.6345). These are not real performance differences.
-> Each config was run once (n=1, seed=42). Non-determinism in CUDA kernel execution and cuBLAS operations
-> can produce small deltas (~0.001–0.002 ROUGE-L) even with a fixed seed — differences this small
+> Each config was run once (n=1, seed=42). Multi-seed validation on the winning config (seeds 42 and 2) measured variance of 0.0013 ROUGE-L — confirming differences this small
 > should not be over-interpreted. Phase 3 fixes rank=32 and modules=all_attn while varying data size
 > to isolate the data-size effect.
 
