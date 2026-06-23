@@ -270,6 +270,7 @@ def main():
         "use_rslora": True,
         "epochs": args.epochs,
         "data_size": args.data_size,
+        "seed": args.seed,
         "dataset": "GuyDor007/medisimplifier-dataset",
     }
     with open(output_path / "run_metadata.json", "w") as f:
