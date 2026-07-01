@@ -88,6 +88,12 @@ All results use seed=42. Multi-seed validation (seeds 42 and 2) confirms ROUGE-L
 > OpenBioLLM-8B: train_loss 0.844→0.635 over 3 epochs (1,500 steps, seed=42).
 > Dashboard includes loss curves, eval metrics per epoch, gradient norms, and hyperparameters.
 
+**📊 Evaluation Tracking (Nebius Managed MLflow):**
+All evaluation results tracked in [Nebius Managed MLflow](results/nebius_evidence/mlflow_runs.csv) — 4 runs across 3 models and 2 seeds, with full params, metrics, and git commit traceability.
+*(MLflow cluster active during judging window — July 15–22, 2026. Export available at all times via [mlflow_runs.csv](results/nebius_evidence/mlflow_runs.csv))*
+
+> Training observability (W&B) + Evaluation observability (Nebius MLflow) = two-layer MLOps visibility, both on Nebius infrastructure.
+
 > **Note on FK-Grade target:** The Technion project target was FK ≤ 6.0.
 > Best achieved on H200: 6.91 (Mistral-7B, Technion run).
 > OpenBioLLM-8B achieved 7.16 on Technion H200 hardware.
