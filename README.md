@@ -253,6 +253,7 @@ All results are committed to this repository for durable verification:
 - Docker: [chambul/medisimplifier:train-v12](https://hub.docker.com/r/chambul/medisimplifier)
 - W&B: [wandb.ai/deepset01-chambul/medisimplifier](https://wandb.ai/deepset01-chambul/medisimplifier)
 - Endpoint: Deploy your own in ~5 minutes — see [Step 5](#5-deploy-live-endpoint) above
+- MLflow: [Experiment export](results/nebius_evidence/mlflow_runs.csv) — 4 evaluation runs tracked in Nebius Managed MLflow (active during judging window)
 
 ## Medical Safety Evaluation (Preliminary)
 
