@@ -164,6 +164,9 @@ def main():
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
 
+    if not os.getenv("WANDB_API_KEY"):
+        os.environ["WANDB_MODE"] = "offline"
+
     wandb.init(
         project=os.getenv("WANDB_PROJECT", "medisimplifier"),
         name=f"{args.model}-r{args.rank}-{args.modules}-{args.data_size}",
