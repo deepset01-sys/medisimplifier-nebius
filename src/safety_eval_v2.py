@@ -165,7 +165,7 @@ def generate_simplified(model, tokenizer, original, model_format="chatml"):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--adapter-path",    default="/mnt/adapters/full_training")
-    parser.add_argument("--adapter-hf-repo", default="GuyDor007/MediSimplifier-LoRA-Adapters")
+    parser.add_argument("--adapter-hf-repo", default=None)
     parser.add_argument("--base-model",      default="aaditya/Llama3-OpenBioLLM-8B")
     parser.add_argument("--n-samples",       type=int, default=1001)
     parser.add_argument("--output-file",     default="/output/safety_results_v2.json")
@@ -187,9 +187,7 @@ def main():
         args.base_model, torch_dtype=torch.float16,
         device_map="auto", trust_remote_code=True)
 
-    adapter = (args.adapter_hf_repo
-               if not os.path.exists(args.adapter_path)
-               else args.adapter_path)
+    adapter = args.adapter_path
     print(f"Loading adapter: {adapter}")
     model = PeftModel.from_pretrained(base, adapter)
     model.eval()
