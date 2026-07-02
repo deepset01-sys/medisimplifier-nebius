@@ -392,15 +392,19 @@ Pipeline:
 |--|----------------|-------------|-----------|
 | Setup time | 0 min | 10–30 min | Hours |
 | Cost when idle | $0 | Full rate | Full rate |
-| Parallel jobs | Instant | Manual | Complex |
+| Parallel jobs | Native | Manual | Native |
+| Job dependencies | Manual | Manual | Native ✅ |
 | 9 ablations | 20 min, ~$9 | 3 hours | Setup overhead |
-| Best for | Experimentation | Long training | Production serving |
+| Best for | Experimentation | Long stable training | Production pipelines |
 
 > Serverless Jobs eliminated cluster management overhead that
 > typically slows ML experimentation. Each job is stateless —
 > the bucket is the only persistent state between runs.
 > I submitted all 9 ablation jobs simultaneously and had
 > results in 20 minutes instead of 3 hours sequentially.
+> Kubernetes would have added native job dependencies (train → merge → eval → safety eval
+> required manual monitoring between stages) — a tradeoff worth noting.
+> For pure stateless experimentation, Serverless Jobs won on every dimension.
 
 ### Merge & Deploy Pipeline (vLLM)
 
