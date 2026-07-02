@@ -119,12 +119,12 @@ def generate_predictions(model, tokenizer, dataset, model_format, batch_size=4):
         # Use shape[1] (the shared dimension) rather than per-row shape[0] to make
         # the slice robust regardless of how the batch loop is structured.
         prompt_len = inputs["input_ids"].shape[1]
-        for output in outputs:
+        for j, output in enumerate(outputs):
             generated = output[prompt_len:]
             pred = tokenizer.decode(generated, skip_special_tokens=True).strip()
-            # Sanity-check: decoded generation must not start with the prompt text
-            assert not pred.startswith(prompts[0][:30]), (
-                "Generation slice leaked prompt text — check padding_side='left'"
+            # Sanity-check: each decoded generation must not start with its own prompt text
+            assert not pred.startswith(prompts[j][:30]), (
+                f"Generation slice leaked prompt text for batch item {j} — check padding_side='left'"
             )
             predictions.append(pred)
         if (i + batch_size) % 100 == 0 or i == 0:
