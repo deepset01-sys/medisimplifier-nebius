@@ -1,5 +1,6 @@
 # Python 3.11 · CUDA 12.1 (matches pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime)
 torch==2.1.0
+torchaudio==2.1.0
 transformers==4.45.0
 peft==0.14.0
 datasets==2.18.0
