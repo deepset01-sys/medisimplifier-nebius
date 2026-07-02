@@ -14,10 +14,15 @@ review_prompt = PROMPT.read_text(encoding="utf-8")
 train_text = TRAIN.read_text(encoding="utf-8")
 eval_text = EVALUATE.read_text(encoding="utf-8")
 
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--model", default="claude-opus-4-7")
+args = parser.parse_args()
+
 client = anthropic.Anthropic()
 
 with client.messages.stream(
-    model="claude-opus-4-8",
+    model=args.model,
     max_tokens=4000,
     messages=[
         {
