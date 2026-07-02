@@ -6,12 +6,12 @@ docker:
   command: python
   args:
     - "safety_eval_v2.py"
-    - "--adapter-hf-repo"
-    - "GuyDor007/MediSimplifier-LoRA-Adapters"
+    - "--adapter-path"
+    - "/mnt/adapters/full_training"
     - "--n-samples"
     - "1001"
     - "--output-file"
-    - "/output/safety_results_v2.json"
+    - "/mnt/adapters/safety_results_v2.json"
     - "--seed"
     - "42"
 
@@ -22,7 +22,7 @@ env:
 
 volumes:
   - bucket: medisimplifier-adapters
-    mount: /output
+    mount: /mnt/adapters
     mode: rw
 
 resources:
