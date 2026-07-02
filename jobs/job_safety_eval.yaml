@@ -1,17 +1,17 @@
 name: medisimplifier-safety-eval
-description: "Medical safety evaluation — scispaCy entity preservation + Llama-3.3-70B judge"
+description: "Medical safety evaluation v2 — dual judge (Llama-3.3-70B + Qwen2.5-72B), Cohen kappa, ROUGE-faithfulness correlation, n=1001"
 
 docker:
-  image: chambul/medisimplifier:train-v11
+  image: chambul/medisimplifier:train-v16
   command: python
   args:
-    - "safety_eval.py"
+    - "safety_eval_v2.py"
     - "--adapter-hf-repo"
     - "GuyDor007/MediSimplifier-LoRA-Adapters"
     - "--n-samples"
-    - "100"
+    - "1001"
     - "--output-file"
-    - "/output/safety_results.json"
+    - "/output/safety_results_v2.json"
     - "--seed"
     - "42"
 
