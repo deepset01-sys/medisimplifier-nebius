@@ -74,6 +74,8 @@ This submission extends it with a full MLOps lifecycle on Nebius:
 
 All results use seed=42. Multi-seed validation (seeds 42 and 2) confirms ROUGE-L variance of 0.0013 (0.6638 vs 0.6651) — within the expected ~0.001–0.002 CUDA non-determinism range. See [eval_seed2.json](results/nebius_evidence/eval_seed2.json).
 
+> **Note on data size:** The training split contains 7,999 samples (not 8,000). All references to "8K" in this README mean 7,999 — the full training set. `--data-size 7999` is the correct CLI value. In the Phase 3 data-size ablation loop, `--data-size 8000` exceeds the dataset size — the `if args.data_size < len(dataset)` guard in `train.py` leaves the full 7,999-sample dataset unchanged.
+
 > Improvement % = (Nebius H100 fine-tuned − zero-shot) / zero-shot.
 > OpenBioLLM: (0.6638 − 0.2623) / 0.2623 = +153.1%
 
