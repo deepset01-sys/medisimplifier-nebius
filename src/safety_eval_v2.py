@@ -24,7 +24,7 @@ from tqdm import tqdm
 
 # ── MODELS ──────────────────────────────────────────────────────────
 LLAMA_MODEL  = "meta-llama/Llama-3.3-70B-Instruct"
-QWEN_MODEL   = "Qwen/Qwen2.5-72B-Instruct"
+QWEN_MODEL   = "Qwen/Qwen3-32B"
 NEBIUS_API_URL = "https://api.studio.nebius.ai/v1/chat/completions"
 
 # ── PROMPTS (identical to training) ─────────────────────────────────
