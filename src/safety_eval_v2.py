@@ -236,6 +236,19 @@ def main():
                   f"Llama={llama_result['verdict']} "
                   f"Qwen={qwen_result['verdict']}")
 
+        # Intermediate save every 100 samples
+        if (i + 1) % 100 == 0:
+            checkpoint = {
+                "n_completed": i + 1,
+                "per_sample": per_sample,
+            }
+            out = Path(args.output_file)
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.with_suffix(".checkpoint.json").write_text(
+                json.dumps(checkpoint, indent=2)
+            )
+            print(f"  Checkpoint saved: {i+1} samples")
+
     # Aggregate
     llama_verdicts = [s["llama_verdict"] for s in per_sample]
     qwen_verdicts  = [s["qwen_verdict"]  for s in per_sample]
