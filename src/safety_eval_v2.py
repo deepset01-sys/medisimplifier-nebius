@@ -69,9 +69,10 @@ def llm_judge_eval(original, simplified, api_key, model, max_retries=3):
             {"role": "system", "content": JUDGE_SYSTEM},
             {"role": "user",   "content": prompt},
         ],
-        "max_tokens": 200,
+        "max_tokens": 500,
         "temperature": 0,
         "response_format": {"type": "json_object"},
+        "extra_body": {"enable_thinking": False},
     }
     headers = {
         "Authorization": f"Bearer {api_key}",
