@@ -361,6 +361,8 @@ selection.
 > - [safety_results_v3.json](results/nebius_evidence/safety_results_v3.json) — CoT prompt, n=1,001
 > - [safety_results.json](results/nebius_evidence/safety_results.json) — v1 preliminary (100 samples, single judge)
 
+> **Limitation and future work:** Without human-anchored ground truth, I cannot determine which judge is closer to clinical accuracy — only that they disagree strongly. LLM evaluation research consistently shows that judges tend to rate fluent, plausible-sounding text as factually accurate even when it contains errors (sycophancy toward fluency). A controlled annotation study with clinical reviewers would be needed to establish which judge family and which prompt structure best approximates human medical judgment — and would convert this from an observational finding into a validated one.
+
 > Both experiments conducted via Nebius Token Factory API — demonstrating
 > serverless LLM-as-judge evaluation at scale (1,001 samples × 2 judges × 2 prompt variants = 4,004 judge calls).
 
