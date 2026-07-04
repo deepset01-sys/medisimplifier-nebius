@@ -95,13 +95,34 @@ def generate_predictions(model, tokenizer, dataset: list, model_format: str, bat
             max_length=2048
         ).to(model.device)
         print(f"Generating sample {i+1}/{len(dataset)}...")
-        with torch.no_grad():
-            outputs = model.generate(
-                **inputs,
-                max_new_tokens=512,
-                do_sample=False,
-                pad_token_id=tokenizer.eos_token_id,
-            )
+        try:
+            with torch.no_grad():
+                outputs = model.generate(
+                    **inputs,
+                    max_new_tokens=512,
+                    do_sample=False,
+                    pad_token_id=tokenizer.eos_token_id,
+                )
+        except RuntimeError as e:
+            if "out of memory" in str(e).lower():
+                print(f"  OOM on batch {i}–{i+batch_size}, retrying sample-by-sample...")
+                torch.cuda.empty_cache()
+                outputs = []
+                for idx, single_input in enumerate(inputs["input_ids"]):
+                    single = {
+                        "input_ids": single_input.unsqueeze(0),
+                        "attention_mask": inputs["attention_mask"][idx:idx+1],
+                    }
+                    with torch.no_grad():
+                        out = model.generate(
+                            **single,
+                            max_new_tokens=512,
+                            do_sample=False,
+                            pad_token_id=tokenizer.eos_token_id,
+                        )
+                    outputs.append(out[0])
+            else:
+                raise
         # With left-padding, all rows in the batch share the same padded length.
         # Use shape[1] (the shared dimension) rather than per-row shape[0] to make
         # the slice robust regardless of how the batch loop is structured.
