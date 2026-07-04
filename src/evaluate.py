@@ -13,6 +13,7 @@ from peft import PeftModel
 from rouge_score import rouge_scorer
 from easse.sari import corpus_sari
 import textstat
+from typing import Optional
 
 MODELS = {
     "openbio": {
@@ -47,7 +48,7 @@ CHATML_INFERENCE = "<|im_start|>system\n{system}<|im_end|>\n<|im_start|>user\n{i
 MISTRAL_INFERENCE = "[INST] <<SYS>>\n{system}\n<</SYS>>\n{instruction}\n\n{input} [/INST]"
 
 
-def build_prompt(sample, model_format):
+def build_prompt(sample: dict, model_format: str) -> str:
     template = CHATML_INFERENCE if model_format == "chatml" else MISTRAL_INFERENCE
     return template.format(
         system=SYSTEM_MESSAGE,
@@ -56,7 +57,7 @@ def build_prompt(sample, model_format):
     )
 
 
-def load_model(hf_path, adapter_path):
+def load_model(hf_path: str, adapter_path: Optional[str]):
     print(f"Loading tokenizer: {hf_path}")
     tokenizer = AutoTokenizer.from_pretrained(hf_path, trust_remote_code=True)
     tokenizer.pad_token = tokenizer.eos_token
@@ -81,7 +82,7 @@ def load_model(hf_path, adapter_path):
     return model, tokenizer
 
 
-def generate_predictions(model, tokenizer, dataset, model_format, batch_size=4):
+def generate_predictions(model, tokenizer, dataset: list, model_format: str, batch_size: int = 4) -> list[str]:
     predictions = []
     for i in range(0, len(dataset), batch_size):
         batch = dataset[i:i+batch_size]
@@ -118,7 +119,7 @@ def generate_predictions(model, tokenizer, dataset, model_format, batch_size=4):
     return predictions
 
 
-def compute_rouge_l(predictions, references):
+def compute_rouge_l(predictions: list[str], references: list[str]) -> tuple[float, list[float]]:
     scorer = rouge_scorer.RougeScorer(["rougeL"], use_stemmer=True)
     scores = [
         scorer.score(ref, pred)["rougeL"].fmeasure
@@ -127,7 +128,7 @@ def compute_rouge_l(predictions, references):
     return float(np.mean(scores)), [float(s) for s in scores]
 
 
-def compute_bertscore(predictions, references):
+def compute_bertscore(predictions: list[str], references: list[str]) -> float:
     from bert_score import score as bert_score
     P, R, F1 = bert_score(
         predictions,
@@ -140,7 +141,7 @@ def compute_bertscore(predictions, references):
     return float(F1.mean())
 
 
-def compute_sari(sources, predictions, references):
+def compute_sari(sources: list[str], predictions: list[str], references: list[str]) -> float:
     return corpus_sari(
         orig_sents=sources,
         sys_sents=predictions,
@@ -148,7 +149,7 @@ def compute_sari(sources, predictions, references):
     )
 
 
-def compute_fk_grade(texts):
+def compute_fk_grade(texts: list[str]) -> float:
     scores = []
     for t in texts:
         try:
