@@ -93,8 +93,10 @@ All results use seed=42. Multi-seed validation (seeds 42 and 2) confirms ROUGE-L
 > Dashboard includes loss curves, eval metrics per epoch, gradient norms, and hyperparameters.
 
 **📊 Evaluation Tracking (Nebius Managed MLflow):**
-All evaluation results tracked in [Nebius Managed MLflow](results/nebius_evidence/mlflow_runs.csv) — 4 runs across 3 models and 2 seeds, with full params, metrics, and git commit traceability.
-*(MLflow cluster active during judging window — July 15–22, 2026. Export available at all times via [mlflow_runs.csv](results/nebius_evidence/mlflow_runs.csv))*
+All evaluation results logged to Nebius Managed MLflow during development — 4 runs across 3 models and 2 seeds, with full params, metrics, and git commit traceability.
+Export: [mlflow_runs.csv](results/nebius_evidence/mlflow_runs.csv) | Logging script: [send_to_mlflow.py](send_to_mlflow.py)
+
+To restore the live experiment: create a Nebius Managed MLflow cluster, set `MLFLOW_TRACKING_URI`, and run `python send_to_mlflow.py` — all 4 runs restore in ~5 minutes.
 
 > Training observability (W&B) + Evaluation observability (Nebius MLflow) = two-layer MLOps visibility, both on Nebius infrastructure.
 
@@ -269,7 +271,7 @@ All results are committed to this repository for durable verification:
 - Docker: [chambul/medisimplifier:train-v23](https://hub.docker.com/r/chambul/medisimplifier)
 - W&B: [wandb.ai/deepset01-chambul/medisimplifier](https://wandb.ai/deepset01-chambul/medisimplifier)
 - Endpoint: Deploy your own in ~5 minutes — see [Step 5](#5-deploy-live-endpoint) above
-- MLflow: [Experiment export](results/nebius_evidence/mlflow_runs.csv) — 4 evaluation runs tracked in Nebius Managed MLflow (active during judging window)
+- MLflow: [Experiment export](results/nebius_evidence/mlflow_runs.csv) + [send_to_mlflow.py](send_to_mlflow.py) — restore live experiment in ~5 min
 
 ## Medical Safety Evaluation
 
