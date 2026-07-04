@@ -286,15 +286,26 @@ Both judges run via **Nebius Token Factory** serverless inference.
 
 ### Results
 
+**Experiment 1 — Simple prompt (v2):**
+
 | Evaluator | Safe | Unsafe | Safe Rate | n evaluated |
 |-----------|------|--------|-----------|-------------|
 | scispaCy (negative control) | 0 | 1,001 | 0.0% | 1,001 |
 | Llama-3.3-70B (same-family) | 325 | 676 | **32.5%** | 1,001 (0 errors) |
 | Qwen3-32B (cross-family) | 888 | 112 | **88.8%** | 1,000 (1 error) |
 
-**Inter-judge agreement:** Cohen's κ = 0.1114 (near-zero)
+Inter-judge agreement: Cohen's κ = 0.1114 | ROUGE↔faithfulness: r = 0.2128
 
-**ROUGE-L ↔ Faithfulness correlation:** Pearson r = 0.2128
+**Experiment 2 — 4-step CoT prompt with anti-sycophancy warning (v3):**
+
+| Evaluator | Safe | Unsafe | Safe Rate | n evaluated |
+|-----------|------|--------|-----------|-------------|
+| Llama-3.3-70B (same-family) | 87 | 909 | **8.7%** | 996 (5 errors) |
+| Qwen3-32B (cross-family) | 803 | 198 | **80.3%** | 1,001 (0 errors) |
+
+Inter-judge agreement: Cohen's κ = 0.0431 | ROUGE↔faithfulness: r = 0.0725
+
+**Key observation:** CoT prompting made Llama ~4× stricter (32.5% → 8.7%) while Qwen shifted only moderately (88.8% → 80.3%). Agreement *decreased* with CoT (κ: 0.11 → 0.04) — chain-of-thought amplified judge family bias rather than reducing it.
 
 > **Note on scispaCy 0%:** Expected — exact-match entity comparison cannot
 > recognize semantic equivalents (e.g., "myocardial infarction" → "heart attack").
@@ -323,13 +334,13 @@ selection.
 > confirming that ROUGE-L alone is an insufficient proxy for medical faithfulness.
 > High ROUGE-L does not guarantee faithful simplification.
 
-> Evidence: [safety_results_v2.json](results/nebius_evidence/safety_results_v2.json)
-> (1,001 samples, per-sample verdicts from both judges, full metrics)
-> Replaces preliminary v1 (100 samples, single judge): [safety_results.json](results/nebius_evidence/safety_results.json)
+> Evidence:
+> - [safety_results_v2.json](results/nebius_evidence/safety_results_v2.json) — simple prompt, n=1,001
+> - [safety_results_v3.json](results/nebius_evidence/safety_results_v3.json) — CoT prompt, n=1,001
+> - [safety_results.json](results/nebius_evidence/safety_results.json) — v1 preliminary (100 samples, single judge)
 
-> This evaluation was conducted on Nebius AI Studio using
-> `meta-llama/Llama-3.3-70B-Instruct` as the judge model,
-> demonstrating Nebius Token Factory's API for LLM-as-judge workflows.
+> Both experiments conducted via Nebius Token Factory API — demonstrating
+> serverless LLM-as-judge evaluation at scale (1,001 samples × 2 judges × 2 prompt variants = 4,004 judge calls).
 
 > **Scope:** This is a research prototype.
 > 76.8% faithfulness (73/95 evaluated) is below the threshold
