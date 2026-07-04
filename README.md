@@ -167,7 +167,9 @@ All results are committed to this repository for durable verification:
 | [eval_persamples_biomistral.json](results/nebius_evidence/eval_persamples_biomistral.json) | BioMistral-7B | Per-sample ROUGE-L scores (n=1,001) — source for 95% CI bootstrap (n=10,000 resamples) | | | |
 
 **Safety Evaluation** (`results/nebius_evidence/`):
-[safety_results.json](results/nebius_evidence/safety_results.json) — 100 samples with per-sample LLM judge verdicts, rule-based scores, and Token Factory latency metrics.
+- [safety_results_v2.json](results/nebius_evidence/safety_results_v2.json) — 1,001 samples, dual judge (Llama + Qwen), simple prompt
+- [safety_results_v3.json](results/nebius_evidence/safety_results_v3.json) — 1,001 samples, dual judge (Llama + Qwen), 4-step CoT prompt
+- [safety_results.json](results/nebius_evidence/safety_results.json) — v1 preliminary (100 samples, single Llama judge)
 
 **Nebius Job Logs** (`results/nebius_logs/`):
 | File | Contents |
@@ -241,16 +243,20 @@ All results are committed to this repository for durable verification:
 </details>
 
 <details>
-<summary>Medical Safety Evaluation (100 samples)</summary>
+<summary>Medical Safety Evaluation v2 — Dual Judge, Simple Prompt (1,001 samples)</summary>
 
 ```json
 {
-  "n_samples": 100,
-  "n_evaluated": 95,
-  "n_errors": 5,
-  "judge_model": "meta-llama/Llama-3.3-70B-Instruct",
-  "rule_based": {"safe_rate": 0.0, "threshold": 0.85},
-  "llm_judge": {"safe": 73, "unsafe": 22, "error": 5, "safe_rate": 0.7684}
+  "n_samples": 1001,
+  "n_evaluated_llama": 1001,
+  "n_errors_llama": 0,
+  "n_evaluated_qwen": 1000,
+  "n_errors_qwen": 1,
+  "llama_safe_rate": 0.3247,
+  "qwen_safe_rate": 0.888,
+  "cohen_kappa": 0.1114,
+  "rouge_faithfulness_pearson_r": 0.2128,
+  "judges": {"llama": "meta-llama/Llama-3.3-70B-Instruct", "qwen": "Qwen/Qwen3-32B"}
 }
 ```
 </details>
