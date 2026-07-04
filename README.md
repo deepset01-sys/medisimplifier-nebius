@@ -572,6 +572,20 @@ Training Job                    Object Storage                  Eval/Serve Job
 > `bash scripts/reproduce.sh full` runs the complete pipeline (training + ablations + eval + endpoint).
 > Requires `NEBIUS_PROJECT_ID`, `NEBIUS_SUBNET_ID`, `HF_TOKEN` env vars and Nebius CLI v0.12.229+.
 
+<details>
+<summary>scripts/reproduce.sh — invocation modes (train-v23)</summary>
+
+```bash
+bash scripts/reproduce.sh eval_only    # evaluate only (no training, uses HF adapters)
+bash scripts/reproduce.sh full         # full pipeline: ablation + train + eval + serve
+bash scripts/reproduce.sh ablation     # ablation study only
+bash scripts/reproduce.sh serve        # deploy vLLM endpoint only
+```
+
+See [`scripts/reproduce.sh`](scripts/reproduce.sh) for the complete implementation.
+Expected output (eval_only): `rouge_l: 0.6638` (±0.002 CUDA variance)
+</details>
+
 **Environment:** Python 3.11 · CUDA 12.1 · PyTorch 2.1.0
 
 ### 0. Install and authenticate Nebius CLI
