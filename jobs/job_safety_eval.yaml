@@ -2,7 +2,7 @@ name: medisimplifier-safety-eval
 description: "Medical safety evaluation v2 — dual judge (Llama-3.3-70B + Qwen2.5-72B), Cohen kappa, ROUGE-faithfulness correlation, n=1001"
 
 docker:
-  image: chambul/medisimplifier:train-v20
+  image: chambul/medisimplifier:train-v22
   command: python
   args:
     - "safety_eval_v2.py"
