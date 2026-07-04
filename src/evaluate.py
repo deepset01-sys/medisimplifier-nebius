@@ -1,17 +1,14 @@
-import sys
 import os
 import json
 import argparse
 from pathlib import Path
 
 import torch
-import torch.nn as nn
 import numpy as np
 from datasets import load_dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import PeftModel
 from rouge_score import rouge_scorer
-from easse.sari import corpus_sari
 import textstat
 from typing import Optional
 
@@ -163,6 +160,7 @@ def compute_bertscore(predictions: list[str], references: list[str]) -> float:
 
 
 def compute_sari(sources: list[str], predictions: list[str], references: list[str]) -> float:
+    from easse.sari import corpus_sari  # lazy import — easse is git-based and only needed for SARI
     return corpus_sari(
         orig_sents=sources,
         sys_sents=predictions,
