@@ -263,51 +263,69 @@ All results are committed to this repository for durable verification:
 - Endpoint: Deploy your own in ~5 minutes — see [Step 5](#5-deploy-live-endpoint) above
 - MLflow: [Experiment export](results/nebius_evidence/mlflow_runs.csv) — 4 evaluation runs tracked in Nebius Managed MLflow (active during judging window)
 
-## Medical Safety Evaluation (Preliminary)
+## Medical Safety Evaluation
 
 Beyond standard NLP metrics, I evaluated whether MediSimplifier preserves
-critical medical information — a safety requirement for real-world deployment.
+critical medical information using a dual-judge framework on the full 1,001
+test samples — a Nebius-native evaluation pipeline via Token Factory.
 
 ### Methodology
 
-I conducted a two-level evaluation on 100 test samples (seed=42):
+Two-level evaluation on all 1,001 test samples (seed=42):
 
 | Level | Method | Model |
 |-------|--------|-------|
 | Rule-based | scispaCy entity preservation | `en_core_sci_sm` |
-| LLM Judge | Medical faithfulness evaluation | `meta-llama/Llama-3.3-70B-Instruct` |
+| LLM Judge A | Same-family judge | `meta-llama/Llama-3.3-70B-Instruct` |
+| LLM Judge B | Cross-family judge | `Qwen/Qwen3-32B` |
 
-The LLM Judge uses the **same instruction prompt** given to MediSimplifier
-during training — evaluating whether the model followed its own guidelines.
-The judge model is from the **same model family** as our fine-tuned
-OpenBioLLM-8B (Meta Llama), but 9× larger.
+Both LLM judges evaluate medical faithfulness using the same prompt.
+Judge A (Llama) is from the **same model family** as OpenBioLLM-8B.
+Judge B (Qwen) is from a **different model family** — enabling cross-family agreement analysis.
+Both judges run via **Nebius Token Factory** serverless inference.
 
 ### Results
 
-| Evaluator | Safe | Unsafe | Safe Rate |
-|-----------|------|--------|-----------|
-| scispaCy (negative control — exact match too strict for semantic equivalents) | 0 | 100 | 0.0% |
-| Llama-3.3-70B Judge | 73 | 22 | **76.8%** (of 95 evaluated; 5 errored) |
+| Evaluator | Safe | Unsafe | Safe Rate | n evaluated |
+|-----------|------|--------|-----------|-------------|
+| scispaCy (negative control) | 0 | 1,001 | 0.0% | 1,001 |
+| Llama-3.3-70B (same-family) | 325 | 676 | **32.5%** | 1,001 (0 errors) |
+| Qwen3-32B (cross-family) | 888 | 112 | **88.8%** | 1,000 (1 error) |
 
-> **Note:** The 0% rule-based safe rate is expected — scispaCy's
-> exact-match entity comparison cannot recognize semantic equivalents
-> (e.g., "heart attack" ≠ "myocardial infarction").
-> The LLM judge correctly identifies these as faithful simplifications.
+**Inter-judge agreement:** Cohen's κ = 0.1114 (near-zero)
 
-> **Note on n=95:** 5 of 100 samples returned an error from the
-> LLM judge (network timeout). safe_rate = 73/95 evaluated samples.
+**ROUGE-L ↔ Faithfulness correlation:** Pearson r = 0.2128
 
-### Key Finding
+> **Note on scispaCy 0%:** Expected — exact-match entity comparison cannot
+> recognize semantic equivalents (e.g., "myocardial infarction" → "heart attack").
+> This confirms rule-based metrics are inappropriate for medical simplification.
 
-**Rule-based exact matching underestimates medical faithfulness.** scispaCy
-flags all simplifications as unsafe because it cannot recognize semantic
-equivalents (e.g., "myocardial infarction" → "heart attack"). The LLM judge,
-which understands semantic equivalence, found **76.8% of simplifications
-fully faithful** to the original medical content (73/95 evaluated outputs).
+### Novel Finding: Judge Family Bias in Medical Faithfulness Evaluation
 
-> In the 22 cases flagged by the LLM judge, issues were limited to
-> minor information condensation rather than hallucinated medical facts
-> (preliminary screening on 100 samples — not a deployment-ready audit).
+**The most striking result is not the safe rate itself — it is the disagreement between judges.**
+
+Cohen's κ = 0.11 indicates near-random agreement between Llama and Qwen on
+whether a simplification is medically faithful. Llama-3.3-70B (same family as
+OpenBioLLM) flags 67.5% of outputs as unsafe; Qwen3-32B flags only 11.2%.
+
+**This reveals a significant judge family bias:** LLM-as-judge medical
+faithfulness evaluation is highly model-dependent. A same-family judge may
+penalize outputs that share stylistic patterns with the evaluated model,
+inflating the unsafe rate. Cross-family evaluation yields a more lenient
+but potentially less biased assessment.
+
+**Implication:** Medical AI evaluation requires multi-judge protocols with
+cross-family diversity. Single-judge evaluation (as in most published work)
+may systematically over- or under-estimate faithfulness depending on judge
+selection.
+
+> **ROUGE-L ↔ Faithfulness:** Pearson r = 0.21 — weak positive correlation,
+> confirming that ROUGE-L alone is an insufficient proxy for medical faithfulness.
+> High ROUGE-L does not guarantee faithful simplification.
+
+> Evidence: [safety_results_v2.json](results/nebius_evidence/safety_results_v2.json)
+> (1,001 samples, per-sample verdicts from both judges, full metrics)
+> Replaces preliminary v1 (100 samples, single judge): [safety_results.json](results/nebius_evidence/safety_results.json)
 
 > This evaluation was conducted on Nebius AI Studio using
 > `meta-llama/Llama-3.3-70B-Instruct` as the judge model,
