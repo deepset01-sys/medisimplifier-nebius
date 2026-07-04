@@ -271,13 +271,23 @@ All results are committed to this repository for durable verification:
 
 ## Medical Safety Evaluation
 
-Beyond standard NLP metrics, I evaluated whether MediSimplifier preserves
-critical medical information using a dual-judge framework on the full 1,001
-test samples — a Nebius-native evaluation pipeline via Token Factory.
+Beyond standard NLP metrics, I conducted a three-round investigation into
+whether MediSimplifier preserves critical medical information — each round
+designed to answer a question raised by the previous round's findings.
+
+### Research Design
+
+| Round | Research Question | Judge Design | Key Finding |
+|-------|------------------|-------------|-------------|
+| v1 (n=100) | What is the baseline faithfulness rate? | Single judge — Llama-3.3-70B (same-family) | 76.8% — but same-family judge may be biased |
+| v2 (n=1,001) | Is evaluation judge-family dependent? | Two judges — Llama-70B + Qwen-32B: differ in **both family and scale** (intentional — to probe sensitivity across both dimensions simultaneously) | Llama 32.5% vs Qwen 88.8%, κ=0.11 |
+| v3 (n=1,001) | Does structured reasoning reduce bias? | Same two judges + 4-step CoT with anti-sycophancy warning (inspired by my LLM evaluation coursework — Nebius Academy AI Performance Engineering) | CoT amplifies bias — κ drops further to 0.04 |
+
+Each experiment used the full Nebius Token Factory pipeline — 4,004 total judge calls across all rounds.
 
 ### Methodology
 
-Two-level evaluation on all 1,001 test samples (seed=42):
+Three-level evaluation per round:
 
 | Level | Method | Model |
 |-------|--------|-------|
