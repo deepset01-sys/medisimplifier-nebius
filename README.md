@@ -841,13 +841,16 @@ The merged model is publicly available on HuggingFace — see Step 5 above. For 
 ## Project structure
 
     src/
-      train.py          LoRA training — runs as Nebius Job
-      evaluate.py       Metrics: ROUGE-L, SARI, BERTScore, FK-Grade
-      safety_eval.py    LLM-as-judge safety evaluation via Nebius Token Factory
-      serve_vllm.py     vLLM inference server — runs as Nebius Endpoint
+      train.py           LoRA training — runs as Nebius Job
+      evaluate.py        Metrics: ROUGE-L, SARI, BERTScore, FK-Grade
+      safety_eval.py     LLM-as-judge safety evaluation v1 (single judge, n=100)
+      safety_eval_v2.py  LLM-as-judge safety evaluation v2/v3 (dual judge, n=1,001)
+      merge_adapter.py   Merge LoRA adapter into base model for vLLM serving
+      save_adapter.py    Save adapter utility
+      serve_vllm.py      vLLM inference server — runs as Nebius Endpoint
     docker/
-      Dockerfile.train  Training image
-      Dockerfile.serve  Serving image
+      Dockerfile.train   Training image
+      Dockerfile.serve   Serving image
     jobs/
       job_train.yaml         Full training job config
       job_ablation.yaml      Parametrized ablation job config
@@ -855,6 +858,11 @@ The merged model is publicly available on HuggingFace — see Step 5 above. For 
       job_safety_eval.yaml   Safety evaluation job config
       job_ablation_run.sh    Ablation submission shell script
       endpoint_vllm.yaml     vLLM endpoint deployment config
+    scripts/
+      reproduce.sh       One-command reproducibility script
+    tests/
+      test_metrics.py    Unit tests for ROUGE-L, FK-Grade, prompt builder
+    send_to_mlflow.py    Nebius Managed MLflow experiment logging
     requirements.txt
 
 ## Key Configuration
