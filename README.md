@@ -411,7 +411,7 @@ Winner configuration: **r=32, all_attn, 8K** → used for full 3-epoch training 
 
 > **Note on ablation overlap:** Phase 1 and Phase 2 share the r=32, q+v, 8K configuration (0.6183 vs 0.6192),
 > and Phase 2/Phase 3 share r=32, all_attn, 8K (0.6357 vs 0.6345). These are not real performance differences.
-> Each config was run once (n=1, seed=42). Multi-seed validation on the winning config (seeds 42 and 2) measured variance of 0.0013 ROUGE-L — confirming differences this small
+> Each config was run once (n=1, seed=42) as a separate Nebius Job. Multi-seed validation on the winning config (seeds 42 and 2) measured variance of 0.0013 ROUGE-L — confirming differences this small
 > should not be over-interpreted. Phase 3 fixes rank=32 and modules=all_attn while varying data size
 > to isolate the data-size effect.
 
