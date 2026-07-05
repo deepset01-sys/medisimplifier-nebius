@@ -23,7 +23,7 @@ client = anthropic.Anthropic()
 
 with client.messages.stream(
     model=args.model,
-    max_tokens=4000,
+    max_tokens=16000,
     messages=[
         {
             "role": "user",
