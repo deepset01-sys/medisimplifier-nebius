@@ -747,6 +747,7 @@ nebius ai job create \
   --preset 1gpu-16vcpu-200gb \
   --disk-size 250Gi \
   --subnet-id ${NEBIUS_SUBNET_ID} \
+  --volume medisimplifier-adapters:/mnt/adapters:rw \
   --timeout 5h
 ```
 
