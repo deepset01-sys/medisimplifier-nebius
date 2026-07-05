@@ -112,7 +112,7 @@ if [[ "$MODE" == "eval_only" || "$MODE" == "full" ]]; then
     --parent-id "${NEBIUS_PROJECT_ID}" \
     --image "$IMAGE" \
     --container-command python \
-    --args "evaluate.py --model openbio --adapter-hf-repo GuyDor007/MediSimplifier-LoRA-Adapters --split test --output-dir /output/eval_results" \
+    --args "evaluate.py --model openbio --adapter-hf-repo chambul/MediSimplifier-LoRA-Adapter-Nebius --split test --output-dir /output/eval_results" \
     --env HF_TOKEN="${HF_TOKEN}" \
     --env HF_HOME=/tmp/hf_cache \
     --platform "$PLATFORM" \
@@ -142,4 +142,4 @@ fi
 
 echo ""
 echo "==> Monitor: nebius ai job list --parent-id \${NEBIUS_PROJECT_ID}"
-echo "==> Pre-trained artifacts: https://huggingface.co/GuyDor007/MediSimplifier-LoRA-Adapters"
+echo "==> Pre-trained artifacts: https://huggingface.co/chambul/MediSimplifier-LoRA-Adapter-Nebius"
