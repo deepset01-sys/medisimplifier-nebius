@@ -188,6 +188,13 @@ All results are committed to this repository for durable verification:
 | [r32_qonly_logs.json.gz](results/nebius_logs/r32_qonly_logs.json.gz) | Ablation: r=32, q only — ROUGE-L 0.6006 |
 | [r16_qv_logs.json.gz](results/nebius_logs/r16_qv_logs.json.gz) | Ablation: r=16, q+v — ROUGE-L 0.6080 |
 | [r8_qv_logs.json.gz](results/nebius_logs/r8_qv_logs.json.gz) | Ablation: r=8, q+v — ROUGE-L 0.6033 |
+| [eval-persamples.json.gz](results/nebius_logs/eval-persamples.json.gz) | OpenBioLLM-8B evaluation job — 1,001 samples, ROUGE-L 0.6638 |
+| [eval-persamples-mistral.json.gz](results/nebius_logs/eval-persamples-mistral.json.gz) | Mistral-7B evaluation job — 1,001 samples, ROUGE-L 0.6253 |
+| [eval-persamples-biomistral.json.gz](results/nebius_logs/eval-persamples-biomistral.json.gz) | BioMistral-7B evaluation job — 1,001 samples, ROUGE-L 0.6004 |
+| [eval-seed2.json.gz](results/nebius_logs/eval-seed2.json.gz) | OpenBioLLM-8B eval — seed=2 (multi-seed validation), ROUGE-L 0.6651 |
+| [seed2.json.gz](results/nebius_logs/seed2.json.gz) | OpenBioLLM-8B training — seed=2, multi-seed validation run |
+| [safety-eval-v2.json.gz](results/nebius_logs/safety-eval-v2.json.gz) | Safety eval v2 — dual judge, simple prompt, n=1,001 |
+| [safety-eval-v3.json.gz](results/nebius_logs/safety-eval-v3.json.gz) | Safety eval v3 — dual judge, 4-step CoT prompt, n=1,001 |
 
 > All logs contain Nebius job IDs (aijob-* / aiendpoint-*),
 > GPU info (NVIDIA H100 80GB HBM3), and timestamps.
