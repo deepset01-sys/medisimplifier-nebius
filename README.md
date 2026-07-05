@@ -1,7 +1,7 @@
 # MediSimplifier — End-to-End Serverless ML Pipeline on Nebius
 
 [![Nebius Jobs](https://img.shields.io/badge/Nebius-Serverless%20AI%20Jobs-blue)](https://nebius.com)
-[![HuggingFace Models](https://img.shields.io/badge/HF-Models-yellow)](https://huggingface.co/GuyDor007/MediSimplifier-LoRA-Adapters)
+[![HuggingFace Models](https://img.shields.io/badge/HF-Models-yellow)](https://huggingface.co/chambul/MediSimplifier-LoRA-Adapter-Nebius)
 [![HuggingFace Dataset](https://img.shields.io/badge/HF-Dataset-blue)](https://huggingface.co/datasets/GuyDor007/medisimplifier-dataset)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green)](LICENSE)
 
@@ -278,6 +278,7 @@ All results are committed to this repository for durable verification:
 - W&B: [wandb.ai/deepset01-chambul/medisimplifier](https://wandb.ai/deepset01-chambul/medisimplifier)
 - Endpoint: Deploy your own in ~5 minutes — see [Step 5](#5-deploy-live-endpoint) above
 - MLflow: [Experiment export](results/nebius_evidence/mlflow_runs.csv) + [send_to_mlflow.py](send_to_mlflow.py) — restore live experiment in ~5 min
+- LoRA Adapter (Nebius): [chambul/MediSimplifier-LoRA-Adapter-Nebius](https://huggingface.co/chambul/MediSimplifier-LoRA-Adapter-Nebius) — r=32, all_attn, 3 epochs, ROUGE-L 0.6638
 - Dataset: [GuyDor007/medisimplifier-dataset](https://huggingface.co/datasets/GuyDor007/medisimplifier-dataset)
 - Adapters (Technion-era): [GuyDor007/MediSimplifier-LoRA-Adapters](https://huggingface.co/GuyDor007/MediSimplifier-LoRA-Adapters)
 
@@ -751,10 +752,10 @@ nebius ai job create \
 
 > **Adapter source options:**
 > - **Option A — from bucket** (after running training): `--adapter-path /mnt/adapters/full_training`
-> - **Option B — from HuggingFace** (no training needed): `--adapter-hf-repo GuyDor007/MediSimplifier-LoRA-Adapters`
+> - **Option B — from HuggingFace** (no training needed): `--adapter-hf-repo chambul/MediSimplifier-LoRA-Adapter-Nebius`
 >
-> Replace `--adapter-path` with `--adapter-hf-repo GuyDor007/MediSimplifier-LoRA-Adapters` in the
-> `--args` string above to evaluate directly from the public HF adapters.
+> Replace `--adapter-path` with `--adapter-hf-repo chambul/MediSimplifier-LoRA-Adapter-Nebius` in the
+> `--args` string above to evaluate directly from the Nebius-trained public adapter (produces ROUGE-L 0.6638).
 
 Our evaluation run:
 
@@ -1121,7 +1122,9 @@ easse @ git+https://github.com/feralvam/easse.git@6a4352ec299ed03fda8ee45445ca43
 | Resource | Link |
 |----------|------|
 | Dataset | GuyDor007/medisimplifier-dataset — 10K samples, public |
-| Models | GuyDor007/MediSimplifier-LoRA-Adapters — 3 adapters, public |
+| LoRA Adapter (Nebius) | [chambul/MediSimplifier-LoRA-Adapter-Nebius](https://huggingface.co/chambul/MediSimplifier-LoRA-Adapter-Nebius) — r=32, all_attn, 3 epochs, ROUGE-L 0.6638 |
+| Merged Model | [chambul/MediSimplifier-OpenBioLLM-merged](https://huggingface.co/chambul/MediSimplifier-OpenBioLLM-merged) — OpenBioLLM-8B + adapter, ready for vLLM serving |
+| Adapters (Technion-era) | [GuyDor007/MediSimplifier-LoRA-Adapters](https://huggingface.co/GuyDor007/MediSimplifier-LoRA-Adapters) — 3 adapters from Technion project |
 
 Dataset: [Asclepius-Synthetic](https://huggingface.co/datasets/starmpcc/Asclepius-Synthetic) (Apache 2.0, HCLS compliant).
 Anonymized synthetic clinical notes. No real patient data.
