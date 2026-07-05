@@ -418,7 +418,8 @@ Nebius Serverless AI Endpoints serve live inference.
 
 > **Observability:** All training runs tracked with Weights & Biases —
 > loss curves, eval metrics, and hyperparameters logged directly from
-> Nebius Jobs via `WANDB_API_KEY` environment variable.
+> Nebius Jobs. Set `WANDB_API_KEY` to log online; omit to run offline
+> (`WANDB_MODE=offline` fallback — no key required).
 
 Pipeline:
 
