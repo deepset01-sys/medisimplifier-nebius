@@ -1,4 +1,4 @@
-# MediSimplifier — Serverless LoRA Fine-Tuning on Nebius
+# MediSimplifier — End-to-End Serverless ML Pipeline on Nebius
 
 [![Nebius Jobs](https://img.shields.io/badge/Nebius-Serverless%20AI%20Jobs-blue)](https://nebius.com)
 [![HuggingFace Models](https://img.shields.io/badge/HF-Models-yellow)](https://huggingface.co/GuyDor007/MediSimplifier-LoRA-Adapters)
@@ -11,16 +11,14 @@
 > The Nebius pipeline, serving layer, safety evaluation, and MLOps
 > infrastructure were built independently for this challenge.
 
-**📝 Blog Post:** [Medical Text Simplification with LoRA on Nebius Serverless: A Builder's Journey](https://medium.com/@deepset01/medical-text-simplification-with-lora-on-nebius-serverless-a-builders-journey-13a9e44c92a4)
+**📝 Blog Post:** [Building an End-to-End Serverless ML Pipeline on Nebius: A Builder's Journey](https://medium.com/@deepset01/medical-text-simplification-with-lora-on-nebius-serverless-a-builders-journey-13a9e44c92a4)
 
 ## What this project does
 
 Medical discharge summaries are written at college reading level (FK-Grade 14.5).
 Only 12% of American adults have sufficient health literacy to understand them.
 
-MediSimplifier fine-tunes open-source LLMs using LoRA to automatically simplify
-these documents to 7th-grade reading level (FK-Grade 14.5 → ~7,
-a reduction of ~7 grade levels) while preserving all critical medical information.
+MediSimplifier is an end-to-end serverless ML pipeline on Nebius — covering fine-tuning, parallel ablation, production serving, safety evaluation, and MLOps — applied to the task of simplifying medical discharge summaries from college reading level (FK-Grade 14.5) to 7th-grade level (~7 grade levels) while preserving all critical medical information.
 
 > **What's new in this Nebius submission vs the Technion project:**
 > The ranking-reversal and LoRA rank findings were first observed
