@@ -364,12 +364,6 @@ selection.
 > Both experiments conducted via Nebius Token Factory API — demonstrating
 > serverless LLM-as-judge evaluation at scale (1,001 samples × 2 judges × 2 prompt variants = 4,004 judge calls).
 
-> **Scope:** This is a research prototype.
-> 76.8% faithfulness (73/95 evaluated) is below the threshold
-> required for clinical deployment. The 22 unsafe cases involved
-> minor information condensation — no hallucinated medical facts
-> were detected. Not intended for production medical use.
-
 ## Ablation Study Results
 
 All ablation runs: 1 epoch, OpenBioLLM-8B base, evaluated on held-out test set (1,001 samples).
