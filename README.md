@@ -338,6 +338,9 @@ Inter-judge agreement: Cohen's κ = 0.0431 | ROUGE↔faithfulness: r = 0.0725
 Cohen's κ = 0.11 indicates near-random agreement between Llama and Qwen on
 whether a simplification is medically faithful. Llama-3.3-70B (same family as
 OpenBioLLM) flags 67.5% of outputs as unsafe; Qwen3-32B flags only 11.2%.
+When CoT prompting was added (v3), the bias intensified rather than diminished:
+κ dropped further to 0.04, with Llama flagging 91.3% unsafe vs Qwen 19.7% —
+suggesting that structured reasoning amplifies family-specific tendencies.
 
 **This reveals a significant judge family bias:** LLM-as-judge medical
 faithfulness evaluation is highly model-dependent. A same-family judge may
