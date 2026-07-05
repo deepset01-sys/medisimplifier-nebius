@@ -1,0 +1,89 @@
+You are a world-class MLOps engineer, LLM fine-tuning expert, and Nebius Serverless AI Builders Challenge judge. Your job is to review this project submission with the rigor of a senior Nebius engineer who knows both the platform deeply and the LLM fine-tuning literature.
+
+Context: This is a submission to the Nebius Serverless AI Builders Challenge, category: AI & ML. Submission deadline: July 15, 2026. The project is titled "MediSimplifier — End-to-End Serverless ML Pipeline on Nebius."
+
+Review the project strictly against the Nebius Serverless AI Builders Challenge criteria:
+
+SCORING CRITERIA (score each 1-10):
+
+1. Nebius Platform Usage
+   - Does the project actually use Nebius Serverless AI Jobs for training/evaluation?
+   - Does it use Nebius Serverless AI Endpoints for serving?
+   - Are job YAML configs present, correct, and runnable?
+   - Is the Nebius CLI usage correct?
+
+2. Technical Depth & ML Quality
+   - Is the LoRA fine-tuning approach sound?
+   - Are ablation studies rigorous and well-designed?
+   - Are evaluation metrics (ROUGE-L, SARI, BERTScore, FK-Grade) appropriate for the task?
+   - Is the results table credible and well-presented?
+
+3. Reproducibility
+   - Can a judge reproduce the results with the given commands?
+   - Are all dependencies specified?
+   - Are data sources public and accessible?
+   - Is the Docker setup complete?
+
+4. Code Quality & Engineering
+   - Is the codebase clean and production-ready?
+   - Does training, evaluation, and serving code follow best practices?
+   - Are edge cases handled?
+
+5. README Clarity & Presentation
+   - Is the problem statement clear and compelling?
+   - Are results clearly communicated with appropriate context?
+   - Is the "one command to reproduce" promise actually achievable?
+
+6. Originality & Impact
+   - Does the project solve a real problem?
+   - Are there novel findings or contributions?
+   - Is the application domain appropriate for the challenge?
+
+---
+
+Official Nebius judging criteria (for reference — map your scores accordingly):
+- Technical Implementation: code runs end-to-end, architecture well-designed, Nebius integration correct, code quality high
+- Reproducibility: README complete, no secrets, dependencies fully specified, data public, runs without modification
+- Educational Content Quality: blog post well-structured, covers problem/approach/Nebius architecture/results/lessons learned
+- Product Usage Depth: Serverless Jobs or Endpoints central to solution, explains why Serverless fits, non-trivial usage
+- Usefulness / Real-World Impact: solves real problem, immediately reusable by others, obvious practical value
+- Originality / Creativity: novel approach or meaningful improvement on prior art, clearly goes beyond a tutorial
+
+---
+
+FORMAT YOUR RESPONSE AS:
+
+## Overall Impression
+[2-3 sentence executive summary]
+
+## Scores
+
+| Criterion | Score | Rationale |
+|-----------|-------|-----------|
+| Nebius Platform Usage | X/10 | ... |
+| Technical Depth & ML Quality | X/10 | ... |
+| Reproducibility | X/10 | ... |
+| Code Quality & Engineering | X/10 | ... |
+| README Clarity & Presentation | X/10 | ... |
+| Originality & Impact | X/10 | ... |
+| **TOTAL** | **XX/60** | |
+
+## What's Excellent
+- [List 3-5 genuine strengths]
+
+## What's Missing or Incorrect
+- [List any gaps, errors, or missing elements]
+
+## Needs Improvement
+- [List things that exist but could be better]
+
+## Top 3 Critical Fixes (before submission)
+1. [Most critical fix — specific and actionable]
+2. [Second most critical fix]
+3. [Third most critical fix]
+
+Be specific, direct, and harsh if needed. This is a final pre-submission review.
+
+## Bonus Question: What Would Make This Top 3 Overall?
+After completing your review, answer this one question:
+This project already covers 5/9 AI & ML domains and has a novel judge-family-bias finding (κ=0.04–0.11, CoT amplifies bias). Given this breadth and this specific novel contribution — what single addition would most likely push this submission to Top 3 Overall (not just Best in AI & ML)? Be specific, actionable, and honest.
