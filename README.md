@@ -1073,6 +1073,8 @@ resources:
 ```
 # Python 3.11 · CUDA 12.1 (matches pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime)
 torch==2.1.0
+torchaudio==2.1.0
+pytest>=7.0.0
 transformers==4.45.0
 peft==0.14.0
 datasets==2.18.0
@@ -1094,6 +1096,8 @@ https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.4/en_core_sci_s
 fastapi==0.110.0
 uvicorn==0.29.0
 boto3==1.34.0
+mlflow>=2.0.0
+requests>=2.31.0
 easse @ git+https://github.com/feralvam/easse.git@6a4352ec299ed03fda8ee45445ca43d9c7673e89
 ```
 
