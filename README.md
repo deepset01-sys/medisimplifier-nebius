@@ -273,12 +273,13 @@ All results are committed to this repository for durable verification:
 </details>
 
 **🔗 Public Artifacts:**
-- Dataset: [GuyDor007/medisimplifier-dataset](https://huggingface.co/datasets/GuyDor007/medisimplifier-dataset)
-- Adapters: [GuyDor007/MediSimplifier-LoRA-Adapters](https://huggingface.co/GuyDor007/MediSimplifier-LoRA-Adapters)
+- Merged model: [chambul/MediSimplifier-OpenBioLLM-merged](https://huggingface.co/chambul/MediSimplifier-OpenBioLLM-merged)
 - Docker: [chambul/medisimplifier:train-v23](https://hub.docker.com/r/chambul/medisimplifier)
 - W&B: [wandb.ai/deepset01-chambul/medisimplifier](https://wandb.ai/deepset01-chambul/medisimplifier)
 - Endpoint: Deploy your own in ~5 minutes — see [Step 5](#5-deploy-live-endpoint) above
 - MLflow: [Experiment export](results/nebius_evidence/mlflow_runs.csv) + [send_to_mlflow.py](send_to_mlflow.py) — restore live experiment in ~5 min
+- Dataset: [GuyDor007/medisimplifier-dataset](https://huggingface.co/datasets/GuyDor007/medisimplifier-dataset)
+- Adapters (Technion-era): [GuyDor007/MediSimplifier-LoRA-Adapters](https://huggingface.co/GuyDor007/MediSimplifier-LoRA-Adapters)
 
 ## Medical Safety Evaluation
 
