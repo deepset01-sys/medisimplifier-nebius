@@ -98,7 +98,7 @@ To restore the live experiment: create a Nebius Managed MLflow cluster, set `MLF
 
 > Training observability (W&B) + Evaluation observability (Nebius MLflow) = two-layer MLOps visibility, both on Nebius infrastructure.
 
-> **Note on adapter provenance:** The merged model (`chambul/MediSimplifier-OpenBioLLM-merged`) was created by merging the LoRA adapter trained on Nebius H100 NVLink (`medisimplifier-adapters/adapter/`, job: `medisimplifier-full-training`, r=32, all_attn, 3 epochs, best_epoch=2) with the base model. This adapter produced ROUGE-L 0.6638 as documented in [`results_openbio.json`](results/nebius_evidence/results_openbio.json) and [`full_training_results.json`](results/nebius_evidence/full_training_results.json). The adapter lives in the Nebius bucket, not under `GuyDor007` — that repo contains the Technion-era adapters.
+> **Note on adapter provenance:** The merged model (`chambul/MediSimplifier-OpenBioLLM-merged`) was created by merging the LoRA adapter trained on Nebius H100 NVLink (`medisimplifier-adapters/adapter/`, job: `medisimplifier-full-training`, r=32, all_attn, 3 epochs, best_epoch=2) with the base model. This adapter produced ROUGE-L 0.6638 as documented in [`results_openbio.json`](results/nebius_evidence/results_openbio.json) and [`full_training_results.json`](results/nebius_evidence/full_training_results.json). The adapter lives in the Nebius bucket and is also publicly available at [`chambul/MediSimplifier-LoRA-Adapter-Nebius`](https://huggingface.co/chambul/MediSimplifier-LoRA-Adapter-Nebius) — the `GuyDor007` repo contains the Technion-era adapters.
 
 > **Note on FK-Grade target:** The Technion project target was FK ≤ 6.0.
 > Best achieved on H200: 6.91 (Mistral-7B, Technion run).
