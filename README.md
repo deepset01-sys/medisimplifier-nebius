@@ -968,6 +968,11 @@ env:
   HF_HOME: "/tmp/hf_cache"
   PYTHONUNBUFFERED: "1"
 
+volumes:
+  - bucket: medisimplifier-adapters
+    mount: /output
+    mode: rw
+
 timeout: 5h
 ```
 
