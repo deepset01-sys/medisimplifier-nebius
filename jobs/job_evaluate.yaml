@@ -9,7 +9,7 @@ resources:
   subnet_id: ${NEBIUS_SUBNET_ID}
 
 docker:
-  image: chambul/medisimplifier:train-v24
+  image: chambul/medisimplifier:train-v25
   command: python
   args:
     - "evaluate.py"
