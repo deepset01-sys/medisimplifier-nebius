@@ -364,6 +364,12 @@ cross-family diversity. Single-judge evaluation (as in most published work)
 may systematically over- or under-estimate faithfulness depending on judge
 selection.
 
+> **Methodological note:** The two judges differ in both model family (Llama vs Qwen)
+> and scale (70B vs 32B) — the observed disagreement is confounded across both dimensions.
+> A scale-matched pair (e.g., Llama-70B vs Qwen-72B) would be needed to isolate the
+> family effect from the scale effect. The finding is therefore best described as
+> "systematic judge disagreement" rather than purely "family bias."
+
 > **ROUGE-L ↔ Faithfulness:** Pearson r = 0.21 — weak positive correlation,
 > confirming that ROUGE-L alone is an insufficient proxy for medical faithfulness.
 > High ROUGE-L does not guarantee faithful simplification.
