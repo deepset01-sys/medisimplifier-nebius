@@ -45,7 +45,13 @@ CHATML_INFERENCE = "<|im_start|>system\n{system}<|im_end|>\n<|im_start|>user\n{i
 MISTRAL_INFERENCE = "[INST] <<SYS>>\n{system}\n<</SYS>>\n{instruction}\n\n{input} [/INST]"
 
 
-def build_prompt(sample: dict, model_format: str) -> str:
+def build_prompt(sample: dict, model_format: str, tokenizer=None, use_native_template: bool = False) -> str:
+    if use_native_template and tokenizer is not None:
+        messages = [
+            {"role": "system", "content": SYSTEM_MESSAGE},
+            {"role": "user", "content": TASK_INSTRUCTION + "\n\n" + sample["input"]},
+        ]
+        return tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
     template = CHATML_INFERENCE if model_format == "chatml" else MISTRAL_INFERENCE
     return template.format(
         system=SYSTEM_MESSAGE,
@@ -79,11 +85,11 @@ def load_model(hf_path: str, adapter_path: Optional[str]):
     return model, tokenizer
 
 
-def generate_predictions(model, tokenizer, dataset: list, model_format: str, batch_size: int = 4) -> list[str]:
+def generate_predictions(model, tokenizer, dataset: list, model_format: str, batch_size: int = 4, use_native_template: bool = False) -> list[str]:
     predictions = []
     for i in range(0, len(dataset), batch_size):
         batch = dataset[i:i+batch_size]
-        prompts = [build_prompt(sample, model_format) for sample in batch]
+        prompts = [build_prompt(sample, model_format, tokenizer=tokenizer, use_native_template=use_native_template) for sample in batch]
         inputs = tokenizer(
             prompts,
             return_tensors="pt",
@@ -187,6 +193,8 @@ def main():
     parser.add_argument("--split",           default="test")
     parser.add_argument("--output-dir",      default="/output/eval")
     parser.add_argument("--zero-shot",       action="store_true")
+    parser.add_argument("--native-template", action="store_true",
+                        help="Use each model's native chat template for zero-shot baseline (do not use with adapter)")
     parser.add_argument("--fast",            action="store_true",
                         help="Skip BERTScore and SARI")
     args = parser.parse_args()
@@ -223,6 +231,7 @@ def main():
         dataset_for_gen,
         MODELS[args.model]["format"],
         batch_size=4,
+        use_native_template=args.native_template,
     )
 
     # ── Metrics ────────────────────────────────────────────────
