@@ -47,11 +47,16 @@ MISTRAL_INFERENCE = "[INST] <<SYS>>\n{system}\n<</SYS>>\n{instruction}\n\n{input
 
 def build_prompt(sample: dict, model_format: str, tokenizer=None, use_native_template: bool = False) -> str:
     if use_native_template and tokenizer is not None:
-        messages = [
-            {"role": "system", "content": SYSTEM_MESSAGE},
-            {"role": "user", "content": TASK_INSTRUCTION + "\n\n" + sample["input"]},
-        ]
-        return tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        # Llama-3 native format for OpenBioLLM-8B (aaditya/Llama3-OpenBioLLM-8B)
+        # Mistral native format for Mistral-7B-Instruct-v0.2 and BioMistral-7B-DARE
+        if model_format == "chatml":
+            return (
+                f"<|start_header_id|>system<|end_header_id|>\n\n{SYSTEM_MESSAGE}<|eot_id|>"
+                f"<|start_header_id|>user<|end_header_id|>\n\n{TASK_INSTRUCTION}\n\n{sample['input']}<|eot_id|>"
+                f"<|start_header_id|>assistant<|end_header_id|>\n\n"
+            )
+        else:
+            return f"[INST] {SYSTEM_MESSAGE}\n\n{TASK_INSTRUCTION}\n\n{sample['input']} [/INST]"
     template = CHATML_INFERENCE if model_format == "chatml" else MISTRAL_INFERENCE
     return template.format(
         system=SYSTEM_MESSAGE,
