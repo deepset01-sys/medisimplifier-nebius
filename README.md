@@ -369,6 +369,8 @@ selection.
 > A scale-matched pair (e.g., Llama-70B vs Qwen-72B) would be needed to isolate the
 > family effect from the scale effect. The finding is therefore best described as
 > "systematic judge disagreement" rather than purely "family bias."
+> A scale-matched Qwen variant (~70B) was not available on Nebius Token Factory
+> at submission time — resolving the family/scale confound remains future work.
 
 > **ROUGE-L ↔ Faithfulness:** Pearson r = 0.21 — weak positive correlation,
 > confirming that ROUGE-L alone is an insufficient proxy for medical faithfulness.
