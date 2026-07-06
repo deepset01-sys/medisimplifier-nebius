@@ -16,7 +16,7 @@ set -euo pipefail
 
 MODE="${1:-full}"
 
-IMAGE="chambul/medisimplifier:train-v23"
+IMAGE="chambul/medisimplifier:train-v24"
 BUCKET="medisimplifier-adapters"
 PLATFORM="gpu-h100-sxm"
 PRESET="1gpu-16vcpu-200gb"

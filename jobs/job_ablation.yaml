@@ -6,7 +6,7 @@ resources:
   gpu_count: 1
 
 docker:
-  image: chambul/medisimplifier:train-v23
+  image: chambul/medisimplifier:train-v24
 
 env:
   HF_TOKEN: "${HF_TOKEN}"
