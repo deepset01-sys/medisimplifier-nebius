@@ -125,6 +125,8 @@ To restore the live experiment: create a Nebius Managed MLflow cluster, set `MLF
 but achieved the *highest* fine-tuned score (0.6749 on Technion H200 hardware; 0.6638 on Nebius H100) — a full ranking
 reversal. All pairwise differences statistically significant: 95% CIs do not overlap across all 3 models (bootstrap n=10,000, n=1,001 test samples each).
 
+> **Note on chat template validation:** Zero-shot baselines above used a custom ChatML/Mistral template consistent with fine-tuning. To rule out template artifacts, I reran all three zero-shot baselines using each model's native chat format (Llama-3 for OpenBioLLM, Mistral-instruct for Mistral and BioMistral) via `--native-template` flag (Nebius H100, n=1,001). Results: OpenBioLLM 0.2440, Mistral 0.3971, BioMistral 0.4190 — ranking order preserved. The ranking reversal is not a template artifact. Evidence: [`zeroshot_native_openbio.json`](results/nebius_evidence/zeroshot_native_openbio.json), [`zeroshot_native_mistral.json`](results/nebius_evidence/zeroshot_native_mistral.json), [`zeroshot_native_biomistral.json`](results/nebius_evidence/zeroshot_native_biomistral.json).
+
 ### Why Did the Ranking Reversal Happen?
 
 The ranking reversal (worst zero-shot → best fine-tuned) is consistent across all 3 models: Pearson r = −0.998 between zero-shot ROUGE-L and fine-tuning gain (descriptive statistic, n=3 — not a significance claim).
