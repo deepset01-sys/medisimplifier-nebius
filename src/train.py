@@ -200,10 +200,10 @@ def main():
         "q_v":      ["q_proj", "v_proj"],
         "all_attn": ["q_proj", "k_proj", "v_proj", "o_proj"],
     }
-    LORA_CONFIG = dict(LORA_CONFIG)  # local copy — do not mutate the module-level global
-    LORA_CONFIG["r"] = args.rank
-    LORA_CONFIG["lora_alpha"] = args.rank * 2
-    LORA_CONFIG["target_modules"] = MODULE_MAP[args.modules]
+    lora_config = dict(LORA_CONFIG)  # local copy — do not mutate the module-level global
+    lora_config["r"] = args.rank
+    lora_config["lora_alpha"] = args.rank * 2
+    lora_config["target_modules"] = MODULE_MAP[args.modules]
 
     model_info = MODELS[args.model]
     print(f"\n{'='*60}")
@@ -222,7 +222,7 @@ def main():
         print(f"  Ablation mode: using {args.data_size} training samples")
 
     model, tokenizer = build_model_and_tokenizer(model_info["hf_path"])
-    model = apply_lora(model, LORA_CONFIG)
+    model = apply_lora(model, lora_config)
 
     training_args = TrainingArguments(
         output_dir=args.output_dir,
