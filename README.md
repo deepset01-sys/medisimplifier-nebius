@@ -104,12 +104,12 @@ To restore the live experiment: create a Nebius Managed MLflow cluster, set `MLF
 > Best achieved on H200: 6.91 (Mistral-7B, Technion run).
 > OpenBioLLM-8B achieved 7.16 on Technion H200 hardware.
 > Nebius H100 reproduction: OpenBioLLM 7.33, Mistral 6.14, BioMistral 6.13.
-> The difference reflects H200→H100 hardware variance.
+> The difference reflects independent reproduction across hardware generations (H200 → H100) — separate training runs, not the same artifact on two GPUs.
 > The gap from the 6.0 target reflects the inherent tension between medical accuracy preservation
 > and maximum simplification.
 
 > The ranking reversal holds across both hardware generations —
-> see Delta column above (H200→H100 variance: 1.6–5.0%).
+> see Delta column above (H200→H100 independent reproduction delta: 1.6–5.0%).
 
 ## Baseline vs Fine-Tuned Results
 
@@ -278,7 +278,7 @@ All results are committed to this repository for durable verification:
 - Merged model: [chambul/MediSimplifier-OpenBioLLM-merged](https://huggingface.co/chambul/MediSimplifier-OpenBioLLM-merged)
 - Docker: [chambul/medisimplifier:train-v25](https://hub.docker.com/r/chambul/medisimplifier)
 - W&B: [wandb.ai/deepset01-chambul/medisimplifier](https://wandb.ai/deepset01-chambul/medisimplifier)
-- Endpoint: Deploy your own in ~5 minutes — see [Step 5](#5-deploy-live-endpoint) above
+- Endpoint: Deploy your own in ~5 minutes — see [Step 5](#5-deploy-live-endpoint) below
 - MLflow: [Experiment export](results/nebius_evidence/mlflow_runs.csv) + [send_to_mlflow.py](send_to_mlflow.py) — restore live experiment in ~5 min
 - LoRA Adapter (Nebius): [chambul/MediSimplifier-LoRA-Adapter-Nebius](https://huggingface.co/chambul/MediSimplifier-LoRA-Adapter-Nebius) — r=32, all_attn, 3 epochs, ROUGE-L 0.6638
 - Dataset: [GuyDor007/medisimplifier-dataset](https://huggingface.co/datasets/GuyDor007/medisimplifier-dataset)
@@ -797,7 +797,7 @@ nebius ai endpoint create \
 > ```json
 > {"choices":[{"text":"The patient had a heart attack and was given blood-thinning medicine..."}]}
 > ```
-> See [Inference Latency](#inference-latency-vllm-h100-nlink) below for benchmarks.
+> See [Inference Latency](#inference-latency-vllm-h100-nvlink) below for benchmarks.
 
 ### 6. Call the live endpoint
 
