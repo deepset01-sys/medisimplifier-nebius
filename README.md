@@ -1124,9 +1124,7 @@ easse @ git+https://github.com/feralvam/easse.git@6a4352ec299ed03fda8ee45445ca43
 
 ## Dataset and models
 
-> **Note on HuggingFace accounts:** Dataset and LoRA adapters are published under `GuyDor007`
-> (Guy Dor, Technion co-author). The Nebius submission repo, Docker images, and W&B dashboard
-> are under `deepset01-sys` / `chambul` (Shmulik Avraham).
+> **Note on HuggingFace accounts:** Dataset and Technion-era LoRA adapters are published under `GuyDor007` (Guy Dor, Technion co-author). The Nebius-trained adapter, merged model, Docker images, repo, and W&B dashboard are under `chambul` / `deepset01-sys` (Shmulik Avraham).
 
 | Resource | Link |
 |----------|------|
