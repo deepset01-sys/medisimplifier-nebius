@@ -138,9 +138,9 @@ def build_model_and_tokenizer(model_name: str, use_4bit: bool = True):
     model = prepare_model_for_kbit_training(model)
     return model, tokenizer
 
-def apply_lora(model):
+def apply_lora(model, lora_config: dict):
     """Apply LoRA adapters with optimal configuration."""
-    lora_cfg = LoraConfig(**LORA_CONFIG)
+    lora_cfg = LoraConfig(**lora_config)
     model = get_peft_model(model, lora_cfg)
     trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
     total = sum(p.numel() for p in model.parameters())
@@ -200,6 +200,7 @@ def main():
         "q_v":      ["q_proj", "v_proj"],
         "all_attn": ["q_proj", "k_proj", "v_proj", "o_proj"],
     }
+    LORA_CONFIG = dict(LORA_CONFIG)  # local copy — do not mutate the module-level global
     LORA_CONFIG["r"] = args.rank
     LORA_CONFIG["lora_alpha"] = args.rank * 2
     LORA_CONFIG["target_modules"] = MODULE_MAP[args.modules]
@@ -221,7 +222,7 @@ def main():
         print(f"  Ablation mode: using {args.data_size} training samples")
 
     model, tokenizer = build_model_and_tokenizer(model_info["hf_path"])
-    model = apply_lora(model)
+    model = apply_lora(model, LORA_CONFIG)
 
     training_args = TrainingArguments(
         output_dir=args.output_dir,

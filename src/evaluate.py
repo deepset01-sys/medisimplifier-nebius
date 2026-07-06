@@ -102,7 +102,7 @@ def generate_predictions(model, tokenizer, dataset: list, model_format: str, bat
             truncation=True,
             max_length=2048
         ).to(model.device)
-        print(f"Generating sample {i+1}/{len(dataset)}...")
+        print(f"Generating samples {i+1}-{min(i+batch_size, len(dataset))}/{len(dataset)}...")
         try:
             with torch.no_grad():
                 outputs = model.generate(
@@ -184,8 +184,8 @@ def compute_fk_grade(texts: list[str]) -> float:
     for t in texts:
         try:
             scores.append(textstat.flesch_kincaid_grade(t))
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"Warning: FK-Grade failed for a sample: {e}")
     return float(np.mean(scores)) if scores else 0.0
 
 
@@ -209,7 +209,6 @@ def main():
 
     # ── Load data ──────────────────────────────────────────────
     print("Loading dataset...")
-    from datasets import load_dataset
     ds = load_dataset("GuyDor007/medisimplifier-dataset", split=args.split)
     sources     = [ex["input"]    for ex in ds]
     references  = [ex["output"]   for ex in ds]
