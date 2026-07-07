@@ -123,7 +123,7 @@ To restore the live experiment: create a Nebius Managed MLflow cluster, set `MLF
 
 **Key finding:** OpenBioLLM-8B had the *lowest* zero-shot score (0.2623)
 but achieved the *highest* fine-tuned score (0.6749 on Technion H200 hardware; 0.6638 on Nebius H100) — a full ranking
-reversal. All pairwise differences statistically significant: 95% CIs do not overlap across all 3 models (bootstrap n=10,000, n=1,001 test samples each).
+reversal. All pairwise differences statistically significant via paired bootstrap on per-sample score differences (n=10,000, n=1,001 test samples each, p<0.001 for all pairs). See [`bootstrap_ci.py`](bootstrap_ci.py) to reproduce.
 
 > **Note on chat template validation:** Zero-shot baselines above used a custom ChatML/Mistral template consistent with fine-tuning. To rule out template artifacts, I reran all three zero-shot baselines using each model's native chat format (Llama-3 for OpenBioLLM, Mistral-instruct for Mistral and BioMistral) via `--native-template` flag (Nebius H100, n=1,001). Results: OpenBioLLM 0.2440, Mistral 0.3971, BioMistral 0.4190 — ranking order preserved. The ranking reversal is not a template artifact. Evidence: [`zeroshot_native_openbio.json`](results/nebius_evidence/zeroshot_native_openbio.json), [`zeroshot_native_mistral.json`](results/nebius_evidence/zeroshot_native_mistral.json), [`zeroshot_native_biomistral.json`](results/nebius_evidence/zeroshot_native_biomistral.json).
 
@@ -884,6 +884,7 @@ The merged model is publicly available on HuggingFace — see Step 5 above. For 
     tests/
       test_metrics.py    Unit tests for ROUGE-L, FK-Grade, prompt builder
     send_to_mlflow.py    Nebius Managed MLflow experiment logging
+    bootstrap_ci.py      Paired bootstrap significance test on per-sample ROUGE-L
     requirements.txt
 
 ## Key Configuration
