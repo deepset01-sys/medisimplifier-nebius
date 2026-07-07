@@ -10,6 +10,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/ .
 COPY tests/ /app/tests/
 
+ARG GIT_SHA=unknown
+LABEL org.opencontainers.image.revision=$GIT_SHA
+
 ENV PYTHONUNBUFFERED=1
 ENV HF_HOME=/tmp/hf_cache
 
