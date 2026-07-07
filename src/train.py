@@ -241,7 +241,7 @@ def main():
         metric_for_best_model="eval_loss",
         greater_is_better=False,
         report_to="wandb",
-        save_safetensors=False,
+        save_safetensors=False,  # safetensors uses mmap I/O incompatible with FUSE-mounted /output bucket
     )
 
     trainer = SFTTrainer(
@@ -260,7 +260,7 @@ def main():
 
     output_path = Path(args.output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
-    model.save_pretrained(output_path, safe_serialization=False)
+    model.save_pretrained(output_path, safe_serialization=False)  # safetensors uses mmap I/O incompatible with FUSE-mounted /output bucket
     tokenizer.save_pretrained(output_path)
     print(f"\nAdapter saved to: {output_path}")
 
