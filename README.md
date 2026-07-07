@@ -611,9 +611,11 @@ Expected output (eval_only): `rouge_l: 0.6638` (±0.002 CUDA variance)
 
 ### 0. Install and authenticate Nebius CLI
 
-Install:
+Install (Linux/macOS):
 
-    pip install nebius
+    curl -sSL https://storage.eu-north1.nebius.cloud/cli/install.sh | bash
+
+Windows: download the installer from [Nebius Console](https://console.nebius.com) or use WSL.
 
 Authenticate:
 
