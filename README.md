@@ -30,11 +30,11 @@ MediSimplifier is an end-to-end serverless ML pipeline on Nebius — covering fi
 > **vLLM production serving**, and **LLM-as-judge safety evaluation**
 > via Token Factory. See [What Nebius Added](#what-nebius-added) for details.
 
-**Key findings (challenging the conventional recommendation of r=4-8 (Hu et al. 2021)):**
+**Key findings (validating r=32 for medical domain fine-tuning, consistent with QLoRA-era practice):**
 
 | Finding | Result |
 |---------|--------|
-| Optimal LoRA rank | r=32 outperforms r=4-8 recommended by Hu et al. 2021 |
+| Optimal LoRA rank | r=32 outperforms r=4-8 (Hu et al. 2021 baseline); consistent with post-QLoRA practice (Dettmers et al. 2023) |
 | Optimal modules | all_attn (Q+K+V+O) outperforms standard Q+V |
 | Ranking reversal | Worst zero-shot model becomes best fine-tuned (+153.1% on Nebius H100) |
 | Readability | FK-Grade 14.5 → 6.91 (Mistral-7B, Technion H200); Nebius H100: OpenBioLLM 7.33, Mistral 6.14, BioMistral 6.13 |
