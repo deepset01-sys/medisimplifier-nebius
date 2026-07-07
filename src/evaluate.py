@@ -246,7 +246,7 @@ def main():
     fk = compute_fk_grade(predictions)
 
     if args.fast:
-        bertscore_val, sari_val = 0.0, 0.0
+        bertscore_val, sari_val = None, None
         print("Skipping BERTScore + SARI (--fast mode)")
     else:
         print("Computing BERTScore...")
