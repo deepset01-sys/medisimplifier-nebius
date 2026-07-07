@@ -34,7 +34,7 @@ fi
 if [[ "$MODE" == "full" ]]; then
   echo "==> Submitting full training job (~70 min, ~$9)..."
   nebius ai job create \
-    --name medisimplifier-full-train \
+    --name medisimplifier-full-training \
     --parent-id "${NEBIUS_PROJECT_ID}" \
     --image "$IMAGE" \
     --container-command python \

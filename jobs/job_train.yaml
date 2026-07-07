@@ -1,4 +1,4 @@
-name: medisimplifier-full-train
+name: medisimplifier-full-training
 description: "LoRA fine-tuning — OpenBioLLM-8B, r=32, all_attn, 3 epochs"
 parent_id: ${NEBIUS_PROJECT_ID}
 
