@@ -628,8 +628,8 @@ Verify:
 ### Prerequisites
 
 ```bash
-export NEBIUS_PROJECT_ID=project-e00g1ev2pr00wjxv40r6ga
-export NEBIUS_SUBNET_ID=vpcsubnet-e00jsdqfjrz04ygxc0
+export NEBIUS_PROJECT_ID=<your-project-id>
+export NEBIUS_SUBNET_ID=<your-subnet-id>
 export HF_TOKEN=your_huggingface_token  # for gated models
 ```
 
