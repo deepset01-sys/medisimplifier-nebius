@@ -653,7 +653,7 @@ nebius storage bucket create \
 
 ```bash
 nebius ai job create \
-  --name medisimplifier-full-train \
+  --name medisimplifier-full-training \
   --parent-id ${NEBIUS_PROJECT_ID} \
   --image chambul/medisimplifier:train-v26 \
   --container-command python \
@@ -961,7 +961,7 @@ The YAML config files in `jobs/` document the parameters for reference:
 <summary>jobs/job_train.yaml</summary>
 
 ```yaml
-name: medisimplifier-full-train
+name: medisimplifier-full-training
 description: "LoRA fine-tuning — OpenBioLLM-8B, r=32, all_attn, 3 epochs"
 parent_id: ${NEBIUS_PROJECT_ID}
 
