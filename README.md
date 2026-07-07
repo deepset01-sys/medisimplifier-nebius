@@ -1099,6 +1099,7 @@ resources:
 
 ```
 # Python 3.11 · CUDA 12.1 (matches pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime)
+# Version stack validated end-to-end inside chambul/medisimplifier:train-v27
 torch==2.1.0
 torchaudio==2.1.0
 pytest>=7.0.0
