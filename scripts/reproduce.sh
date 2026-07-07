@@ -86,7 +86,7 @@ if [[ "$MODE" == "full" || "$MODE" == "ablation" ]]; then
   done
 
   echo "==> Submitting ablation jobs (Phase 3 — data size, r=32, all_attn)..."
-  for DATA in 2000 4000 8000; do
+  for DATA in 2000 4000 7999; do
     nebius ai job create \
       --name "medisimplifier-ablation-data${DATA}" \
       --parent-id "${NEBIUS_PROJECT_ID}" \

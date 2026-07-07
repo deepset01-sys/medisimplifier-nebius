@@ -725,7 +725,7 @@ for MODULES in q_only q_v all_attn; do
 done
 
 # Phase 3 — Data size (r=32, all_attn)
-for DATA in 2000 4000 8000; do
+for DATA in 2000 4000 7999; do
   nebius ai job create \
     --name medisimplifier-ablation-data${DATA} \
     --parent-id ${NEBIUS_PROJECT_ID} \
