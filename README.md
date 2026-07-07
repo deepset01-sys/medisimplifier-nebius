@@ -439,6 +439,7 @@ Nebius Serverless AI Endpoints serve live inference.
 > loss curves, eval metrics, and hyperparameters logged directly from
 > Nebius Jobs. Set `WANDB_API_KEY` to log online; omit to run offline
 > (`WANDB_MODE=offline` fallback — no key required).
+> To enable live tracking: add `--env WANDB_API_KEY=$WANDB_API_KEY` to any job command.
 
 Pipeline:
 
