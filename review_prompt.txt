@@ -84,6 +84,14 @@ FORMAT YOUR RESPONSE AS:
 
 Be specific, direct, and harsh if needed. This is a final pre-submission review.
 
-## Bonus Question: What Would Make This Top 3 Overall?
-After completing your review, answer this one question:
-This project already covers 5/9 AI & ML domains and has a novel judge-family-bias finding (κ=0.04–0.11, CoT amplifies bias). Given this breadth and this specific novel contribution — what single addition would most likely push this submission to Top 3 Overall (not just Best in AI & ML)? Be specific, actionable, and honest.
+## Bonus Questions: What Would Make This Top 3 Overall?
+
+This is a Nebius Serverless AI Builders Challenge — not a research competition. The judging criteria reward Product Usage Depth, Reproducibility, and Educational Content Quality alongside Originality.
+
+With that context, please answer THREE questions:
+
+1. What finding already in this submission best demonstrates what Nebius Serverless enables that wouldn't be possible otherwise? How should this be foregrounded in the README and blog post?
+
+2. Claude Opus 4.7 suggested running a proper multi-seed ablation (n=3 seeds × 9 configs = 27 jobs, ~$104) to convert n=1 ablation to mean ± std. Does this align with your vision for what would make this Top 3? Or does it address a different weakness?
+
+3. Claude Opus 4.8 and you (in v31) both suggested human-anchored safety evaluation. Given the Nebius Serverless challenge context and the 10-day deadline, is there a realistic alternative that demonstrates the same rigor using Nebius infrastructure?
