@@ -893,7 +893,8 @@ The merged model is publicly available on HuggingFace — see Step 5 above. For 
     tests/
       test_metrics.py    Unit tests for ROUGE-L, FK-Grade, prompt builder
     send_to_mlflow.py    Nebius Managed MLflow experiment logging
-    bootstrap_ci.py      Paired bootstrap significance test on per-sample ROUGE-L
+    bootstrap_ci.py               Paired bootstrap significance test on per-sample ROUGE-L
+    perturbation_calibration.py   Judge calibration via known-error injection (sensitivity/specificity)
     requirements.txt
 
 ## Key Configuration
