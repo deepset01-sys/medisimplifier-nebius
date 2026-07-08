@@ -11,7 +11,7 @@
 > The Nebius pipeline, serving layer, safety evaluation, and MLOps
 > infrastructure were built independently for this challenge.
 
-**Executive Summary:** End-to-end serverless ML pipeline on Nebius — fine-tuning, parallel ablation (9 jobs), vLLM serving, and LLM-as-judge safety evaluation, all on Nebius Serverless infrastructure. Key findings: (1) ranking reversal confirmed across hardware (H100/H200) and chat templates; (2) CoT prompting amplifies judge disagreement (κ: 0.11→0.04) — a novel finding in medical LLM evaluation. Five Nebius services used: Jobs, Endpoints, Token Factory, Object Storage, Managed MLflow.
+**Executive Summary:** 7 ablation experiments in 20 minutes wall-clock for ~$12 on Nebius Serverless Jobs → winner config → full training → vLLM serving → 4,004 Token Factory judge calls across 3 safety evaluation rounds — zero standing infrastructure, $0 idle cost. Key findings: (1) ranking reversal confirmed across hardware (H100/H200) and chat templates; (2) CoT prompting amplifies judge disagreement (κ: 0.11→0.04) — a novel finding enabled by serverless LLM-as-judge at scale. Five Nebius services: Jobs, Endpoints, Token Factory, Object Storage, Managed MLflow.
 
 **📝 Blog Post:** [Building an End-to-End Serverless ML Pipeline on Nebius: A Builder's Journey](https://medium.com/@deepset01/medical-text-simplification-with-lora-on-nebius-serverless-a-builders-journey-13a9e44c92a4)
 
