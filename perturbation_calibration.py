@@ -222,8 +222,9 @@ Verdict:"""
                              "Content-Type": "application/json"},
                     json={"model": model,
                           "messages": [{"role": "user", "content": prompt}],
-                          "max_tokens": 10,
-                          "temperature": 0},
+                          "max_tokens": 200,
+                          "temperature": 0,
+                          "extra_body": {"enable_thinking": False}},
                     timeout=30
                 )
                 resp.raise_for_status()
