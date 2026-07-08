@@ -1,7 +1,6 @@
 """
 Medical Safety Evaluation v2 — MediSimplifier
-Two-level evaluation: scispaCy rule-based + dual LLM Judge
-Judges: Llama-3.3-70B + Qwen3-32B (cross-family) via Nebius Token Factory
+Dual LLM Judge evaluation: Llama-3.3-70B (same-family) + Qwen3-32B (cross-family) via Nebius Token Factory
 Computes: safe_rate per judge, Cohen's kappa (inter-judge),
           Pearson r (ROUGE-L vs faithfulness), explicit error tracking
 """
