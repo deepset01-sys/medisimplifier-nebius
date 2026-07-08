@@ -1124,8 +1124,9 @@ easse @ git+https://github.com/feralvam/easse.git@6a4352ec299ed03fda8ee45445ca43
 | Merged Model | [chambul/MediSimplifier-OpenBioLLM-merged](https://huggingface.co/chambul/MediSimplifier-OpenBioLLM-merged) — OpenBioLLM-8B + adapter, ready for vLLM serving |
 | Adapters (Technion-era) | [GuyDor007/MediSimplifier-LoRA-Adapters](https://huggingface.co/GuyDor007/MediSimplifier-LoRA-Adapters) — 3 adapters from Technion project |
 
-Dataset: [Asclepius-Synthetic-Clinical-Notes](https://huggingface.co/datasets/starmpcc/Asclepius-Synthetic-Clinical-Notes) (Apache 2.0, HCLS compliant).
+Dataset: [Asclepius-Synthetic-Clinical-Notes](https://huggingface.co/datasets/starmpcc/Asclepius-Synthetic-Clinical-Notes) (CC-BY-NC-SA-4.0).
 Anonymized synthetic clinical notes. No real patient data.
+Note: CC-BY-NC-SA-4.0 restricts commercial use and requires derivatives to share under the same license.
 
 ## License
 
