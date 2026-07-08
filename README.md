@@ -410,11 +410,9 @@ All ablation runs: 1 epoch, OpenBioLLM-8B base, 7 Nebius H100 Jobs (some configs
 
 Winner configuration: **r=32, all_attn, 8K** — lowest `eval_loss` → used for full 3-epoch training → final ROUGE-L **0.6638** (Nebius H100; 0.6749 on Technion H200).
 
-> Each configuration was run once (n=1, seed=42) as a separate Nebius Job. Winner selected by `eval_loss` from committed training logs — Phase 3 fixes rank=32 and modules=all_attn while varying data size to isolate the data-size effect.
+> Each configuration was run once (n=1, seed=42) as a separate Nebius Job. Winner selected by `eval_loss` from committed training logs.
 
-> **Limitation:** Number of training epochs (3) was not independently ablated — the full training
-> run uses 3 epochs while ablation jobs use 1 epoch. The 1→3 epoch improvement
-> (ROUGE-L ~0.636→0.675) is observed but not isolated as a controlled variable.
+> **Limitation:** Number of training epochs (3) was not independently ablated — ablation jobs use 1 epoch for compute efficiency while the full training run uses 3 epochs. The epoch effect is observed but not isolated as a controlled variable.
 
 ## How it runs on Nebius
 
