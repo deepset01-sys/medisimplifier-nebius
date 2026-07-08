@@ -569,16 +569,18 @@ Training Job                    Object Storage                  Eval/Serve Job
 
 | Resource | Usage | Cost |
 |----------|-------|------|
-| NVIDIA H100 NVLink | 48.41 GPU hours | $186.39 |
-| CPU (AMD EPYC Genoa) | 166.24 vCPU hours | $1.99 |
-| RAM | 664.95 GiB hours | $2.13 |
-| Network SSD disk | 50,087.83 GiB hours | $4.87 |
-| Object Storage | medisimplifier-adapters bucket | $0.08 |
-| **Total Nebius spend** | | **$195.47** |
+| NVIDIA H100 NVLink | 76.23 GPU hours | $293.47 |
+| CPU (AMD EPYC Genoa) | 433.61 vCPU hours | $5.20 |
+| RAM | 1,734.45 GiB hours | $5.55 |
+| Network SSD disk | 93,510.03 GiB hours | $9.09 |
+| Object Storage | medisimplifier-adapters bucket | $0.25 |
+| Managed Services | MLflow + misc | $1.20 |
+| Other (failed jobs, iteration) | misc | $5.44 |
+| **Total Nebius spend** | | **$320.20** |
 
 > H100 NVLink rate: ~$3.85/hr on Nebius eu-north1.
 > Core pipeline compute (ablation + training + eval + safety + merge + bootstrap CI): ~$43.
-> Remaining ~$152 covers failed runs during debugging, endpoint serving,
+> Remaining ~$277 covers failed jobs, accidental GPU type, endpoint serving,
 > Build VM, and iteration — all on Nebius Serverless, no reserved instances.
 
 > 9 parallel jobs = same wall-clock time as 1 job (~20 min total).
