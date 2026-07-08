@@ -11,7 +11,7 @@
 > The Nebius pipeline, serving layer, safety evaluation, and MLOps
 > infrastructure were built independently for this challenge.
 
-**Executive Summary:** 7 ablation experiments in 20 minutes wall-clock for ~$12 on Nebius Serverless Jobs → winner config → full training → vLLM serving → 4,004 Token Factory judge calls across 3 safety evaluation rounds — zero standing infrastructure, $0 idle cost. Key findings: (1) ranking reversal confirmed across hardware (H100/H200) and chat templates; (2) CoT prompting amplifies judge disagreement (κ: 0.11→0.04) — a novel finding enabled by serverless LLM-as-judge at scale. Five Nebius services: Jobs, Endpoints, Token Factory, Object Storage, Managed MLflow.
+**Executive Summary:** 7 ablation experiments in 20 minutes wall-clock for ~$9 on Nebius Serverless Jobs → winner config → full training → vLLM serving → 4,004 Token Factory judge calls across 3 safety evaluation rounds — zero standing infrastructure, $0 idle cost. Key findings: (1) ranking reversal confirmed across hardware (H100/H200) and chat templates; (2) CoT prompting amplifies judge disagreement (κ: 0.11→0.04) — a novel finding enabled by serverless LLM-as-judge at scale. Five Nebius services: Jobs, Endpoints, Token Factory, Object Storage, Managed MLflow.
 
 **📝 Blog Post:** [Building an End-to-End Serverless ML Pipeline on Nebius: A Builder's Journey](https://medium.com/@deepset01/medical-text-simplification-with-lora-on-nebius-serverless-a-builders-journey-13a9e44c92a4)
 
@@ -40,7 +40,7 @@ MediSimplifier is an end-to-end serverless ML pipeline on Nebius — covering fi
 | Readability | FK-Grade 14.5 → 6.91 (Mistral-7B, Technion H200); Nebius H100: OpenBioLLM 7.33, Mistral 6.14, BioMistral 6.13 |
 | Data efficiency | 4K samples achieves 97% of 8K performance |
 | Baseline-improvement correlation | Monotonic across all 3 models — zero-shot rank inversely predicts fine-tuning gain (n=3, descriptive only) |
-| Total compute | 9 ablation runs + 3 full training runs, ~10 GPU hours (~7h wall-clock; ablation jobs run in parallel) |
+| Total compute | 7 ablation runs + 3 full training runs, ~10 GPU hours (~7h wall-clock; ablation jobs run in parallel) |
 
 ## What Nebius Added
 
@@ -50,7 +50,7 @@ This submission extends it with a full MLOps lifecycle on Nebius:
 | | Technion project (Guy Dor & Shmulik Avraham) | This Nebius submission (Shmulik Avraham) |
 |--|----------------------------------------------|------------------------------------------|
 | Training | ✅ H200, single run | ✅ Reproduced on H100 — validated |
-| Parallel ablation | ❌ | ✅ 9 jobs × 20 min simultaneously |
+| Parallel ablation | ❌ | ✅ 7 jobs × 20 min simultaneously |
 | Production serving | ❌ | ✅ vLLM Endpoint — OpenAI-compatible API |
 | Safety evaluation | ❌ | ✅ LLM-as-judge via Token Factory |
 | MLOps pipeline | ❌ | ✅ Object Storage — stateless jobs, persistent adapters |
@@ -463,7 +463,7 @@ Pipeline:
 | Cost when idle | $0 | Full rate | Full rate |
 | Parallel jobs | Native | Manual | Native |
 | Job dependencies | Manual | Manual | Native ✅ |
-| 9 ablations | 20 min, ~$9 | 3 hours | Setup overhead |
+| 7 ablations | 20 min, ~$9 | 3 hours | Setup overhead |
 | Best for | Experimentation | Long stable training | Production pipelines |
 
 > Serverless Jobs eliminated cluster management overhead that
@@ -555,7 +555,7 @@ Training Job                    Object Storage                  Eval/Serve Job
 
 | Step | GPU | Wall-clock time | Approx. compute cost |
 |------|-----|----------------|---------------------|
-| Ablation ×9 (parallel) | H100 NVLink | ~20 min total | ~$12 |
+| Ablation ×7 (parallel) | H100 NVLink | ~20 min total | ~$9 |
 | OpenBioLLM-8B training | H100 NVLink | ~70 min | ~$4.50 |
 | Mistral-7B training | H100 NVLink | ~70 min | ~$4.50 |
 | BioMistral-7B training | H100 NVLink | ~70 min | ~$4.50 |
