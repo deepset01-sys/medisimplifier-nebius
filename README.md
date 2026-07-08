@@ -390,21 +390,25 @@ selection.
 
 ## Ablation Study Results
 
-All ablation runs: 1 epoch, OpenBioLLM-8B base, 7 parallel Nebius H100 Jobs.
+All ablation runs: 1 epoch, OpenBioLLM-8B base, 7 Nebius H100 Jobs (some configs shared across phases).
 
 > All ablation runs use 1 epoch for compute efficiency.
 > Winner selected by `eval_loss` from committed Nebius training logs (`results/nebius_logs/r*_logs.json.gz`).
 > Final model trained for 3 epochs using the winning configuration.
 
-**Ablation configurations explored:**
+**7 ablation configurations (Nebius Jobs):**
 
-| Phase | Variable | Configs tested | Winner |
-|-------|----------|---------------|--------|
-| Phase 1 — LoRA Rank | rank (modules=q+v) | r=8, r=16, r=32 | **r=32** |
-| Phase 2 — Target Modules | modules (r=32) | q_only, q+v, all_attn | **all_attn** |
-| Phase 3 — Data Size | data size (r=32, all_attn) | 2K, 4K, 8K | **8K** |
+| Config | rank | modules | data |
+|--------|------|---------|------|
+| r=8, q+v | 8 | q+v | 8K |
+| r=16, q+v | 16 | q+v | 8K |
+| r=32, q+v | 32 | q+v | 8K |
+| r=32, q_only | 32 | q_only | 8K |
+| r=32, all_attn | 32 | all_attn | 8K |
+| r=32, all_attn, 4K | 32 | all_attn | 4K |
+| r=32, all_attn, 2K | 32 | all_attn | 2K |
 
-Winner configuration: **r=32, all_attn, 8K** → used for full 3-epoch training → final ROUGE-L **0.6638** (Nebius H100; 0.6749 on Technion H200).
+Winner configuration: **r=32, all_attn, 8K** — lowest `eval_loss` → used for full 3-epoch training → final ROUGE-L **0.6638** (Nebius H100; 0.6749 on Technion H200).
 
 > Each configuration was run once (n=1, seed=42) as a separate Nebius Job. Winner selected by `eval_loss` from committed training logs — Phase 3 fixes rank=32 and modules=all_attn while varying data size to isolate the data-size effect.
 
