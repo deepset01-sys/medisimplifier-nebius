@@ -185,13 +185,13 @@ All results are committed to this repository for durable verification:
 | [full_train_logs.json.gz](results/nebius_logs/full_train_logs.json.gz) | Full OpenBioLLM-8B training — H100, train_loss 0.844→0.635 |
 | [endpoint_vllm_logs.json.gz](results/nebius_logs/endpoint_vllm_logs.json.gz) | vLLM endpoint startup + requests, vmapp_id: aiendpoint-e00ef3br6r14grvhhd |
 | [adapters_logs.json.gz](results/nebius_logs/adapters_logs.json.gz) | Merge adapter job |
-| [r32_all_8kdata.json.gz](results/nebius_logs/r32_all_8kdata.json.gz) | Ablation: r=32, all_attn, 8K data — ROUGE-L 0.6345 |
-| [r32_all_4kdata_logs.json.gz](results/nebius_logs/r32_all_4kdata_logs.json.gz) | Ablation: r=32, all_attn, 4K data — ROUGE-L 0.6198 |
-| [r32_all_attention_logs.json.gz](results/nebius_logs/r32_all_attention_logs.json.gz) | Ablation: r=32, all_attn modules |
-| [r32_qv_logs.json.gz](results/nebius_logs/r32_qv_logs.json.gz) | Ablation: r=32, q+v modules — ROUGE-L 0.6192 |
-| [r32_qonly_logs.json.gz](results/nebius_logs/r32_qonly_logs.json.gz) | Ablation: r=32, q only — ROUGE-L 0.6006 |
-| [r16_qv_logs.json.gz](results/nebius_logs/r16_qv_logs.json.gz) | Ablation: r=16, q+v — ROUGE-L 0.6080 |
-| [r8_qv_logs.json.gz](results/nebius_logs/r8_qv_logs.json.gz) | Ablation: r=8, q+v — ROUGE-L 0.6033 |
+| [r32_all_8kdata.json.gz](results/nebius_logs/r32_all_8kdata.json.gz) | Ablation training: r=32, all_attn, 8K data |
+| [r32_all_4kdata_logs.json.gz](results/nebius_logs/r32_all_4kdata_logs.json.gz) | Ablation training: r=32, all_attn, 4K data |
+| [r32_all_attention_logs.json.gz](results/nebius_logs/r32_all_attention_logs.json.gz) | Ablation training: r=32, all_attn modules |
+| [r32_qv_logs.json.gz](results/nebius_logs/r32_qv_logs.json.gz) | Ablation training: r=32, q+v modules |
+| [r32_qonly_logs.json.gz](results/nebius_logs/r32_qonly_logs.json.gz) | Ablation training: r=32, q only |
+| [r16_qv_logs.json.gz](results/nebius_logs/r16_qv_logs.json.gz) | Ablation training: r=16, q+v |
+| [r8_qv_logs.json.gz](results/nebius_logs/r8_qv_logs.json.gz) | Ablation training: r=8, q+v |
 | [eval-persamples.json.gz](results/nebius_logs/eval-persamples.json.gz) | OpenBioLLM-8B evaluation job — 1,001 samples, ROUGE-L 0.6638 |
 | [eval-persamples-mistral.json.gz](results/nebius_logs/eval-persamples-mistral.json.gz) | Mistral-7B evaluation job — 1,001 samples, ROUGE-L 0.6253 |
 | [eval-persamples-biomistral.json.gz](results/nebius_logs/eval-persamples-biomistral.json.gz) | BioMistral-7B evaluation job — 1,001 samples, ROUGE-L 0.6004 |
@@ -390,43 +390,23 @@ selection.
 
 ## Ablation Study Results
 
-All ablation runs: 1 epoch, OpenBioLLM-8B base, evaluated on held-out test set (1,001 samples).
+All ablation runs: 1 epoch, OpenBioLLM-8B base, 7 parallel Nebius H100 Jobs.
 
 > All ablation runs use 1 epoch for compute efficiency.
-> Metrics measured on the test set after each checkpoint.
+> Winner selected by `eval_loss` from committed Nebius training logs (`results/nebius_logs/r*_logs.json.gz`).
 > Final model trained for 3 epochs using the winning configuration.
 
-**Phase 1 — LoRA Rank** (modules=q+v, data=8K)
+**Ablation configurations explored:**
 
-| Rank | ROUGE-L | SARI | BERTScore | FK-Grade |
-|------|---------|------|-----------|----------|
-| r=8  | 0.6033  | 67.21 | 0.9301   | 8.12     |
-| r=16 | 0.6080  | 68.45 | 0.9334   | 7.89     |
-| **r=32 ✓** | **0.6183** | **69.87** | **0.9358** | **7.64** |
-
-**Phase 2 — Target Modules** (r=32, data=8K)
-
-| Modules | ROUGE-L | SARI | BERTScore | FK-Grade |
-|---------|---------|------|-----------|----------|
-| q_only  | 0.6006  | 66.14 | 0.9289   | 8.34     |
-| q+v     | 0.6192  | 68.93 | 0.9341   | 7.81     |
-| **all_attn ✓** | **0.6357** | **71.23** | **0.9389** | **7.42** |
-
-**Phase 3 — Data Size** (r=32, all_attn)
-
-| Data | ROUGE-L | SARI | BERTScore | FK-Grade |
-|------|---------|------|-----------|----------|
-| 2K   | 0.6014  | 66.89 | 0.9298   | 8.21     |
-| 4K   | 0.6198  | 69.12 | 0.9347   | 7.73     |
-| **8K ✓** | **0.6345** | **71.08** | **0.9382** | **7.51** |
+| Phase | Variable | Configs tested | Winner |
+|-------|----------|---------------|--------|
+| Phase 1 — LoRA Rank | rank (modules=q+v) | r=8, r=16, r=32 | **r=32** |
+| Phase 2 — Target Modules | modules (r=32) | q_only, q+v, all_attn | **all_attn** |
+| Phase 3 — Data Size | data size (r=32, all_attn) | 2K, 4K, 8K | **8K** |
 
 Winner configuration: **r=32, all_attn, 8K** → used for full 3-epoch training → final ROUGE-L **0.6638** (Nebius H100; 0.6749 on Technion H200).
 
-> **Note on ablation overlap:** Phase 1 and Phase 2 share the r=32, q+v, 8K configuration (0.6183 vs 0.6192),
-> and Phase 2/Phase 3 share r=32, all_attn, 8K (0.6357 vs 0.6345). These are not real performance differences.
-> Each config was run once (n=1, seed=42) as a separate Nebius Job. Multi-seed validation on the winning config (seeds 42 and 2) measured variance of 0.0013 ROUGE-L — confirming differences this small
-> should not be over-interpreted. Phase 3 fixes rank=32 and modules=all_attn while varying data size
-> to isolate the data-size effect.
+> Each configuration was run once (n=1, seed=42) as a separate Nebius Job. Winner selected by `eval_loss` from committed training logs — Phase 3 fixes rank=32 and modules=all_attn while varying data size to isolate the data-size effect.
 
 > **Limitation:** Number of training epochs (3) was not independently ablated — the full training
 > run uses 3 epochs while ablation jobs use 1 epoch. The 1→3 epoch improvement
