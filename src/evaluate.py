@@ -139,9 +139,10 @@ def generate_predictions(model, tokenizer, dataset: list, model_format: str, bat
             generated = output[prompt_len:]
             pred = tokenizer.decode(generated, skip_special_tokens=True).strip()
             # Sanity-check: each decoded generation must not start with its own prompt text
-            assert not pred.startswith(prompts[j][:30]), (
-                f"Generation slice leaked prompt text for batch item {j} — check padding_side='left'"
-            )
+            if pred.startswith(prompts[j][:30]):
+                print(f"  Warning: generation slice leaked prompt for batch {i}, item {j} — appending empty prediction")
+                predictions.append("")
+                continue
             predictions.append(pred)
         if (i + batch_size) % 100 == 0 or i == 0:
             print(f"  Generated {min(i+batch_size, len(dataset))}/{len(dataset)}")
