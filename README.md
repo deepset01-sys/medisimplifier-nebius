@@ -560,10 +560,14 @@ Training Job                    Object Storage                  Eval/Serve Job
 | Mistral-7B training | H100 NVLink | ~70 min | ~$4.50 |
 | BioMistral-7B training | H100 NVLink | ~70 min | ~$4.50 |
 | Evaluation ×3 | H100 NVLink | ~45 min each | ~$9 |
-| Safety evaluation | H100 NVLink | ~30 min | ~$2 |
+| Safety evaluation v1 | H100 NVLink | ~30 min | ~$2 |
+| Safety evaluation v2 (dual judge) | H100 NVLink | ~6h | ~$23 |
+| Safety evaluation v3 (CoT) | H100 NVLink | ~8h | ~$31 |
+| Native template zero-shot ×3 | H100 NVLink | ~2.5h total | ~$10 |
+| Seed-2 validation (train + eval) | H100 NVLink | ~115 min | ~$7.50 |
 | Merge + misc | H100 NVLink | — | ~$2 |
 | Bootstrap CI eval ×3 (parallel) | H100 NVLink | ~45 min total | ~$9 |
-| **Core pipeline subtotal** | | | **~$43** |
+| **Core pipeline subtotal** | | | **~$112** |
 
 **Cost breakdown (actual Nebius billing):**
 
@@ -580,7 +584,7 @@ Training Job                    Object Storage                  Eval/Serve Job
 
 > H100 NVLink rate: ~$3.85/hr on Nebius eu-north1.
 > Core pipeline compute (ablation + training + eval + safety + merge + bootstrap CI): ~$43.
-> Remaining ~$277 covers failed jobs, accidental GPU type, endpoint serving,
+> Remaining ~$208 covers failed jobs, accidental GPU type, endpoint serving,
 > Build VM, and iteration — all on Nebius Serverless, no reserved instances.
 
 > 9 parallel jobs = same wall-clock time as 1 job (~20 min total).
