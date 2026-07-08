@@ -787,6 +787,8 @@ nebius ai endpoint create \
   --public
 ```
 
+> **Note:** `--public` creates an unauthenticated endpoint — suitable for demo use only. Do not route real patient data through it.
+
 > **Important:** After creating the endpoint, wait ~10–15 minutes
 > for the model to load from HuggingFace before sending requests.
 > To check if ready: `curl http://<your-ip>:8000/v1/models`
