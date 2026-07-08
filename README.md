@@ -366,6 +366,12 @@ cross-family diversity. Single-judge evaluation (as in most published work)
 may systematically over- or under-estimate faithfulness depending on judge
 selection.
 
+> **Deployment posture:** MediSimplifier is a research prototype — not validated for clinical use.
+> The vLLM endpoint (`--public`, port 8000) is unauthenticated demo infrastructure;
+> do not route real patient data through it. Reference simplifications in the training set
+> are synthetic (Asclepius-derived) — ROUGE-L measures similarity to synthetic references,
+> not clinician-validated output quality.
+
 > **Methodological note:** The two judges differ in both model family (Llama vs Qwen)
 > and scale (70B vs 32B) — the observed disagreement is confounded across both dimensions.
 > A scale-matched pair (e.g., Llama-70B vs Qwen-72B) would be needed to isolate the
