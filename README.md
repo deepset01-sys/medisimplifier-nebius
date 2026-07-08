@@ -150,6 +150,14 @@ fine-tuning.** LoRA essentially taught OpenBioLLM *how* to simplify —
 and it ran with the task, applying its deep domain knowledge to produce
 the most faithful and readable simplifications.
 
+> **Alternative hypothesis:** OpenBioLLM-8B is a Llama-3 base model fine-tune
+> with limited instruction-following capability, while Mistral-7B-Instruct-v0.2
+> is already instruction-tuned. The zero-shot gap may reflect instruction-following
+> deficits rather than domain knowledge differences — fine-tuning would then
+> teach instruction-following as much as simplification. Both hypotheses are
+> consistent with the observed data (n=3); distinguishing them would require
+> a controlled instruction-tuning ablation.
+
 **Implication for practitioners:** When selecting a base model for
 domain-specific fine-tuning, don't optimize for zero-shot benchmark
 performance. Instead, optimize for *domain alignment* — the model that
