@@ -11,7 +11,7 @@
 > The Nebius pipeline, serving layer, safety evaluation, and MLOps
 > infrastructure were built independently for this challenge.
 
-**Executive Summary:** 7 ablation experiments in 20 minutes wall-clock for ~$9 on Nebius Serverless Jobs → winner config → full training → vLLM serving → 4,004 Token Factory judge calls across 3 safety evaluation rounds — zero standing infrastructure, $0 idle cost. Key findings: (1) ranking reversal confirmed across hardware (H100/H200) and chat templates; (2) CoT prompting amplifies judge disagreement (κ: 0.11→0.04) — a novel finding enabled by serverless LLM-as-judge at scale. Five Nebius services: Jobs, Endpoints, Token Factory, Object Storage, Managed MLflow.
+**Executive Summary:** 7 ablation experiments in 20 minutes wall-clock for ~$9 on Nebius Serverless Jobs → winner config → full training → vLLM serving → 5,420 Token Factory judge calls across 3 safety evaluation rounds + perturbation calibration — zero standing infrastructure, $0 idle cost. Key findings: (1) ranking reversal confirmed across hardware (H100/H200) and chat templates; (2) CoT prompting amplifies judge disagreement (κ: 0.11→0.04) — a novel finding enabled by serverless LLM-as-judge at scale. Five Nebius services: Jobs, Endpoints, Token Factory, Object Storage, Managed MLflow.
 
 **📝 Blog Post:** [Building an End-to-End Serverless ML Pipeline on Nebius: A Builder's Journey](https://medium.com/@deepset01/medical-text-simplification-with-lora-on-nebius-serverless-a-builders-journey-13a9e44c92a4)
 
@@ -311,7 +311,7 @@ designed to answer a question raised by the previous round's findings.
 | v2 (n=1,001) | Is evaluation judge-family dependent? | Two judges — Llama-70B + Qwen-32B: differ in **both family and scale** (intentional — to probe sensitivity across both dimensions simultaneously) | Llama 32.5% vs Qwen 88.8%, κ=0.11 |
 | v3 (n=1,001) | Does structured reasoning reduce bias? | Same two judges + 4-step CoT with anti-sycophancy warning (inspired by my LLM evaluation coursework — Nebius Academy AI Performance Engineering) | CoT amplifies bias — κ drops further to 0.04 |
 
-Each experiment used the full Nebius Token Factory pipeline — 4,004 total judge calls across all rounds.
+Each experiment used the full Nebius Token Factory pipeline — 4,004 judge calls across v1/v2/v3 safety rounds + 1,416 calibration calls = 5,420 total Token Factory calls.
 
 ### Methodology
 
@@ -403,7 +403,7 @@ selection.
 > **Limitation and future work:** Without human-anchored ground truth, I cannot determine which judge is closer to clinical accuracy — only that they disagree strongly. LLM evaluation research consistently shows that judges tend to rate fluent, plausible-sounding text as factually accurate even when it contains errors (sycophancy toward fluency). A controlled annotation study with clinical reviewers would be needed to establish which judge family and which prompt structure best approximates human medical judgment — and would convert this from an observational finding into a validated one.
 
 > Both experiments conducted via Nebius Token Factory API — demonstrating
-> serverless LLM-as-judge evaluation at scale (1,001 samples × 2 judges × 2 prompt variants = 4,004 judge calls).
+> serverless LLM-as-judge evaluation at scale (1,001 samples × 2 judges × 2 prompt variants = 4,004 safety judge calls; 708 × 2 judges = 1,416 calibration calls; 5,420 total).
 
 ### Judge Calibration — Perturbation-Based Sensitivity Analysis
 
