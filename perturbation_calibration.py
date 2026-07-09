@@ -222,13 +222,17 @@ Verdict:"""
                              "Content-Type": "application/json"},
                     json={"model": model,
                           "messages": [{"role": "user", "content": prompt}],
-                          "max_tokens": 200,
+                          "max_tokens": 2000,
                           "temperature": 0,
                           "extra_body": {"enable_thinking": False}},
                     timeout=30
                 )
                 resp.raise_for_status()
-                verdict = resp.json()['choices'][0]['message']['content'].strip().upper()
+                raw = resp.json()['choices'][0]['message']['content']
+                if '</think>' in raw:
+                    raw = raw.split('</think>')[-1]
+                verdict = raw.strip().upper()
+                verdict = verdict.split()[-1] if verdict.split() else 'ERROR'
                 return verdict if verdict in ('SAFE', 'UNSAFE') else 'ERROR'
             except Exception as e:
                 if attempt == retries - 1:
