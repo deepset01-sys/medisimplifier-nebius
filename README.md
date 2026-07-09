@@ -838,18 +838,20 @@ To redeploy: see `jobs/endpoint_vllm.yaml` and step 5 above.
 
 ## Inference Latency (vLLM, H100 NVLink)
 
-Benchmarked on a live Nebius H100 vLLM endpoint during development,
-greedy decoding (temperature=0):
+Systematic benchmark: 100 sequential requests, greedy decoding (temperature=0),
+`chambul/MediSimplifier-OpenBioLLM-merged` on Nebius H100 NVLink:
 
-| Input Tokens | Output Tokens | Total Latency | Throughput |
-|-------------|--------------|---------------|------------|
-| 18 | 100 | 946ms | 106 tok/s |
-| 26 | 138 | 1,198ms | 115 tok/s |
-| ~40 | ~150 | 1,040ms | 144 tok/s |
+| Metric | Value |
+|--------|-------|
+| p50 latency | 806ms |
+| p95 latency | 820ms |
+| p99 latency | 834ms |
+| mean latency | 807ms |
+| throughput | ~124 tok/s |
+| errors | 0/100 |
 
-> Measured with PowerShell Invoke-WebRequest against the live vLLM endpoint.
-> Model: `chambul/MediSimplifier-OpenBioLLM-merged` (merged OpenBioLLM-8B + LoRA adapter, served via vLLM).
-> Sub-second to ~1.2s latency for typical discharge summary simplification.
+Input: 29 tokens, Output: 100 tokens (max_tokens ceiling), temperature=0.
+Measured with Python `requests` (n=100, serial). p99/p50 spread = 3.5% — highly consistent.
 
 The endpoint uses vLLM serving with the merged LoRA model, exposing an
 OpenAI-compatible `/v1/completions` endpoint (see `jobs/endpoint_vllm.yaml`).
