@@ -11,7 +11,7 @@
 > The Nebius pipeline, serving layer, safety evaluation, and MLOps
 > infrastructure were built independently for this challenge.
 
-**Executive Summary:** 7 ablation experiments in 20 minutes wall-clock for ~$9 on Nebius Serverless Jobs → winner config → full training → vLLM serving → 5,420 Token Factory judge calls across 3 safety evaluation rounds + perturbation calibration — zero standing infrastructure, $0 idle cost. Key findings: (1) ranking reversal confirmed across hardware (H100/H200) and chat templates; (2) CoT prompting amplifies judge disagreement (κ: 0.11→0.04) — a novel finding enabled by serverless LLM-as-judge at scale. Five Nebius services: Jobs, Endpoints, Token Factory, Object Storage, Managed MLflow.
+**Executive Summary:** 7 ablation experiments in 20 minutes wall-clock for ~$9 on Nebius Serverless Jobs → winner config → full training → vLLM serving → 5,420 Token Factory judge calls across 3 safety evaluation rounds + perturbation calibration — zero standing infrastructure, $0 idle cost. Key findings: (1) ranking reversal confirmed across hardware (H100/H200) and chat templates; (2) CoT amplifies judge disagreement (κ: 0.11→0.04); (3) perturbation calibration reveals Qwen detects structural errors better than Llama (dose: 80% vs 44%) while both miss diagnosis drops (7–14%) — all findings enabled by serverless Token Factory at scale. Five Nebius services: Jobs, Endpoints, Token Factory, Object Storage, Managed MLflow.
 
 **📝 Blog Post:** [Building an End-to-End Serverless ML Pipeline on Nebius: A Builder's Journey](https://medium.com/@deepset01/medical-text-simplification-with-lora-on-nebius-serverless-a-builders-journey-13a9e44c92a4)
 
@@ -593,7 +593,8 @@ Training Job                    Object Storage                  Eval/Serve Job
 | Seed-2 validation (train + eval) | H100 NVLink | ~115 min | ~$7.50 |
 | Merge + misc | H100 NVLink | — | ~$2 |
 | Bootstrap CI eval ×3 (parallel) | H100 NVLink | ~45 min total | ~$9 |
-| **Core pipeline subtotal** | | | **~$112** |
+| Perturbation calibration (708 × 2 judges) | Token Factory | ~3h | ~$6 |
+| **Core pipeline subtotal** | | | **~$118** |
 
 **Cost breakdown (actual Nebius billing):**
 
@@ -610,7 +611,7 @@ Training Job                    Object Storage                  Eval/Serve Job
 
 > H100 NVLink rate: ~$3.85/hr on Nebius eu-north1.
 > Core pipeline compute (ablation + training + eval + safety + merge + bootstrap CI): ~$43.
-> Remaining ~$208 covers failed jobs, accidental GPU type, endpoint serving,
+> Remaining ~$202 covers failed jobs, accidental GPU type, endpoint serving,
 > Build VM, and iteration — all on Nebius Serverless, no reserved instances.
 
 > 9 parallel jobs = same wall-clock time as 1 job (~20 min total).
