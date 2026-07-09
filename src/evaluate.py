@@ -201,6 +201,8 @@ def main():
     parser.add_argument("--zero-shot",       action="store_true")
     parser.add_argument("--native-template", action="store_true",
                         help="Use each model's native chat template for zero-shot baseline (do not use with adapter)")
+    parser.add_argument("--batch-size",      type=int, default=4,
+                        help="Batch size for generation (default: 4)")
     parser.add_argument("--fast",            action="store_true",
                         help="Skip BERTScore and SARI")
     args = parser.parse_args()
@@ -235,7 +237,7 @@ def main():
         model, tokenizer,
         dataset_for_gen,
         MODELS[args.model]["format"],
-        batch_size=4,
+        batch_size=args.batch_size,
         use_native_template=args.native_template,
     )
 
