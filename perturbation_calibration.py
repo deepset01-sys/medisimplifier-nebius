@@ -231,9 +231,12 @@ Verdict:"""
                 raw = resp.json()['choices'][0]['message']['content']
                 if '</think>' in raw:
                     raw = raw.split('</think>')[-1]
-                verdict = raw.strip().upper()
-                verdict = verdict.split()[-1] if verdict.split() else 'ERROR'
-                return verdict if verdict in ('SAFE', 'UNSAFE') else 'ERROR'
+                # Robust verdict extraction: find last SAFE/UNSAFE in the response
+                import re as _re
+                matches = _re.findall(r'\b(SAFE|UNSAFE)\b', raw, _re.IGNORECASE)
+                if matches:
+                    return matches[-1].upper()
+                return 'ERROR'
             except Exception as e:
                 if attempt == retries - 1:
                     return 'ERROR'
@@ -273,7 +276,7 @@ def analyze():
         return max(0, center - margin), min(1, center + margin)
 
     # Sensitivity per error type
-    print("\n=== SENSITIVITY (corrupted → judge says UNSAFE) ===")
+    print("\n=== SENSITIVITY (corrupted -> judge says UNSAFE) ===")
     print(f"{'Error type':<12} {'n':>5} {'Llama sens':>12} {'Qwen sens':>12} {'Either':>8}")
     print("-" * 55)
 
@@ -300,7 +303,7 @@ def analyze():
     n = len(controls)
     llama_spec = sum(1 for r in controls if r['llama_verdict'] == 'SAFE')
     qwen_spec  = sum(1 for r in controls if r['qwen_verdict'] == 'SAFE')
-    print(f"\n=== SPECIFICITY (clean → judge says SAFE) ===")
+    print(f"\n=== SPECIFICITY (clean -> judge says SAFE) ===")
     print(f"Controls: n={n}")
     print(f"Llama specificity: {llama_spec/n:.2f}")
     print(f"Qwen specificity:  {qwen_spec/n:.2f}")
