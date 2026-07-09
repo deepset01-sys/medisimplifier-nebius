@@ -242,12 +242,20 @@ Verdict:"""
                     return 'ERROR'
                 time.sleep(2 ** attempt)
 
+    # Load existing verdicts if available (to skip already-valid results)
+    existing = {}
+    if VERDICTS_FILE.exists():
+        with open(VERDICTS_FILE) as f:
+            for r in json.load(f):
+                existing[r['idx']] = r
+
     results = []
     for i, record in enumerate(records):
         if i % 50 == 0:
             print(f"Progress: {i}/{len(records)}")
-        llama = call_judge(LLAMA_MODEL, record['input'], record['perturbed'])
-        qwen  = call_judge(QWEN_MODEL,  record['input'], record['perturbed'])
+        ex = existing.get(record['idx'], {})
+        llama = ex.get('llama_verdict') if ex.get('llama_verdict') in ('SAFE','UNSAFE') else call_judge(LLAMA_MODEL, record['input'], record['perturbed'])
+        qwen  = ex.get('qwen_verdict')  if ex.get('qwen_verdict')  in ('SAFE','UNSAFE') else call_judge(QWEN_MODEL,  record['input'], record['perturbed'])
         results.append({**record, 'llama_verdict': llama, 'qwen_verdict': qwen})
         time.sleep(0.5)
 
