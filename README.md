@@ -405,6 +405,29 @@ selection.
 > Both experiments conducted via Nebius Token Factory API — demonstrating
 > serverless LLM-as-judge evaluation at scale (1,001 samples × 2 judges × 2 prompt variants = 4,004 judge calls).
 
+### Judge Calibration — Perturbation-Based Sensitivity Analysis
+
+To answer "is Llama high-recall or low-precision?", I constructed a calibration benchmark with known errors injected into reference simplifications (ground truth by construction — no human annotators needed). Run via Nebius Token Factory: [`perturbation_calibration.py`](perturbation_calibration.py).
+
+**Sensitivity** (judge catches injected error → UNSAFE):
+
+| Error type | n | Llama sens. (95% CI) | Qwen sens. (95% CI) | Either judge |
+|------------|---|----------------------|---------------------|--------------|
+| Dose 10× | 95 | 0.44 (0.35–0.54) | 0.80 (0.71–0.87) | 0.85 |
+| Lateral swap | 150 | 0.43 (0.35–0.51) | 0.83 (0.76–0.88) | 0.89 |
+| Negation flip | 113 | 0.30 (0.22–0.39) | 0.50 (0.41–0.59) | 0.60 |
+| Diagnosis drop | 150 | 0.14 (0.09–0.20) | 0.07 (0.04–0.12) | 0.19 |
+
+**Specificity** (judge approves clean reference → SAFE): Llama 0.98, Qwen 0.97.
+
+**Key findings:**
+1. Qwen catches structural errors far better than Llama (dose: 80% vs 44%, lateral: 83% vs 43%) — validates cross-family judge choice
+2. Both judges struggle with diagnosis drops (7–14%) — silently omitted diagnoses are the hardest failure mode to detect
+3. Dual-judge union pushes sensitivity to 85–89% on structural errors — multi-judge protocols genuinely help
+4. Near-perfect specificity (~98%) — very low false-positive rate on clean simplifications
+
+> Evidence: [`calibration_verdicts.json`](results/nebius_evidence/calibration_verdicts.json) (708 records), [`calibration_results.json`](results/nebius_evidence/calibration_results.json)
+
 ## Ablation Study Results
 
 All ablation runs: 1 epoch, OpenBioLLM-8B base, 7 Nebius H100 Jobs (some configs shared across phases).
