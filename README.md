@@ -207,6 +207,9 @@ All results are committed to this repository for durable verification:
 | [seed2.json.gz](results/nebius_logs/seed2.json.gz) | OpenBioLLM-8B training — seed=2, multi-seed validation run |
 | [safety-eval-v2.json.gz](results/nebius_logs/safety-eval-v2.json.gz) | Safety eval v2 — dual judge, simple prompt, n=1,001 |
 | [safety-eval-v3.json.gz](results/nebius_logs/safety-eval-v3.json.gz) | Safety eval v3 — dual judge, 4-step CoT prompt, n=1,001 |
+| [zeroshot-native-openbio.json.gz](results/nebius_logs/zeroshot-native-openbio.json.gz) | Native template zero-shot — OpenBioLLM-8B, n=1,001, ROUGE-L 0.2440 |
+| [zeroshot-native-mistral.json.gz](results/nebius_logs/zeroshot-native-mistral.json.gz) | Native template zero-shot — Mistral-7B, n=1,001, ROUGE-L 0.3971 |
+| [zeroshot-native-biomistral.json.gz](results/nebius_logs/zeroshot-native-biomistral.json.gz) | Native template zero-shot — BioMistral-7B, n=1,001, ROUGE-L 0.4190 |
 
 > All logs contain Nebius job IDs (aijob-* / aiendpoint-*),
 > GPU info (NVIDIA H100 80GB HBM3), and timestamps.
