@@ -629,10 +629,11 @@ Training Job                    Object Storage                  Eval/Serve Job
 <summary>scripts/reproduce.sh — invocation modes (train-v27)</summary>
 
 ```bash
-bash scripts/reproduce.sh eval_only    # evaluate only (no training, uses HF adapters)
-bash scripts/reproduce.sh full         # full pipeline: ablation + train + eval + serve
-bash scripts/reproduce.sh ablation     # ablation study only
-bash scripts/reproduce.sh serve        # deploy vLLM endpoint only
+bash scripts/reproduce.sh eval_only         # evaluate only (no training, uses HF adapters)
+bash scripts/reproduce.sh eval_only smoke   # 20-sample sanity check (~5 min, <$1)
+bash scripts/reproduce.sh full              # full pipeline: ablation + train + eval + serve
+bash scripts/reproduce.sh ablation          # ablation study only
+bash scripts/reproduce.sh serve             # deploy vLLM endpoint only
 ```
 
 See [`scripts/reproduce.sh`](scripts/reproduce.sh) for the complete implementation.
