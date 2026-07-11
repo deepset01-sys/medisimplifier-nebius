@@ -19,8 +19,9 @@ python3 -m vllm.entrypoints.openai.api_server \
 VLLM_PID=$!
 
 echo "==> Waiting for vLLM to load (~10-15 min)..."
-until curl -s http://127.0.0.1:${VLLM_PORT}/health | grep -q "ok"; do
-    sleep 10
+until [ "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:${VLLM_PORT}/health)" = "200" ]; do
+    echo "Waiting for vLLM..."
+    sleep 15
 done
 echo "==> vLLM ready."
 
