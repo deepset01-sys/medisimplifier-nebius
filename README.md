@@ -296,6 +296,7 @@ All results are committed to this repository for durable verification:
 - LoRA Adapter (Nebius): [chambul/MediSimplifier-LoRA-Adapter-Nebius](https://huggingface.co/chambul/MediSimplifier-LoRA-Adapter-Nebius) — r=32, all_attn, 3 epochs, ROUGE-L 0.6638
 - Dataset: [GuyDor007/medisimplifier-dataset](https://huggingface.co/datasets/GuyDor007/medisimplifier-dataset)
 - Adapters (Technion-era): [GuyDor007/MediSimplifier-LoRA-Adapters](https://huggingface.co/GuyDor007/MediSimplifier-LoRA-Adapters)
+- Judge Calibration Benchmark: [chambul/MedSimp-JudgeBench](https://huggingface.co/datasets/chambul/MedSimp-JudgeBench) — 708 samples, 4 error types, dual-judge sensitivity/specificity (CC-BY-NC-SA-4.0)
 
 ## Medical Safety Evaluation
 
