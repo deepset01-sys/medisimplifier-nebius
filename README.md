@@ -470,7 +470,7 @@ Pipeline:
     Dataset (HuggingFace: GuyDor007/medisimplifier-dataset)
         |
         v
-    Nebius Job: Ablation (9 parallel jobs — rank x modules x data size)
+    Nebius Job: Ablation (7 parallel jobs — rank x modules x data size)
         |
         v
     Nebius Job: Full training (r=32, all_attn, 3 epochs, H100)
@@ -495,7 +495,7 @@ Pipeline:
 > Serverless Jobs eliminated cluster management overhead that
 > typically slows ML experimentation. Each job is stateless —
 > the bucket is the only persistent state between runs.
-> I submitted all 9 ablation jobs simultaneously and had
+> I submitted all 7 ablation jobs simultaneously and had
 > results in 20 minutes instead of 3 hours sequentially.
 > Kubernetes would have added native job dependencies (train → merge → eval → safety eval
 > required manual monitoring between stages) — a tradeoff worth noting.
@@ -614,7 +614,7 @@ Training Job                    Object Storage                  Eval/Serve Job
 > Remaining ~$202 covers failed jobs, accidental GPU type, endpoint serving,
 > Build VM, and iteration — all on Nebius Serverless, no reserved instances.
 
-> 9 parallel jobs = same wall-clock time as 1 job (~20 min total).
+> 7 parallel jobs = same wall-clock time as 1 job (~20 min total).
 
 > Technion hardware: RunPod H200 SXM (~90 min/model across 3 GPUs).
 > Nebius reproduction uses H100 NVLink (~70 min, single GPU per job).
@@ -718,7 +718,7 @@ Our training run:
 - **Job name:** `medisimplifier-full-training`
 - **GPU:** H100 SXM · 1 GPU · 3 epochs · ~70 min
 
-### 3. Run ablation study (9 parallel jobs)
+### 3. Run ablation study (7 parallel jobs)
 
 ```bash
 # Phase 1 — LoRA rank
@@ -775,7 +775,7 @@ done
 
 > **Note:** Jobs are submitted in parallel via the CLI loop.
 > Actual parallel scheduling depends on account quota.
-> In our runs, all 9 jobs started within 2 minutes of submission.
+> In our runs, all 7 jobs started within 2 minutes of submission.
 
 ### 4. Evaluate
 
