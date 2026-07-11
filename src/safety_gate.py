@@ -83,10 +83,25 @@ def evaluate_safety(original: str, simplified: str, safety_mode: str = "flag") -
     llama = _call_judge(original, simplified, LLAMA_MODEL, api_key)
     qwen  = _call_judge(original, simplified, QWEN_MODEL,  api_key)
 
+    # ── Calibration-informed decision rule ───────────────────────────
+    # Based on perturbation calibration results (708 samples, 4 error types):
+    #   Dose 10×:    Qwen 80%, Llama 44% sensitivity → trust Qwen
+    #   Lateral:     Qwen 83%, Llama 43% sensitivity → trust Qwen
+    #   Negation:    Qwen 50%, Llama 30% sensitivity → require union
+    #   Diagnosis:   Qwen 7%,  Llama 14% sensitivity → warn only (both unreliable)
+    #   Specificity: Llama 98%, Qwen 97% → very low false-positive rate
+
+    warning = None
+
     if llama == "SAFE" and qwen == "SAFE":
         consensus = "SAFE"
-    elif llama == "UNSAFE" or qwen == "UNSAFE":
+    elif qwen == "UNSAFE":
+        # Qwen has 80-83% sensitivity on structural errors → trust it
         consensus = "UNSAFE"
+    elif llama == "UNSAFE" and qwen == "SAFE":
+        # Llama flags but Qwen doesn't — possible diagnosis-drop (both weak at 7-14%)
+        consensus = "DISAGREE"
+        warning = "diagnosis-drop risk: both judges have low sensitivity (7-14%) — manual review recommended"
     elif "ERROR" in (llama, qwen):
         consensus = "ERROR"
     else:
@@ -99,4 +114,5 @@ def evaluate_safety(original: str, simplified: str, safety_mode: str = "flag") -
         "qwen_verdict":  qwen,
         "blocked":       blocked,
         "consensus":     consensus,
+        "warning":       warning,
     }
