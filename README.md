@@ -13,7 +13,7 @@
 
 **Executive Summary:** 7 ablation experiments in 20 minutes wall-clock for ~$9 on Nebius Serverless Jobs → winner config → full training → Safe Simplification Endpoint (vLLM + calibration-informed dual-judge guardrail via Token Factory) → 5,420 Token Factory judge calls across 3 safety evaluation rounds + perturbation calibration — zero standing infrastructure, $0 idle cost. Key findings: (1) ranking reversal confirmed across hardware (H100/H200) and chat templates; (2) CoT amplifies judge disagreement (κ: 0.11→0.04); (3) **[perturbation calibration](#judge-calibration--perturbation-based-sensitivity-analysis)** reveals Qwen detects structural errors 2× better than Llama (dose: 80% vs 44%) while both miss diagnosis drops (7–14%) — enabled by serverless Token Factory, answering "which judge to trust?" without human annotators. Five Nebius services: Jobs, Endpoints, Token Factory, Object Storage, Managed MLflow.
 
-**📝 Blog Post:** [Building an End-to-End Serverless ML Pipeline on Nebius: A Builder's Journey](https://medium.com/@deepset01/medical-text-simplification-with-lora-on-nebius-serverless-a-builders-journey-13a9e44c92a4)
+**📝 Blog Post:** [Building a Serverless ML Research Platform on Nebius: From Fine-Tuning to Calibrated Medical AI](https://medium.com/@deepset01/medical-text-simplification-with-lora-on-nebius-serverless-a-builders-journey-13a9e44c92a4)
 
 ## What this project does
 
