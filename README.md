@@ -888,7 +888,7 @@ curl -X POST http://<your-job-ip>:8000/v1/simplify \
 **Response:**
 ```json
 {
-  "simplified_text": "The patient came in with severe heart failure. The heart was only pumping at 25% of its normal strength.",
+  "simplified_text": "The patient was admitted because the heart suddenly stopped working well. They had trouble breathing, could not breathe while lying down, and had swelling in both legs. A heart ultrasound showed the heart was only pumping 25% of the blood it should.",
   "blocked": false,
   "safety": {
     "llama_verdict": "SAFE",
@@ -896,7 +896,7 @@ curl -X POST http://<your-job-ip>:8000/v1/simplify \
     "consensus": "SAFE",
     "warning": null
   },
-  "latency_ms": {"vllm_ms": 806, "total_ms": 3200}
+  "latency_ms": {"vllm_ms": 1148, "total_ms": 15424}
 }
 ```
 
