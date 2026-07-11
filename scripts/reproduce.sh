@@ -58,7 +58,7 @@ if [[ "$MODE" == "full" || "$MODE" == "ablation" ]]; then
       --parent-id "${NEBIUS_PROJECT_ID}" \
       --image "$IMAGE" \
       --container-command python \
-      --args "train.py --model openbio --epochs 1 --rank ${RANK} --modules q_v --data-size 7999 --seed 42" \
+      --args "train.py --model openbio --epochs 1 --rank ${RANK} --modules q_v --data-size 7999 --seed 42 --output-dir /output/ablation_r${RANK}_qv_8k" \
       --env HF_TOKEN="${HF_TOKEN}" \
       --platform "$PLATFORM" \
       --preset "$PRESET" \
@@ -69,13 +69,13 @@ if [[ "$MODE" == "full" || "$MODE" == "ablation" ]]; then
   done
 
   echo "==> Submitting ablation jobs (Phase 2 — modules, r=32, data=8K)..."
-  for MODULES in q_only q_v all_attn; do
+  for MODULES in q_only all_attn; do
     nebius ai job create \
       --name "medisimplifier-ablation-${MODULES}" \
       --parent-id "${NEBIUS_PROJECT_ID}" \
       --image "$IMAGE" \
       --container-command python \
-      --args "train.py --model openbio --epochs 1 --rank 32 --modules ${MODULES} --data-size 7999 --seed 42" \
+      --args "train.py --model openbio --epochs 1 --rank 32 --modules ${MODULES} --data-size 7999 --seed 42 --output-dir /output/ablation_r32_${MODULES}_8k" \
       --env HF_TOKEN="${HF_TOKEN}" \
       --platform "$PLATFORM" \
       --preset "$PRESET" \
@@ -86,13 +86,13 @@ if [[ "$MODE" == "full" || "$MODE" == "ablation" ]]; then
   done
 
   echo "==> Submitting ablation jobs (Phase 3 — data size, r=32, all_attn)..."
-  for DATA in 2000 4000 7999; do
+  for DATA in 2000 4000; do
     nebius ai job create \
       --name "medisimplifier-ablation-data${DATA}" \
       --parent-id "${NEBIUS_PROJECT_ID}" \
       --image "$IMAGE" \
       --container-command python \
-      --args "train.py --model openbio --epochs 1 --rank 32 --modules all_attn --data-size ${DATA} --seed 42" \
+      --args "train.py --model openbio --epochs 1 --rank 32 --modules all_attn --data-size ${DATA} --seed 42 --output-dir /output/ablation_r32_all_attn_${DATA}" \
       --env HF_TOKEN="${HF_TOKEN}" \
       --platform "$PLATFORM" \
       --preset "$PRESET" \
@@ -101,7 +101,7 @@ if [[ "$MODE" == "full" || "$MODE" == "ablation" ]]; then
       --subnet-id "${NEBIUS_SUBNET_ID}" \
       --timeout 2h
   done
-  echo "9 ablation jobs submitted (~20 min each)."
+  echo "7 ablation jobs submitted in parallel (~20 min each): 3 rank × 1 modules + 2 modules + 2 data-size configs."
 fi
 
 # ── Step 3: Evaluate (uses public HF adapters — no prior training needed) ─────
