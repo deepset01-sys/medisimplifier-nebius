@@ -870,7 +870,7 @@ The endpoint composes two Nebius Serverless products into one inference path:
 
 **Deploy your own (5 minutes):**
 ```bash
-nebius ai job create -f jobs/safe_endpoint.yaml \
+nebius ai endpoint create -f jobs/safe_endpoint.yaml \
   --env NEBIUS_API_KEY=<your-key> \
   --env HF_TOKEN=<your-token>
 ```
@@ -905,7 +905,7 @@ curl -X POST http://<your-job-ip>:8000/v1/simplify \
 - Llama flags only → DISAGREE + diagnosis-drop warning (both judges weak at 7–14%)
 - Both SAFE → pass through
 
-Image: `chambul/medisimplifier:endpoint-v1` — see [`docker/Dockerfile.endpoint`](docker/Dockerfile.endpoint) and [`jobs/safe_endpoint.yaml`](jobs/safe_endpoint.yaml).
+Image: `chambul/medisimplifier:endpoint-v2` — see [`docker/Dockerfile.endpoint`](docker/Dockerfile.endpoint) and [`jobs/safe_endpoint.yaml`](jobs/safe_endpoint.yaml).
 
 ## Inference Latency (vLLM, H100 NVLink)
 
@@ -970,7 +970,7 @@ The merged model is publicly available on HuggingFace — see Step 5 above. For 
       safe_endpoint.yaml     Safe Simplification Endpoint job config
     scripts/
       reproduce.sh         One-command reproducibility script
-      start_endpoint.sh    Boot vLLM + Safe Endpoint API (used inside endpoint-v1 image)
+      start_endpoint.sh    Boot vLLM + Safe Endpoint API (used inside endpoint-v2 image)
     tests/
       test_metrics.py    Unit tests for ROUGE-L, FK-Grade, prompt builder
     send_to_mlflow.py    Nebius Managed MLflow experiment logging

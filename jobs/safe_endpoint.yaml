@@ -9,7 +9,7 @@ resources:
   subnet_id: ${NEBIUS_SUBNET_ID}
 
 docker:
-  image: chambul/medisimplifier:endpoint-v1
+  image: chambul/medisimplifier:endpoint-v2
   command: /start.sh
 
 env:
