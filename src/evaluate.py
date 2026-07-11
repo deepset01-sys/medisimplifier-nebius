@@ -90,11 +90,15 @@ def load_model(hf_path: str, adapter_path: Optional[str]):
     return model, tokenizer
 
 
-def generate_predictions(model, tokenizer, dataset: list, model_format: str, batch_size: int = 4, use_native_template: bool = False) -> list[str]:
+def generate_predictions(model, tokenizer, dataset: list, model_format: str, batch_size: int = 4, use_native_template: bool = False) -> tuple[list[str], dict]:
     predictions = []
+    n_truncated = 0
+    n_prompt_leaks = 0
     for i in range(0, len(dataset), batch_size):
         batch = dataset[i:i+batch_size]
         prompts = [build_prompt(sample, model_format, tokenizer=tokenizer, use_native_template=use_native_template) for sample in batch]
+        encoded = tokenizer(prompts, return_tensors="pt", padding=True, truncation=False, max_length=None)
+        n_truncated += sum(1 for ids in encoded["input_ids"] if len(ids) > 2048)
         inputs = tokenizer(
             prompts,
             return_tensors="pt",
@@ -141,12 +145,13 @@ def generate_predictions(model, tokenizer, dataset: list, model_format: str, bat
             # Sanity-check: each decoded generation must not start with its own prompt text
             if pred.startswith(prompts[j][:30]):
                 print(f"  Warning: generation slice leaked prompt for batch {i}, item {j} — appending empty prediction")
+                n_prompt_leaks += 1
                 predictions.append("")
                 continue
             predictions.append(pred)
         if (i + batch_size) % 100 == 0 or i == 0:
             print(f"  Generated {min(i+batch_size, len(dataset))}/{len(dataset)}")
-    return predictions
+    return predictions, {"n_truncated": n_truncated, "n_prompt_leaks": n_prompt_leaks}
 
 
 def compute_rouge_l(predictions: list[str], references: list[str]) -> tuple[float, list[float]]:
@@ -209,6 +214,12 @@ def main():
                         help="Skip BERTScore and SARI")
     args = parser.parse_args()
 
+    # Guard: --native-template without --zero-shot means adapter + wrong template = silent wrong results
+    if args.native_template and not args.zero_shot:
+        print("ERROR: --native-template requires --zero-shot (native templates are for zero-shot baselines only).")
+        print("       Fine-tuned models must use the training-time template. Remove --native-template or add --zero-shot.")
+        import sys; sys.exit(1)
+
     out = Path(args.output_dir)
     out.mkdir(parents=True, exist_ok=True)
 
@@ -239,13 +250,17 @@ def main():
     print(f"Generating on {len(sources)} samples...")
     dataset_for_gen = [{"input": s, "output": r}
                        for s, r in zip(sources, references)]
-    predictions = generate_predictions(
+    predictions, gen_stats = generate_predictions(
         model, tokenizer,
         dataset_for_gen,
         MODELS[args.model]["format"],
         batch_size=args.batch_size,
         use_native_template=args.native_template,
     )
+    if gen_stats["n_truncated"] > 0:
+        print(f"  Warning: {gen_stats['n_truncated']} prompts were truncated at max_length=2048")
+    if gen_stats["n_prompt_leaks"] > 0:
+        print(f"  Warning: {gen_stats['n_prompt_leaks']} prompt leaks detected (empty predictions)")
 
     # ── Metrics ────────────────────────────────────────────────
     print("Computing ROUGE-L...")
@@ -274,6 +289,8 @@ def main():
         "bertscore":  bertscore_val,
         "sari":       sari_val,
         "fk_grade":   fk,
+        "n_truncated_prompts": gen_stats["n_truncated"],
+        "n_prompt_leaks":      gen_stats["n_prompt_leaks"],
     }
     with open(out / "results.json", "w") as f:
         json.dump(results, f, indent=2)
