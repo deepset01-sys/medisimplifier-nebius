@@ -11,7 +11,7 @@
 > The Nebius pipeline, serving layer, safety evaluation, and MLOps
 > infrastructure were built independently for this challenge.
 
-**Executive Summary:** 7 ablation experiments in 20 minutes wall-clock for ~$9 on Nebius Serverless Jobs → winner config → full training → vLLM serving → 5,420 Token Factory judge calls across 3 safety evaluation rounds + perturbation calibration — zero standing infrastructure, $0 idle cost. Key findings: (1) ranking reversal confirmed across hardware (H100/H200) and chat templates; (2) CoT amplifies judge disagreement (κ: 0.11→0.04); (3) **[perturbation calibration](#judge-calibration--perturbation-based-sensitivity-analysis)** reveals Qwen detects structural errors 2× better than Llama (dose: 80% vs 44%) while both miss diagnosis drops (7–14%) — enabled by serverless Token Factory, answering "which judge to trust?" without human annotators. Five Nebius services: Jobs, Endpoints, Token Factory, Object Storage, Managed MLflow.
+**Executive Summary:** 7 ablation experiments in 20 minutes wall-clock for ~$9 on Nebius Serverless Jobs → winner config → full training → Safe Simplification Endpoint (vLLM + calibration-informed dual-judge guardrail via Token Factory) → 5,420 Token Factory judge calls across 3 safety evaluation rounds + perturbation calibration — zero standing infrastructure, $0 idle cost. Key findings: (1) ranking reversal confirmed across hardware (H100/H200) and chat templates; (2) CoT amplifies judge disagreement (κ: 0.11→0.04); (3) **[perturbation calibration](#judge-calibration--perturbation-based-sensitivity-analysis)** reveals Qwen detects structural errors 2× better than Llama (dose: 80% vs 44%) while both miss diagnosis drops (7–14%) — enabled by serverless Token Factory, answering "which judge to trust?" without human annotators. Five Nebius services: Jobs, Endpoints, Token Factory, Object Storage, Managed MLflow.
 
 **📝 Blog Post:** [Building an End-to-End Serverless ML Pipeline on Nebius: A Builder's Journey](https://medium.com/@deepset01/medical-text-simplification-with-lora-on-nebius-serverless-a-builders-journey-13a9e44c92a4)
 
@@ -860,6 +860,51 @@ nebius ai endpoint create \
       }'
 
 To redeploy: see `jobs/endpoint_vllm.yaml` and step 5 above.
+
+## Safe Simplification Endpoint
+
+The endpoint composes two Nebius Serverless products into one inference path:
+1. **vLLM** — simplifies medical text (OpenBioLLM-8B merged model)
+2. **Token Factory** — dual-judge safety gate (Llama-3.3-70B + Qwen3-32B), parameterized by perturbation calibration results
+
+**Deploy your own (5 minutes):**
+```bash
+nebius ai job create -f jobs/safe_endpoint.yaml \
+  --env NEBIUS_API_KEY=<your-key> \
+  --env HF_TOKEN=<your-token>
+```
+
+**API contract:**
+```bash
+curl -X POST http://<your-job-ip>:8000/v1/simplify \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "The patient was admitted with acute decompensated heart failure, ejection fraction 25%.",
+    "safety_mode": "flag"
+  }'
+```
+
+**Response:**
+```json
+{
+  "simplified_text": "The patient came in with severe heart failure. The heart was only pumping at 25% of its normal strength.",
+  "blocked": false,
+  "safety": {
+    "llama_verdict": "SAFE",
+    "qwen_verdict": "SAFE",
+    "consensus": "SAFE",
+    "warning": null
+  },
+  "latency_ms": {"vllm_ms": 806, "total_ms": 3200}
+}
+```
+
+**Calibration-informed decision rule** (from [`perturbation_calibration.py`](perturbation_calibration.py)):
+- Qwen flags UNSAFE → blocked (80–83% sensitivity on structural errors)
+- Llama flags only → DISAGREE + diagnosis-drop warning (both judges weak at 7–14%)
+- Both SAFE → pass through
+
+Image: `chambul/medisimplifier:endpoint-v1` — see [`docker/Dockerfile.endpoint`](docker/Dockerfile.endpoint) and [`jobs/safe_endpoint.yaml`](jobs/safe_endpoint.yaml).
 
 ## Inference Latency (vLLM, H100 NVLink)
 
