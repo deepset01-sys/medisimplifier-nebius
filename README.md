@@ -870,10 +870,23 @@ The endpoint composes two Nebius Serverless products into one inference path:
 
 **Deploy your own (5 minutes):**
 ```bash
-nebius ai endpoint create -f jobs/safe_endpoint.yaml \
-  --env NEBIUS_API_KEY=<your-key> \
-  --env HF_TOKEN=<your-token>
+nebius ai endpoint create \
+  --name medisimplifier-safe-endpoint \
+  --parent-id ${NEBIUS_PROJECT_ID} \
+  --image chambul/medisimplifier:endpoint-v2 \
+  --container-command /start.sh \
+  --container-port 8000 \
+  --platform gpu-h100-sxm \
+  --preset 1gpu-16vcpu-200gb \
+  --disk-size 250Gi \
+  --subnet-id ${NEBIUS_SUBNET_ID} \
+  --env HF_TOKEN=${HF_TOKEN} \
+  --env NEBIUS_API_KEY=${NEBIUS_API_KEY} \
+  --env HF_HOME=/tmp/hf_cache \
+  --env PYTHONUNBUFFERED=1 \
+  --public
 ```
+> See [`jobs/safe_endpoint.yaml`](jobs/safe_endpoint.yaml) for reference configuration.
 
 **API contract:**
 ```bash
