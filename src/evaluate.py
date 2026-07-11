@@ -203,6 +203,8 @@ def main():
                         help="Use each model's native chat template for zero-shot baseline (do not use with adapter)")
     parser.add_argument("--batch-size",      type=int, default=4,
                         help="Batch size for generation (default: 4)")
+    parser.add_argument("--limit",           type=int, default=None,
+                        help="Limit evaluation to first N samples (smoke test)")
     parser.add_argument("--fast",            action="store_true",
                         help="Skip BERTScore and SARI")
     args = parser.parse_args()
@@ -215,6 +217,10 @@ def main():
     ds = load_dataset("GuyDor007/medisimplifier-dataset", split=args.split)
     sources     = [ex["input"]    for ex in ds]
     references  = [ex["output"]   for ex in ds]
+    if args.limit:
+        sources     = sources[:args.limit]
+        references  = references[:args.limit]
+        print(f"Smoke mode: limiting to {args.limit} samples")
 
     # ── Load model ─────────────────────────────────────────────
     print("Loading model...")

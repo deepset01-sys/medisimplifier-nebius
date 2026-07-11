@@ -14,7 +14,21 @@ set -euo pipefail
 : "${NEBIUS_SUBNET_ID:?Set NEBIUS_SUBNET_ID}"
 : "${HF_TOKEN:?Set HF_TOKEN}"
 
+# ── Preflight checks ──────────────────────────────────────────────────────────
+echo "==> Preflight checks..."
+if ! command -v nebius &>/dev/null; then
+  echo "ERROR: nebius CLI not found. Install from https://console.nebius.com" && exit 1
+fi
+if ! nebius profile list &>/dev/null; then
+  echo "ERROR: nebius CLI not authenticated. Run: nebius auth login" && exit 1
+fi
+if ! python3 -c "from huggingface_hub import HfApi; HfApi().whoami(token='${HF_TOKEN}')" &>/dev/null; then
+  echo "ERROR: HF_TOKEN is invalid or expired. Get a new token at https://huggingface.co/settings/tokens" && exit 1
+fi
+echo "==> Preflight OK (nebius CLI authenticated, HF token valid)"
+
 MODE="${1:-full}"
+SMOKE="${2:-}"  # pass "smoke" as second arg for a quick 20-sample sanity check
 
 IMAGE="chambul/medisimplifier:train-v27"
 BUCKET="medisimplifier-adapters"
@@ -112,7 +126,7 @@ if [[ "$MODE" == "eval_only" || "$MODE" == "full" ]]; then
     --parent-id "${NEBIUS_PROJECT_ID}" \
     --image "$IMAGE" \
     --container-command python \
-    --args "evaluate.py --model openbio --adapter-hf-repo chambul/MediSimplifier-LoRA-Adapter-Nebius --split test --output-dir /output/eval_results" \
+    --args "evaluate.py --model openbio --adapter-hf-repo chambul/MediSimplifier-LoRA-Adapter-Nebius --split test --output-dir /output/eval_results${SMOKE:+ --limit 20 --fast}" \
     --env HF_TOKEN="${HF_TOKEN}" \
     --env HF_HOME=/tmp/hf_cache \
     --platform "$PLATFORM" \
@@ -121,6 +135,18 @@ if [[ "$MODE" == "eval_only" || "$MODE" == "full" ]]; then
     --subnet-id "${NEBIUS_SUBNET_ID}" \
     --volume "${BUCKET}:/output:rw" \
     --timeout 5h
+fi
+
+# ── Auto-diff: verify ROUGE-L after eval_only ─────────────────────────────────
+if [[ "$MODE" == "eval_only" && -z "$SMOKE" ]]; then
+  echo "==> Waiting for eval job to complete before checking ROUGE-L..."
+  echo "    (run manually after job completes:)"
+  echo "    python3 -c \""
+  echo "    import json; r=json.load(open('/tmp/eval_results/results.json'))"
+  echo "    rouge=r['rouge_l']; expected=0.6638; tol=0.002"
+  echo "    ok = abs(rouge-expected) <= tol"
+  echo "    print(f'ROUGE-L: {rouge:.4f} (expected {expected} ± {tol}) — {\"OK\" if ok else \"MISMATCH\"}')"
+  echo "    \""
 fi
 
 # ── Step 4: Deploy vLLM endpoint (merged model from HuggingFace) ──────────────
