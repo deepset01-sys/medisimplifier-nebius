@@ -1,0 +1,21 @@
+name: medisimplifier-safe-endpoint
+description: "Safe Simplification Endpoint — vLLM + dual-judge Token Factory safety gate"
+parent_id: ${NEBIUS_PROJECT_ID}
+
+resources:
+  platform: gpu-h100-sxm
+  preset: 1gpu-16vcpu-200gb
+  disk_size: 250Gi
+  subnet_id: ${NEBIUS_SUBNET_ID}
+
+docker:
+  image: chambul/medisimplifier:endpoint-v1
+  command: /start.sh
+
+env:
+  HF_TOKEN: "${HF_TOKEN}"
+  HF_HOME: "/tmp/hf_cache"
+  NEBIUS_API_KEY: "${NEBIUS_API_KEY}"
+  PYTHONUNBUFFERED: "1"
+
+timeout: 24h

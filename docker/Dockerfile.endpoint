@@ -1,0 +1,17 @@
+FROM vllm/vllm-openai:latest
+
+WORKDIR /app
+
+# Install FastAPI dependencies
+RUN pip install fastapi uvicorn httpx pydantic requests --quiet
+
+# Copy endpoint source
+COPY src/safe_endpoint.py .
+COPY src/safety_gate.py .
+COPY scripts/start_endpoint.sh /start.sh
+RUN chmod +x /start.sh
+
+ENV PYTHONUNBUFFERED=1
+ENV HF_HOME=/tmp/hf_cache
+
+CMD ["/start.sh"]
