@@ -455,6 +455,8 @@ Winner configuration: **r=32, all_attn, 8K** — lowest `eval_loss` → used for
 
 > **Limitation:** Number of training epochs (3) was not independently ablated — ablation jobs use 1 epoch for compute efficiency while the full training run uses 3 epochs. The epoch effect is observed but not isolated as a controlled variable.
 
+> **Limitation:** `SFTTrainer` was used without `DataCollatorForCompletionOnlyLM`, so loss is computed on the full prompt+response sequence (not completion-only). Combined with `pad_token = eos_token`, this is the standard SFT footgun pair. The model still achieves ROUGE-L 0.6638 — suggesting the task is learnable without masking — but completion-only masking would be the correct approach and remains future work.
+
 ## How it runs on Nebius
 
 Nebius Serverless AI Jobs handle training and ablation.
