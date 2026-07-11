@@ -1004,7 +1004,7 @@ The training image is available on two registries:
 
 **Nebius Container Registry (used in job configs):**
 
-    cr.eu-north1.nebius.cloud/e00p4ryvm6npw9w9pz/medisimplifier:train-v27
+    cr.eu-north1.nebius.cloud/<your-project-id>/medisimplifier:train-v27
 
 Built from `docker/Dockerfile.train`. To rebuild:
 
