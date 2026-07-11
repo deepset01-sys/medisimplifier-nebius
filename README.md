@@ -953,9 +953,12 @@ The merged model is publicly available on HuggingFace — see Step 5 above. For 
       merge_adapter.py   Merge LoRA adapter into base model for vLLM serving
       save_adapter.py    Save adapter utility
       serve_vllm.py      vLLM inference server — runs as Nebius Endpoint
+      safety_gate.py     Calibration-informed dual-judge safety gate (Token Factory)
+      safe_endpoint.py   Safe Simplification Endpoint — FastAPI: vLLM + safety gate
     docker/
-      Dockerfile.train   Training image
-      Dockerfile.serve   Serving image
+      Dockerfile.train    Training image
+      Dockerfile.serve    Serving image
+      Dockerfile.endpoint Safe Simplification Endpoint image (vLLM + FastAPI)
     jobs/
       job_train.yaml         Full training job config
       job_ablation.yaml      Parametrized ablation job config
@@ -963,8 +966,10 @@ The merged model is publicly available on HuggingFace — see Step 5 above. For 
       job_safety_eval.yaml   Safety evaluation job config
       job_ablation_run.sh    Ablation submission shell script
       endpoint_vllm.yaml     vLLM endpoint deployment config
+      safe_endpoint.yaml     Safe Simplification Endpoint job config
     scripts/
-      reproduce.sh       One-command reproducibility script
+      reproduce.sh         One-command reproducibility script
+      start_endpoint.sh    Boot vLLM + Safe Endpoint API (used inside endpoint-v1 image)
     tests/
       test_metrics.py    Unit tests for ROUGE-L, FK-Grade, prompt builder
     send_to_mlflow.py    Nebius Managed MLflow experiment logging
