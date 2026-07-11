@@ -457,6 +457,8 @@ Winner configuration: **r=32, all_attn, 8K** — lowest `eval_loss` → used for
 
 > **Limitation:** `SFTTrainer` was used without `DataCollatorForCompletionOnlyLM`, so loss is computed on the full prompt+response sequence (not completion-only). Combined with `pad_token = eos_token`, this is the standard SFT footgun pair. The model still achieves ROUGE-L 0.6638 — suggesting the task is learnable without masking — but completion-only masking would be the correct approach and remains future work.
 
+> **Limitation:** `TASK_INSTRUCTION` in `train.py` and `evaluate.py` have drifted — the training prompt includes two additional constraints not present in the eval prompt. The model was trained against `train.py`'s stricter version; eval uses a slightly looser prompt. Template unification via `src/prompts.py` was deferred to avoid changing `evaluate.py` close to submission.
+
 ## How it runs on Nebius
 
 Nebius Serverless AI Jobs handle training and ablation.
