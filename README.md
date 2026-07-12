@@ -51,7 +51,9 @@ This submission extends it with a full MLOps lifecycle on Nebius:
 | Training | ✅ H200, single run | ✅ Reproduced on H100 — validated |
 | Parallel ablation | ❌ | ✅ 7 jobs × 20 min simultaneously |
 | Production serving | ❌ | ✅ vLLM Endpoint — OpenAI-compatible API |
-| Safety evaluation | ❌ | ✅ LLM-as-judge via Token Factory |
+| Safety evaluation | ❌ | ✅ LLM-as-judge via Token Factory (3 rounds, 4,004 calls) |
+| Judge calibration | ❌ | ✅ Perturbation-based benchmark — [MedSimp-JudgeBench](https://huggingface.co/datasets/chambul/MedSimp-JudgeBench) |
+| Safe Endpoint | ❌ | ✅ vLLM + calibration-informed Token Factory guardrail |
 | MLOps pipeline | ❌ | ✅ Object Storage — stateless jobs, persistent adapters |
 | Hardware validation | ❌ | ✅ H200 → H100 reproduction, δ 1.6–5.0% |
 
