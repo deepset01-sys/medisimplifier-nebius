@@ -96,11 +96,27 @@ Please pay special attention to:
 
 This is a Nebius Serverless AI Builders Challenge — not a research competition. The judging criteria reward Product Usage Depth, Reproducibility, and Educational Content Quality alongside Originality.
 
-Since the last review, we implemented the perturbation-based judge calibration you suggested:
-- 708 reference simplifications with known errors (dose 10×, negation flip, diagnosis drop, lateral swap)
-- Run via Nebius Token Factory: 1,416 judge calls (708 × 2 judges)
-- Results: Qwen detects structural errors better than Llama (dose: 80% vs 44%, lateral: 83% vs 43%); both miss diagnosis drops (7-14%); specificity ~98% for both
-- Total Token Factory calls now: 5,420 (4,004 safety + 1,416 calibration)
-- Cost: ~$5
+Since the last review (v34, score 49/60), we implemented ALL your top-3 critical fixes plus your bonus recommendation:
 
-Given this addition, what is the single most impactful remaining change that would push this to Top 3 Overall? Be specific and honest about whether it's achievable before July 15.
+**Critical fixes completed:**
+- Ablation output collision fixed (unique --output-dir per config, 3+2+2=7 non-overlapping jobs)
+- eval_only bulletproofed (preflight checks, smoke mode --limit 20, ROUGE-L auto-diff hint)
+- Silent failure paths closed (n_truncated_prompts, n_prompt_leaks in results.json, --native-template guard)
+
+**Bonus recommendation completed:**
+- Safe Simplification Endpoint shipped: vLLM + calibration-informed dual-judge Token Factory guardrail
+- Calibration decision rule: trust Qwen on structural errors (80-83% sensitivity), warn on diagnosis-drop risk (7-14%)
+- Docker image: chambul/medisimplifier:endpoint-v2 (live tested, FastAPI on port 8000)
+- 5,420 total Token Factory calls (4,004 safety + 1,416 calibration)
+
+**Additional artifacts:**
+- chambul/MedSimp-JudgeBench: 708-sample HuggingFace dataset (public, CC-BY-NC-SA-4.0)
+- SFTTrainer completion-only masking disclosed as known limitation
+- Template drift (train.py vs evaluate.py) disclosed as known limitation
+
+**The submission now has:**
+- 5 Nebius services: Jobs, Endpoints, Token Factory, Object Storage, Managed MLflow
+- Two Nebius products composed: Endpoint (vLLM) + Token Factory (judges) in one inference path
+- Findings → product: calibration data parameterizes the Safe Endpoint decision rule
+
+Given all of this, what is your honest assessment: is this submission Top 3 material? What single gap, if any, remains that we could close before July 15?
