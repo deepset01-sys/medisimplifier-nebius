@@ -817,6 +817,8 @@ Our evaluation run:
 
 ### 5. Deploy live endpoint
 
+> **For production use with calibrated safety guardrail:** see [Safe Simplification Endpoint](#safe-simplification-endpoint) below. This step deploys the raw vLLM endpoint without safety evaluation — suitable for quick testing.
+
 The merged OpenBioLLM-8B model is publicly available on HuggingFace:
 [chambul/MediSimplifier-OpenBioLLM-merged](https://huggingface.co/chambul/MediSimplifier-OpenBioLLM-merged)
 
