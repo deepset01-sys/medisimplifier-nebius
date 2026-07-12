@@ -91,24 +91,6 @@ All results use seed=42. Multi-seed validation (seeds 42 and 2) confirms ROUGE-L
 
 > **FK-Grade target:** Technion target was FK ≤ 6.0. Best achieved: 6.14 (Mistral-7B, Nebius H100). The gap reflects the tension between medical accuracy preservation and maximum simplification.
 
-## Observability — Two-Layer MLOps on Nebius
-
-**📊 Live Training Dashboard (Weights & Biases):**
-[wandb.ai/deepset01-chambul/medisimplifier](https://wandb.ai/deepset01-chambul/medisimplifier)
-*(Project is public — no login required to view training curves)*
-
-> Training monitored via W&B on Nebius H100 NVLink.
-> OpenBioLLM-8B: train_loss 0.844→0.635 over 3 epochs (1,500 steps, seed=42).
-> Dashboard includes loss curves, eval metrics per epoch, gradient norms, and hyperparameters.
-
-**📊 Evaluation Tracking (Nebius Managed MLflow):**
-All evaluation results logged to Nebius Managed MLflow during development — 4 runs across 3 models and 2 seeds, with full params, metrics, and git commit traceability.
-Export: [mlflow_runs.csv](results/nebius_evidence/mlflow_runs.csv) | Logging script: [send_to_mlflow.py](send_to_mlflow.py)
-
-To restore the live experiment: create a Nebius Managed MLflow cluster, set `MLFLOW_TRACKING_URI`, and run `python send_to_mlflow.py` — all 4 runs restore in ~5 minutes.
-
-> Training observability (W&B) + Evaluation observability (Nebius MLflow) = two-layer MLOps visibility, both on Nebius infrastructure.
-
 ## Baseline vs Fine-Tuned Results
 
 ### Zero-Shot Baseline (no fine-tuning, 1,001 test samples)
@@ -132,6 +114,24 @@ OpenBioLLM-8B had deep biomedical vocabulary but lacked the simplification task 
 > **Alternative hypothesis:** OpenBioLLM's low zero-shot may reflect instruction-following deficit (Llama-3 base vs instruction-tuned Mistral) rather than domain knowledge differences. Both hypotheses consistent with n=3 data — distinguishing them requires a controlled ablation.
 
 > **Implication for practitioners:** Optimize for domain alignment, not zero-shot benchmark performance. The model that knows your domain deepest will extract the most value from fine-tuning, even from a weaker baseline.
+
+## Observability — Two-Layer MLOps on Nebius
+
+**📊 Live Training Dashboard (Weights & Biases):**
+[wandb.ai/deepset01-chambul/medisimplifier](https://wandb.ai/deepset01-chambul/medisimplifier)
+*(Project is public — no login required to view training curves)*
+
+> Training monitored via W&B on Nebius H100 NVLink.
+> OpenBioLLM-8B: train_loss 0.844→0.635 over 3 epochs (1,500 steps, seed=42).
+> Dashboard includes loss curves, eval metrics per epoch, gradient norms, and hyperparameters.
+
+**📊 Evaluation Tracking (Nebius Managed MLflow):**
+All evaluation results logged to Nebius Managed MLflow during development — 4 runs across 3 models and 2 seeds, with full params, metrics, and git commit traceability.
+Export: [mlflow_runs.csv](results/nebius_evidence/mlflow_runs.csv) | Logging script: [send_to_mlflow.py](send_to_mlflow.py)
+
+To restore the live experiment: create a Nebius Managed MLflow cluster, set `MLFLOW_TRACKING_URI`, and run `python send_to_mlflow.py` — all 4 runs restore in ~5 minutes.
+
+> Training observability (W&B) + Evaluation observability (Nebius MLflow) = two-layer MLOps visibility, both on Nebius infrastructure.
 
 ## Evaluation Evidence
 
