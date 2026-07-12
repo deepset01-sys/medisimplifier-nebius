@@ -87,6 +87,8 @@ All results use seed=42. Multi-seed validation (seeds 42 and 2) confirms ROUGE-L
 
 > Evaluation: 1,001 test samples, greedy decoding, seed=42.
 
+## Observability — Two-Layer MLOps on Nebius
+
 **📊 Live Training Dashboard (Weights & Biases):**
 [wandb.ai/deepset01-chambul/medisimplifier](https://wandb.ai/deepset01-chambul/medisimplifier)
 *(Project is public — no login required to view training curves)*
