@@ -66,6 +66,38 @@ This submission extends it with a full MLOps lifecycle on Nebius:
 > **Endpoint** = Safe Simplification Endpoint (vLLM + calibration-informed dual-judge guardrail).
 > The ranking reversal finding reproduces on Nebius H100 within 1.6–5.0% — confirming it is not a hardware artifact. The novel Nebius-enabled finding: CoT prompting amplifies judge disagreement (κ: 0.11→0.04), quantified via perturbation calibration (Qwen: 80% sensitivity on structural errors vs Llama: 44%).
 
+## Ablation Study Results
+
+All ablation runs: 1 epoch, OpenBioLLM-8B base, 7 Nebius H100 Jobs (some configs shared across phases).
+
+> All ablation runs use 1 epoch for compute efficiency.
+> Winner selected by `eval_loss` from committed Nebius training logs (`results/nebius_logs/r*_logs.json.gz`).
+> Final model trained for 3 epochs using the winning configuration.
+
+**7 ablation configurations (Nebius Jobs):**
+
+| Config | rank | modules | data |
+|--------|------|---------|------|
+| r=8, q+v | 8 | q+v | 8K |
+| r=16, q+v | 16 | q+v | 8K |
+| r=32, q+v | 32 | q+v | 8K |
+| r=32, q_only | 32 | q_only | 8K |
+| r=32, all_attn | 32 | all_attn | 8K |
+| r=32, all_attn, 4K | 32 | all_attn | 4K |
+| r=32, all_attn, 2K | 32 | all_attn | 2K |
+
+Winner configuration: **r=32, all_attn, 8K** — lowest `eval_loss` → used for full 3-epoch training → final ROUGE-L **0.6638** (Nebius H100; 0.6749 on Technion H200).
+
+> Each configuration was run once (n=1, seed=42) as a separate Nebius Job. Winner selected by `eval_loss` from committed training logs.
+
+> **Limitation:** Number of training epochs (3) was not independently ablated — ablation jobs use 1 epoch for compute efficiency while the full training run uses 3 epochs. The epoch effect is observed but not isolated as a controlled variable.
+
+> **Limitation:** `SFTTrainer` was used without `DataCollatorForCompletionOnlyLM`, so loss is computed on the full prompt+response sequence (not completion-only). Combined with `pad_token = eos_token`, this is the standard SFT footgun pair. The model still achieves ROUGE-L 0.6638 — suggesting the task is learnable without masking — but completion-only masking would be the correct approach and remains future work.
+
+> **Limitation:** `TASK_INSTRUCTION` in `train.py` and `evaluate.py` have drifted — the training prompt includes two additional constraints not present in the eval prompt. The model was trained against `train.py`'s stricter version; eval uses a slightly looser prompt. Template unification via `src/prompts.py` was deferred to avoid changing `evaluate.py` close to submission.
+
+> **Note on template residue:** ChatML tokens (`<|im_end|>`) are plain text in Llama-3's tokenizer (not special tokens), so `skip_special_tokens=True` would not strip a literal `<|im_end|>` from predictions. A grep of the committed eval job log (`results/nebius_logs/eval-persamples.json.gz`) found zero `<|im_end|>` occurrences — consistent with Llama-3's EOS token halting generation before any template suffix. ROUGE-L 0.6638 is unaffected. Adding explicit `StoppingCriteria` remains future work.
+
 ## Evaluation Results
 
 OpenBioLLM-8B achieves ROUGE-L 0.6638 on Nebius H100 — independently reproduced from the Technion project (H200 results in parentheses for comparison):
@@ -114,38 +146,6 @@ OpenBioLLM-8B had deep biomedical vocabulary but lacked the simplification task 
 > **Alternative hypothesis:** OpenBioLLM's low zero-shot may reflect instruction-following deficit (Llama-3 base vs instruction-tuned Mistral) rather than domain knowledge differences. Both hypotheses consistent with n=3 data — distinguishing them requires a controlled ablation.
 
 > **Implication for practitioners:** Optimize for domain alignment, not zero-shot benchmark performance. The model that knows your domain deepest will extract the most value from fine-tuning, even from a weaker baseline.
-
-## Ablation Study Results
-
-All ablation runs: 1 epoch, OpenBioLLM-8B base, 7 Nebius H100 Jobs (some configs shared across phases).
-
-> All ablation runs use 1 epoch for compute efficiency.
-> Winner selected by `eval_loss` from committed Nebius training logs (`results/nebius_logs/r*_logs.json.gz`).
-> Final model trained for 3 epochs using the winning configuration.
-
-**7 ablation configurations (Nebius Jobs):**
-
-| Config | rank | modules | data |
-|--------|------|---------|------|
-| r=8, q+v | 8 | q+v | 8K |
-| r=16, q+v | 16 | q+v | 8K |
-| r=32, q+v | 32 | q+v | 8K |
-| r=32, q_only | 32 | q_only | 8K |
-| r=32, all_attn | 32 | all_attn | 8K |
-| r=32, all_attn, 4K | 32 | all_attn | 4K |
-| r=32, all_attn, 2K | 32 | all_attn | 2K |
-
-Winner configuration: **r=32, all_attn, 8K** — lowest `eval_loss` → used for full 3-epoch training → final ROUGE-L **0.6638** (Nebius H100; 0.6749 on Technion H200).
-
-> Each configuration was run once (n=1, seed=42) as a separate Nebius Job. Winner selected by `eval_loss` from committed training logs.
-
-> **Limitation:** Number of training epochs (3) was not independently ablated — ablation jobs use 1 epoch for compute efficiency while the full training run uses 3 epochs. The epoch effect is observed but not isolated as a controlled variable.
-
-> **Limitation:** `SFTTrainer` was used without `DataCollatorForCompletionOnlyLM`, so loss is computed on the full prompt+response sequence (not completion-only). Combined with `pad_token = eos_token`, this is the standard SFT footgun pair. The model still achieves ROUGE-L 0.6638 — suggesting the task is learnable without masking — but completion-only masking would be the correct approach and remains future work.
-
-> **Limitation:** `TASK_INSTRUCTION` in `train.py` and `evaluate.py` have drifted — the training prompt includes two additional constraints not present in the eval prompt. The model was trained against `train.py`'s stricter version; eval uses a slightly looser prompt. Template unification via `src/prompts.py` was deferred to avoid changing `evaluate.py` close to submission.
-
-> **Note on template residue:** ChatML tokens (`<|im_end|>`) are plain text in Llama-3's tokenizer (not special tokens), so `skip_special_tokens=True` would not strip a literal `<|im_end|>` from predictions. A grep of the committed eval job log (`results/nebius_logs/eval-persamples.json.gz`) found zero `<|im_end|>` occurrences — consistent with Llama-3's EOS token halting generation before any template suffix. ROUGE-L 0.6638 is unaffected. Adding explicit `StoppingCriteria` remains future work.
 
 ## Observability — Two-Layer MLOps on Nebius
 
