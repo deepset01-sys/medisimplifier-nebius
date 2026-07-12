@@ -17,10 +17,7 @@
 
 ## What this project does
 
-Medical discharge summaries are written at college reading level (FK-Grade 14.5).
-Only 12% of American adults have sufficient health literacy to understand them.
-
-MediSimplifier is an end-to-end serverless ML pipeline on Nebius — covering fine-tuning, parallel ablation, production serving, safety evaluation, and MLOps — applied to the task of simplifying medical discharge summaries from college reading level (FK-Grade 14.5) to 7th-grade level (~7 grade levels) while preserving all critical medical information.
+MediSimplifier is an end-to-end serverless ML research platform on Nebius — covering fine-tuning, parallel ablation, production serving, safety evaluation, perturbation-based judge calibration, and a calibration-informed Safe Simplification Endpoint — applied to the task of simplifying medical discharge summaries from college reading level (FK-Grade 14.5) to 7th-grade level while preserving all critical medical information.
 
 > **What's new in this Nebius submission vs the Technion project:**
 > The ranking-reversal and LoRA rank findings were first observed
