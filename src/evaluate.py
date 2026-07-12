@@ -220,9 +220,7 @@ def main():
 
     # Guard: --native-template without --zero-shot means adapter + wrong template = silent wrong results
     if args.native_template and not args.zero_shot:
-        print("ERROR: --native-template requires --zero-shot (native templates are for zero-shot baselines only).")
-        print("       Fine-tuned models must use the training-time template. Remove --native-template or add --zero-shot.")
-        import sys; sys.exit(1)
+        parser.error("--native-template requires --zero-shot (native templates are for zero-shot baselines only). Fine-tuned models must use the training-time template.")
 
     out = Path(args.output_dir)
     out.mkdir(parents=True, exist_ok=True)
