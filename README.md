@@ -105,18 +105,9 @@ To restore the live experiment: create a Nebius Managed MLflow cluster, set `MLF
 
 > Training observability (W&B) + Evaluation observability (Nebius MLflow) = two-layer MLOps visibility, both on Nebius infrastructure.
 
-> **Note on adapter provenance:** The merged model (`chambul/MediSimplifier-OpenBioLLM-merged`) was created by merging the LoRA adapter trained on Nebius H100 NVLink (`medisimplifier-adapters/adapter/`, job: `medisimplifier-full-training`, r=32, all_attn, 3 epochs, best_epoch=2) with the base model. This adapter produced ROUGE-L 0.6638 as documented in [`results_openbio.json`](results/nebius_evidence/results_openbio.json) and [`full_training_results.json`](results/nebius_evidence/full_training_results.json). The adapter lives in the Nebius bucket and is also publicly available at [`chambul/MediSimplifier-LoRA-Adapter-Nebius`](https://huggingface.co/chambul/MediSimplifier-LoRA-Adapter-Nebius) — the `GuyDor007` repo contains the Technion-era adapters.
+> **Adapter provenance:** `chambul/MediSimplifier-OpenBioLLM-merged` merges the Nebius-trained LoRA adapter (`chambul/MediSimplifier-LoRA-Adapter-Nebius`, r=32, all_attn, 3 epochs) with the base model. ROUGE-L 0.6638 documented in [`results_openbio.json`](results/nebius_evidence/results_openbio.json).
 
-> **Note on FK-Grade target:** The Technion project target was FK ≤ 6.0.
-> Best achieved on H200: 6.91 (Mistral-7B, Technion run).
-> OpenBioLLM-8B achieved 7.16 on Technion H200 hardware.
-> Nebius H100 reproduction: OpenBioLLM 7.33, Mistral 6.14, BioMistral 6.13.
-> The difference reflects independent reproduction across hardware generations (H200 → H100) — separate training runs, not the same artifact on two GPUs.
-> The gap from the 6.0 target reflects the inherent tension between medical accuracy preservation
-> and maximum simplification.
-
-> The ranking reversal holds across both hardware generations —
-> see Delta column above (H200→H100 independent reproduction delta: 1.6–5.0%).
+> **FK-Grade target:** Technion target was FK ≤ 6.0. Best achieved: 6.14 (Mistral-7B, Nebius H100). The gap reflects the tension between medical accuracy preservation and maximum simplification.
 
 ## Baseline vs Fine-Tuned Results
 
