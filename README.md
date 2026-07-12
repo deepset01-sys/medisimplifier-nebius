@@ -734,7 +734,7 @@ for RANK in 8 16 32; do
     --parent-id ${NEBIUS_PROJECT_ID} \
     --image chambul/medisimplifier:train-v27 \
     --container-command python \
-    --args "train.py --model openbio --epochs 1 --rank ${RANK} --modules q_v --data-size 7999 --seed 42" \
+    --args "train.py --model openbio --epochs 1 --rank ${RANK} --modules q_v --data-size 7999 --seed 42 --output-dir /output/ablation_r${RANK}_qv_8k" \
     --env HF_TOKEN=${HF_TOKEN} \
     --platform gpu-h100-sxm \
     --preset 1gpu-16vcpu-200gb \
@@ -745,13 +745,13 @@ for RANK in 8 16 32; do
 done
 
 # Phase 2 — Target modules (r=32, 8K data)
-for MODULES in q_only q_v all_attn; do
+for MODULES in q_only all_attn; do
   nebius ai job create \
     --name medisimplifier-ablation-${MODULES} \
     --parent-id ${NEBIUS_PROJECT_ID} \
     --image chambul/medisimplifier:train-v27 \
     --container-command python \
-    --args "train.py --model openbio --epochs 1 --rank 32 --modules ${MODULES} --data-size 7999 --seed 42" \
+    --args "train.py --model openbio --epochs 1 --rank 32 --modules ${MODULES} --data-size 7999 --seed 42 --output-dir /output/ablation_r32_${MODULES}_8k" \
     --platform gpu-h100-sxm \
     --preset 1gpu-16vcpu-200gb \
     --disk-size 250Gi \
@@ -762,13 +762,13 @@ for MODULES in q_only q_v all_attn; do
 done
 
 # Phase 3 — Data size (r=32, all_attn)
-for DATA in 2000 4000 7999; do
+for DATA in 2000 4000; do
   nebius ai job create \
     --name medisimplifier-ablation-data${DATA} \
     --parent-id ${NEBIUS_PROJECT_ID} \
     --image chambul/medisimplifier:train-v27 \
     --container-command python \
-    --args "train.py --model openbio --epochs 1 --rank 32 --modules all_attn --data-size ${DATA} --seed 42" \
+    --args "train.py --model openbio --epochs 1 --rank 32 --modules all_attn --data-size ${DATA} --seed 42 --output-dir /output/ablation_r32_all_attn_${DATA}" \
     --platform gpu-h100-sxm \
     --preset 1gpu-16vcpu-200gb \
     --disk-size 250Gi \
