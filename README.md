@@ -20,12 +20,14 @@
 MediSimplifier is an end-to-end serverless ML research platform on Nebius — covering fine-tuning, parallel ablation, production serving, safety evaluation, perturbation-based judge calibration, and a calibration-informed Safe Simplification Endpoint — applied to the task of simplifying medical discharge summaries from college reading level (FK-Grade 14.5) to 7th-grade level while preserving all critical medical information.
 
 > **What's new in this Nebius submission vs the Technion project:**
-> The ranking-reversal and LoRA rank findings were first observed
-> in the Technion project. New contributions here are:
-> the **Nebius MLOps pipeline** (parallel ablation, stateless jobs,
-> bucket persistence), **H100 hardware reproduction** (δ 1.6–5.0%),
-> **vLLM production serving**, and **LLM-as-judge safety evaluation**
-> via Token Factory. See [What Nebius Added](#what-nebius-added) for details.
+> The ranking-reversal and LoRA rank findings were first observed in the Technion project.
+> New contributions here are: the **Nebius MLOps pipeline** (parallel ablation, stateless jobs,
+> bucket persistence), **H100 hardware reproduction** (δ 1.6–5.0%), **vLLM production serving**,
+> **three-round LLM-as-judge safety evaluation** (4,004 Token Factory calls) revealing CoT
+> amplifies judge disagreement (κ: 0.11→0.04), **perturbation-based judge calibration**
+> ([MedSimp-JudgeBench](https://huggingface.co/datasets/chambul/MedSimp-JudgeBench), 708 samples),
+> and a **calibration-informed Safe Simplification Endpoint** composing vLLM + Token Factory
+> into one inference path. See [What Nebius Added](#what-nebius-added) for details.
 
 **Key findings (validating r=32 for medical domain fine-tuning, consistent with QLoRA-era practice):**
 
