@@ -817,7 +817,9 @@ Our evaluation run:
 
 ### 5. Deploy live endpoint
 
-> **For production use with calibrated safety guardrail:** see [Safe Simplification Endpoint](#safe-simplification-endpoint) below. This step deploys the raw vLLM endpoint without safety evaluation — suitable for quick testing.
+> **MediSimplifier ships two serving options:**
+> 1. **vLLM Endpoint** (this step) — fast, OpenAI-compatible, no safety evaluation. Ideal for quick testing and integration.
+> 2. **[Safe Simplification Endpoint](#safe-simplification-endpoint)** — vLLM + calibration-informed dual-judge guardrail via Token Factory. Recommended for production use.
 
 The merged OpenBioLLM-8B model is publicly available on HuggingFace:
 [chambul/MediSimplifier-OpenBioLLM-merged](https://huggingface.co/chambul/MediSimplifier-OpenBioLLM-merged)
