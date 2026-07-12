@@ -1,4 +1,4 @@
-# MediSimplifier — End-to-End Serverless ML Pipeline on Nebius
+# MediSimplifier — Serverless ML Research Platform on Nebius
 
 [![Nebius Jobs](https://img.shields.io/badge/Nebius-Serverless%20AI%20Jobs-blue)](https://nebius.com)
 [![HuggingFace Models](https://img.shields.io/badge/HF-Models-yellow)](https://huggingface.co/chambul/MediSimplifier-LoRA-Adapter-Nebius)
