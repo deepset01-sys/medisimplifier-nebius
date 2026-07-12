@@ -87,6 +87,10 @@ All results use seed=42. Multi-seed validation (seeds 42 and 2) confirms ROUGE-L
 
 > Evaluation: 1,001 test samples, greedy decoding, seed=42.
 
+> **Adapter provenance:** `chambul/MediSimplifier-OpenBioLLM-merged` merges the Nebius-trained LoRA adapter (`chambul/MediSimplifier-LoRA-Adapter-Nebius`, r=32, all_attn, 3 epochs) with the base model. ROUGE-L 0.6638 documented in [`results_openbio.json`](results/nebius_evidence/results_openbio.json).
+
+> **FK-Grade target:** Technion target was FK ≤ 6.0. Best achieved: 6.14 (Mistral-7B, Nebius H100). The gap reflects the tension between medical accuracy preservation and maximum simplification.
+
 ## Observability — Two-Layer MLOps on Nebius
 
 **📊 Live Training Dashboard (Weights & Biases):**
@@ -104,10 +108,6 @@ Export: [mlflow_runs.csv](results/nebius_evidence/mlflow_runs.csv) | Logging scr
 To restore the live experiment: create a Nebius Managed MLflow cluster, set `MLFLOW_TRACKING_URI`, and run `python send_to_mlflow.py` — all 4 runs restore in ~5 minutes.
 
 > Training observability (W&B) + Evaluation observability (Nebius MLflow) = two-layer MLOps visibility, both on Nebius infrastructure.
-
-> **Adapter provenance:** `chambul/MediSimplifier-OpenBioLLM-merged` merges the Nebius-trained LoRA adapter (`chambul/MediSimplifier-LoRA-Adapter-Nebius`, r=32, all_attn, 3 epochs) with the base model. ROUGE-L 0.6638 documented in [`results_openbio.json`](results/nebius_evidence/results_openbio.json).
-
-> **FK-Grade target:** Technion target was FK ≤ 6.0. Best achieved: 6.14 (Mistral-7B, Nebius H100). The gap reflects the tension between medical accuracy preservation and maximum simplification.
 
 ## Baseline vs Fine-Tuned Results
 
