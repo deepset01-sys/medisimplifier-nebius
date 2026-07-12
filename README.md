@@ -57,10 +57,10 @@ This submission extends it with a full MLOps lifecycle on Nebius:
 | MLOps pipeline | ❌ | ✅ Object Storage — stateless jobs, persistent adapters |
 | Hardware validation | ❌ | ✅ H200 → H100 reproduction, δ 1.6–5.0% |
 
-> **Jobs** = training / ablation / evaluation (stateless, pay-per-second).
-> **Endpoint** = inference serving (live, OpenAI-compatible API).
-> The ranking reversal finding reproduces on Nebius H100 within 1.6–5.0%
-> of the original — confirming it is not a hardware artifact.
+> **Jobs** = training / ablation / evaluation / safety eval (stateless, pay-per-second).
+> **Token Factory** = LLM-as-judge safety evaluation + perturbation calibration (5,420 calls total).
+> **Endpoint** = Safe Simplification Endpoint (vLLM + calibration-informed dual-judge guardrail).
+> The ranking reversal finding reproduces on Nebius H100 within 1.6–5.0% — confirming it is not a hardware artifact. The novel Nebius-enabled finding: CoT prompting amplifies judge disagreement (κ: 0.11→0.04), quantified via perturbation calibration (Qwen: 80% sensitivity on structural errors vs Llama: 44%).
 
 ## Results
 
