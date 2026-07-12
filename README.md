@@ -486,7 +486,14 @@ Pipeline:
     Nebius Job: Evaluation (ROUGE-L, SARI, BERTScore, FK-Grade)
         |
         v
-    Nebius Endpoint: POST /v1/completions -> simplified text (vLLM, OpenAI-compatible)
+    Nebius Jobs: Safety eval v1/v2/v3 (Token Factory: 4,004 judge calls)
+        |
+        v
+    Token Factory: Perturbation calibration (708 × 2 judges = 1,416 calls → MedSimp-JudgeBench)
+        |
+        v
+    Nebius Endpoint: Safe Simplification Endpoint
+        POST /v1/simplify → simplified text + calibrated safety verdict (vLLM + Token Factory)
 
 **Why Serverless Jobs and not a VM or Kubernetes cluster?**
 
