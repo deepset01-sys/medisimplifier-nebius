@@ -127,38 +127,11 @@ reversal. All pairwise differences statistically significant via paired bootstra
 
 ### Why Did the Ranking Reversal Happen?
 
-The ranking reversal (worst zero-shot → best fine-tuned) is consistent across all 3 models: zero-shot rank inversely predicts fine-tuning gain in a monotonic pattern (n=3, descriptive only — not a significance claim).
+OpenBioLLM-8B had deep biomedical vocabulary but lacked the simplification task — fine-tuning taught it *how* to simplify, and it ran with its domain knowledge. BioMistral was already closer to the task, so it had less headroom to improve.
 
-**OpenBioLLM-8B** was pre-trained exclusively on biomedical literature.
-It already "knew" the domain vocabulary — terms like "myocardial infarction,"
-"bilateral pneumonia," and "anticoagulation therapy" were deeply embedded
-in its representations. What it lacked was the *simplification task* itself:
-the ability to translate that knowledge into plain language.
+> **Alternative hypothesis:** OpenBioLLM's low zero-shot may reflect instruction-following deficit (Llama-3 base vs instruction-tuned Mistral) rather than domain knowledge differences. Both hypotheses consistent with n=3 data — distinguishing them requires a controlled ablation.
 
-**BioMistral-7B**, by contrast, had stronger zero-shot simplification
-because its general-purpose pre-training included more everyday language
-patterns. But it had less headroom to improve — it was already closer
-to the task, so fine-tuning gave it less leverage.
-
-This creates a counterintuitive result: **the model that knew the most
-about medicine but the least about simplification benefited most from
-fine-tuning.** LoRA essentially taught OpenBioLLM *how* to simplify —
-and it ran with the task, applying its deep domain knowledge to produce
-the most faithful and readable simplifications.
-
-> **Alternative hypothesis:** OpenBioLLM-8B is a Llama-3 base model fine-tune
-> with limited instruction-following capability, while Mistral-7B-Instruct-v0.2
-> is already instruction-tuned. The zero-shot gap may reflect instruction-following
-> deficits rather than domain knowledge differences — fine-tuning would then
-> teach instruction-following as much as simplification. Both hypotheses are
-> consistent with the observed data (n=3); distinguishing them would require
-> a controlled instruction-tuning ablation.
-
-**Implication for practitioners:** When selecting a base model for
-domain-specific fine-tuning, don't optimize for zero-shot benchmark
-performance. Instead, optimize for *domain alignment* — the model that
-knows your domain deepest will extract the most value from task-specific
-fine-tuning, even if it starts from a weaker baseline.
+> **Implication for practitioners:** Optimize for domain alignment, not zero-shot benchmark performance. The model that knows your domain deepest will extract the most value from fine-tuning, even from a weaker baseline.
 
 ## Evaluation Evidence
 
