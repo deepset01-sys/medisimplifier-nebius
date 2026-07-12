@@ -29,17 +29,21 @@ MediSimplifier is an end-to-end serverless ML research platform on Nebius — co
 > and a **calibration-informed Safe Simplification Endpoint** composing vLLM + Token Factory
 > into one inference path. See [What Nebius Added](#what-nebius-added) for details.
 
-**Key findings (validating r=32 for medical domain fine-tuning, consistent with QLoRA-era practice):**
+**Key findings:**
 
-| Finding | Result |
-|---------|--------|
-| Optimal LoRA rank | r=32 outperforms r=4-8 (Hu et al. 2021 baseline); consistent with post-QLoRA practice (Dettmers et al. 2023) |
-| Optimal modules | all_attn (Q+K+V+O) outperforms standard Q+V |
-| Ranking reversal | Worst zero-shot model becomes best fine-tuned (+153.1% on Nebius H100) |
-| Readability | FK-Grade 14.5 → 6.91 (Mistral-7B, Technion H200); Nebius H100: OpenBioLLM 7.33, Mistral 6.14, BioMistral 6.13 |
-| Data efficiency | 4K samples achieves 97% of 8K performance |
-| Baseline-improvement correlation | Monotonic across all 3 models — zero-shot rank inversely predicts fine-tuning gain (n=3, descriptive only) |
-| Total compute | 7 ablation runs + 3 full training runs, ~10 GPU hours (~7h wall-clock; ablation jobs run in parallel) |
+| Finding | Result | Nebius service |
+|---------|--------|----------------|
+| Ranking reversal | Worst zero-shot → best fine-tuned (+153.1% on Nebius H100) | Jobs |
+| Native template validation | Ranking reversal confirmed — not a chat-template artifact | Jobs |
+| H100 reproduction | δ 1.6–5.0% from Technion H200 — not a hardware artifact | Jobs |
+| Optimal LoRA config | r=32, all_attn — consistent with QLoRA-era practice (Dettmers et al. 2023) | Jobs |
+| Data efficiency | 4K samples achieves 97% of 8K performance | Jobs |
+| Readability | FK-Grade 14.5 → 6.91 — significant simplification | Jobs |
+| Baseline-improvement correlation | Monotonic across all 3 models (n=3, descriptive only) | Jobs |
+| CoT amplifies judge disagreement | κ: 0.11→0.04 — counterintuitive, novel finding | Token Factory |
+| Judge calibration | Qwen 2× better than Llama on structural errors (dose: 80% vs 44%) | Token Factory |
+| Diagnosis-drop blind spot | Both judges: 7–14% sensitivity | Token Factory |
+| Specificity | ~98% — near-zero false positives on clean simplifications | Token Factory |
 
 ## What Nebius Added
 
