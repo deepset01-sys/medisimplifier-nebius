@@ -459,6 +459,8 @@ Winner configuration: **r=32, all_attn, 8K** — lowest `eval_loss` → used for
 
 > **Limitation:** `TASK_INSTRUCTION` in `train.py` and `evaluate.py` have drifted — the training prompt includes two additional constraints not present in the eval prompt. The model was trained against `train.py`'s stricter version; eval uses a slightly looser prompt. Template unification via `src/prompts.py` was deferred to avoid changing `evaluate.py` close to submission.
 
+> **Note on template residue:** ChatML tokens (`<|im_end|>`) are plain text in Llama-3's tokenizer (not special tokens), so `skip_special_tokens=True` would not strip a literal `<|im_end|>` from predictions. A grep of the committed eval job log (`results/nebius_logs/eval-persamples.json.gz`) found zero `<|im_end|>` occurrences — consistent with Llama-3's EOS token halting generation before any template suffix. ROUGE-L 0.6638 is unaffected. Adding explicit `StoppingCriteria` remains future work.
+
 ## How it runs on Nebius
 
 Nebius Serverless AI Jobs handle training and ablation.
