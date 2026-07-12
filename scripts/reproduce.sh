@@ -25,7 +25,13 @@ fi
 if ! python3 -c "from huggingface_hub import HfApi; HfApi().whoami(token='${HF_TOKEN}')" &>/dev/null; then
   echo "ERROR: HF_TOKEN is invalid or expired. Get a new token at https://huggingface.co/settings/tokens" && exit 1
 fi
-echo "==> Preflight OK (nebius CLI authenticated, HF token valid)"
+if ! python3 -c "from huggingface_hub import auth_check; auth_check('aaditya/Llama3-OpenBioLLM-8B', token='${HF_TOKEN}')" &>/dev/null; then
+  echo "ERROR: HF access to aaditya/Llama3-OpenBioLLM-8B not approved."
+  echo "       Request access at https://huggingface.co/aaditya/Llama3-OpenBioLLM-8B"
+  echo "       Fallback: bash scripts/reproduce.sh eval_only_merged (uses public merged model, no gate required)"
+  exit 1
+fi
+echo "==> Preflight OK (nebius CLI authenticated, HF token valid, gated model accessible)"
 
 MODE="${1:-full}"
 SMOKE="${2:-}"  # pass "smoke" as second arg for a quick 20-sample sanity check
@@ -127,6 +133,26 @@ if [[ "$MODE" == "eval_only" || "$MODE" == "full" ]]; then
     --image "$IMAGE" \
     --container-command python \
     --args "evaluate.py --model openbio --adapter-hf-repo chambul/MediSimplifier-LoRA-Adapter-Nebius --split test --output-dir /output/eval_results${SMOKE:+ --limit 20 --fast}" \
+    --env HF_TOKEN="${HF_TOKEN}" \
+    --env HF_HOME=/tmp/hf_cache \
+    --platform "$PLATFORM" \
+    --preset "$PRESET" \
+    --disk-size "$DISK" \
+    --subnet-id "${NEBIUS_SUBNET_ID}" \
+    --volume "${BUCKET}:/output:rw" \
+    --timeout 5h
+fi
+
+# ── Step 3b: eval_only_merged — fallback using public merged model (no gated base) ──
+if [[ "$MODE" == "eval_only_merged" ]]; then
+  echo "==> Submitting evaluation job (merged model, no gated base required)..."
+  echo "    Expected ROUGE-L: ~0.6638 (merged model may differ slightly from adapter)"
+  nebius ai job create \
+    --name medisimplifier-evaluate-merged \
+    --parent-id "${NEBIUS_PROJECT_ID}" \
+    --image "$IMAGE" \
+    --container-command python \
+    --args "evaluate.py --model merged --zero-shot --split test --output-dir /output/eval_results_merged" \
     --env HF_TOKEN="${HF_TOKEN}" \
     --env HF_HOME=/tmp/hf_cache \
     --platform "$PLATFORM" \

@@ -25,6 +25,10 @@ MODELS = {
         "hf_path": "mistralai/Mistral-7B-Instruct-v0.2",
         "format": "mistral",
     },
+    "merged": {
+        "hf_path": "chambul/MediSimplifier-OpenBioLLM-merged",
+        "format": "chatml",
+    },
 }
 
 TASK_INSTRUCTION = """Simplify the following medical discharge summary in plain language for patients with no medical background.
