@@ -66,10 +66,9 @@ This submission extends it with a full MLOps lifecycle on Nebius:
 > **Endpoint** = Safe Simplification Endpoint (vLLM + calibration-informed dual-judge guardrail).
 > The ranking reversal finding reproduces on Nebius H100 within 1.6–5.0% — confirming it is not a hardware artifact. The novel Nebius-enabled finding: CoT prompting amplifies judge disagreement (κ: 0.11→0.04), quantified via perturbation calibration (Qwen: 80% sensitivity on structural errors vs Llama: 44%).
 
-## Results
+## Evaluation Results
 
-> **Primary results: Nebius H100 reproduction**
-> (Technion H200 results in parentheses for comparison)
+OpenBioLLM-8B achieves ROUGE-L 0.6638 on Nebius H100 — independently reproduced from the Technion project (H200 results in parentheses for comparison):
 
 | Model | ROUGE-L (Nebius H100) | ROUGE-L (Technion H200) | Delta | SARI | BERTScore | FK-Grade | Improvement |
 |-------|----------------------|------------------------|-------|------|-----------|----------|-------------|
@@ -86,7 +85,6 @@ All results use seed=42. Multi-seed validation (seeds 42 and 2) confirms ROUGE-L
 > Improvement % = (Nebius H100 fine-tuned − zero-shot) / zero-shot.
 > OpenBioLLM: (0.6638 − 0.2623) / 0.2623 = +153.1%
 
-> Key finding: ranking reversal fully reproduced on Nebius H100.
 > Evaluation: 1,001 test samples, greedy decoding, seed=42.
 
 **📊 Live Training Dashboard (Weights & Biases):**
