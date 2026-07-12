@@ -133,140 +133,6 @@ To restore the live experiment: create a Nebius Managed MLflow cluster, set `MLF
 
 > Training observability (W&B) + Evaluation observability (Nebius MLflow) = two-layer MLOps visibility, both on Nebius infrastructure.
 
-## Evaluation Evidence
-
-All results are reproducible from public artifacts:
-
-### Committed Evidence Files
-
-All results are committed to this repository for durable verification:
-
-**Evaluation Results** (`results/nebius_evidence/`):
-| File | Model | ROUGE-L | 95% CI | SARI | BERTScore | FK-Grade |
-|------|-------|---------|--------|------|-----------|----------|
-| [results_openbio.json](results/nebius_evidence/results_openbio.json) | OpenBioLLM-8B | 0.6638 | 0.660–0.668 | 73.49 | 0.9460 | 7.33 |
-| [results_mistral.json](results/nebius_evidence/results_mistral.json) | Mistral-7B | 0.6253 | 0.620–0.630 | 72.75 | 0.9418 | 6.14 |
-| [results_biomistral.json](results/nebius_evidence/results_biomistral.json) | BioMistral-7B | 0.6004 | 0.595–0.605 | 71.97 | 0.9372 | 6.13 |
-| [bootstrap_input.json](results/nebius_evidence/bootstrap_input.json) | OpenBioLLM-8B | Per-sample ROUGE-L scores (n=1,001) — source for 95% CI bootstrap (n=10,000 resamples) | | | |
-| [eval_persamples_mistral.json](results/nebius_evidence/eval_persamples_mistral.json) | Mistral-7B | Per-sample ROUGE-L scores (n=1,001) — source for 95% CI bootstrap (n=10,000 resamples) | | | |
-| [eval_persamples_biomistral.json](results/nebius_evidence/eval_persamples_biomistral.json) | BioMistral-7B | Per-sample ROUGE-L scores (n=1,001) — source for 95% CI bootstrap (n=10,000 resamples) | | | |
-
-**Safety Evaluation** (`results/nebius_evidence/`):
-- [safety_results_v2.json](results/nebius_evidence/safety_results_v2.json) — 1,001 samples, dual judge (Llama + Qwen), simple prompt
-- [safety_results_v3.json](results/nebius_evidence/safety_results_v3.json) — 1,001 samples, dual judge (Llama + Qwen), 4-step CoT prompt
-- [safety_results.json](results/nebius_evidence/safety_results.json) — v1 preliminary (100 samples, single Llama judge)
-
-**Nebius Job Logs** (`results/nebius_logs/`):
-| File | Contents |
-|------|---------|
-| [full_train_logs.json.gz](results/nebius_logs/full_train_logs.json.gz) | Full OpenBioLLM-8B training — H100, train_loss 0.844→0.635 |
-| [endpoint_vllm_logs.json.gz](results/nebius_logs/endpoint_vllm_logs.json.gz) | vLLM endpoint startup + requests, vmapp_id: aiendpoint-e00ef3br6r14grvhhd |
-| [adapters_logs.json.gz](results/nebius_logs/adapters_logs.json.gz) | Merge adapter job |
-| [r32_all_8kdata.json.gz](results/nebius_logs/r32_all_8kdata.json.gz) | Ablation training: r=32, all_attn, 8K data |
-| [r32_all_4kdata_logs.json.gz](results/nebius_logs/r32_all_4kdata_logs.json.gz) | Ablation training: r=32, all_attn, 4K data |
-| [r32_all_attention_logs.json.gz](results/nebius_logs/r32_all_attention_logs.json.gz) | Ablation training: r=32, all_attn modules |
-| [r32_qv_logs.json.gz](results/nebius_logs/r32_qv_logs.json.gz) | Ablation training: r=32, q+v modules |
-| [r32_qonly_logs.json.gz](results/nebius_logs/r32_qonly_logs.json.gz) | Ablation training: r=32, q only |
-| [r16_qv_logs.json.gz](results/nebius_logs/r16_qv_logs.json.gz) | Ablation training: r=16, q+v |
-| [r8_qv_logs.json.gz](results/nebius_logs/r8_qv_logs.json.gz) | Ablation training: r=8, q+v |
-| [eval-persamples.json.gz](results/nebius_logs/eval-persamples.json.gz) | OpenBioLLM-8B evaluation job — 1,001 samples, ROUGE-L 0.6638 |
-| [eval-persamples-mistral.json.gz](results/nebius_logs/eval-persamples-mistral.json.gz) | Mistral-7B evaluation job — 1,001 samples, ROUGE-L 0.6253 |
-| [eval-persamples-biomistral.json.gz](results/nebius_logs/eval-persamples-biomistral.json.gz) | BioMistral-7B evaluation job — 1,001 samples, ROUGE-L 0.6004 |
-| [eval-seed2.json.gz](results/nebius_logs/eval-seed2.json.gz) | OpenBioLLM-8B eval — seed=2 (multi-seed validation), ROUGE-L 0.6651 |
-| [seed2.json.gz](results/nebius_logs/seed2.json.gz) | OpenBioLLM-8B training — seed=2, multi-seed validation run |
-| [safety-eval-v2.json.gz](results/nebius_logs/safety-eval-v2.json.gz) | Safety eval v2 — dual judge, simple prompt, n=1,001 |
-| [safety-eval-v3.json.gz](results/nebius_logs/safety-eval-v3.json.gz) | Safety eval v3 — dual judge, 4-step CoT prompt, n=1,001 |
-| [zeroshot-native-openbio.json.gz](results/nebius_logs/zeroshot-native-openbio.json.gz) | Native template zero-shot — OpenBioLLM-8B, n=1,001, ROUGE-L 0.2440 |
-| [zeroshot-native-mistral.json.gz](results/nebius_logs/zeroshot-native-mistral.json.gz) | Native template zero-shot — Mistral-7B, n=1,001, ROUGE-L 0.3971 |
-| [zeroshot-native-biomistral.json.gz](results/nebius_logs/zeroshot-native-biomistral.json.gz) | Native template zero-shot — BioMistral-7B, n=1,001, ROUGE-L 0.4190 |
-
-> All logs contain Nebius job IDs (aijob-* / aiendpoint-*),
-> GPU info (NVIDIA H100 80GB HBM3), and timestamps.
-> Proving the full pipeline ran on Nebius infrastructure.
-
-**📁 Eval Results (from medisimplifier-adapters bucket):**
-
-<details>
-<summary>OpenBioLLM-8B eval results</summary>
-
-```json
-{
-  "model": "openbio",
-  "n_samples": 1001,
-  "rouge_l": 0.6638,
-  "sari": 73.49,
-  "bertscore": 0.9460,
-  "fk_grade": 7.33,
-  "zero_shot": false,
-  "split": "test"
-}
-```
-</details>
-
-<details>
-<summary>Mistral-7B eval results</summary>
-
-```json
-{
-  "model": "mistral",
-  "n_samples": 1001,
-  "rouge_l": 0.6253,
-  "sari": 72.75,
-  "bertscore": 0.9418,
-  "fk_grade": 6.14,
-  "zero_shot": false,
-  "split": "test"
-}
-```
-</details>
-
-<details>
-<summary>BioMistral-7B eval results</summary>
-
-```json
-{
-  "model": "biomistral",
-  "n_samples": 1001,
-  "rouge_l": 0.6004,
-  "sari": 71.97,
-  "bertscore": 0.9372,
-  "fk_grade": 6.13,
-  "zero_shot": false,
-  "split": "test"
-}
-```
-</details>
-
-<details>
-<summary>Medical Safety Evaluation v2 — Dual Judge, Simple Prompt (1,001 samples)</summary>
-
-```json
-{
-  "n_samples": 1001,
-  "n_evaluated_llama": 1001,
-  "n_errors_llama": 0,
-  "n_evaluated_qwen": 1000,
-  "n_errors_qwen": 1,
-  "llama_safe_rate": 0.3247,
-  "qwen_safe_rate": 0.888,
-  "cohen_kappa": 0.1114,
-  "rouge_faithfulness_pearson_r": 0.2128,
-  "judges": {"llama": "meta-llama/Llama-3.3-70B-Instruct", "qwen": "Qwen/Qwen3-32B"}
-}
-```
-</details>
-
-**🔗 Public Artifacts:**
-- Merged model: [chambul/MediSimplifier-OpenBioLLM-merged](https://huggingface.co/chambul/MediSimplifier-OpenBioLLM-merged) — Built with Meta Llama 3 (base: aaditya/Llama3-OpenBioLLM-8B). Released under [Llama 3 Community License](https://llama.meta.com/llama3/license/).
-- Docker: [chambul/medisimplifier:train-v27](https://hub.docker.com/r/chambul/medisimplifier)
-- W&B: [wandb.ai/deepset01-chambul/medisimplifier](https://wandb.ai/deepset01-chambul/medisimplifier)
-- Endpoint: Deploy your own in ~5 minutes — see [Step 5](#5-deploy-live-endpoint) below
-- MLflow: [Experiment export](results/nebius_evidence/mlflow_runs.csv) + [send_to_mlflow.py](send_to_mlflow.py) — restore live experiment in ~5 min
-- LoRA Adapter (Nebius): [chambul/MediSimplifier-LoRA-Adapter-Nebius](https://huggingface.co/chambul/MediSimplifier-LoRA-Adapter-Nebius) — r=32, all_attn, 3 epochs, ROUGE-L 0.6638
-- Dataset: [GuyDor007/medisimplifier-dataset](https://huggingface.co/datasets/GuyDor007/medisimplifier-dataset)
-- Adapters (Technion-era): [GuyDor007/MediSimplifier-LoRA-Adapters](https://huggingface.co/GuyDor007/MediSimplifier-LoRA-Adapters)
-- Judge Calibration Benchmark: [chambul/MedSimp-JudgeBench](https://huggingface.co/datasets/chambul/MedSimp-JudgeBench) — 708 samples, 4 error types, dual-judge sensitivity/specificity (CC-BY-NC-SA-4.0)
-
 ## Medical Safety Evaluation
 
 Beyond standard NLP metrics, I conducted a three-round investigation into
@@ -1255,6 +1121,140 @@ easse @ git+https://github.com/feralvam/easse.git@6a4352ec299ed03fda8ee45445ca43
 Dataset: [Asclepius-Synthetic-Clinical-Notes](https://huggingface.co/datasets/starmpcc/Asclepius-Synthetic-Clinical-Notes) (CC-BY-NC-SA-4.0).
 Anonymized synthetic clinical notes. No real patient data.
 Note: CC-BY-NC-SA-4.0 restricts commercial use and requires derivatives to share under the same license.
+
+## Research Evidence & Bibliography
+
+All results are reproducible from public artifacts:
+
+### Committed Evidence Files
+
+All results are committed to this repository for durable verification:
+
+**Evaluation Results** (`results/nebius_evidence/`):
+| File | Model | ROUGE-L | 95% CI | SARI | BERTScore | FK-Grade |
+|------|-------|---------|--------|------|-----------|----------|
+| [results_openbio.json](results/nebius_evidence/results_openbio.json) | OpenBioLLM-8B | 0.6638 | 0.660–0.668 | 73.49 | 0.9460 | 7.33 |
+| [results_mistral.json](results/nebius_evidence/results_mistral.json) | Mistral-7B | 0.6253 | 0.620–0.630 | 72.75 | 0.9418 | 6.14 |
+| [results_biomistral.json](results/nebius_evidence/results_biomistral.json) | BioMistral-7B | 0.6004 | 0.595–0.605 | 71.97 | 0.9372 | 6.13 |
+| [bootstrap_input.json](results/nebius_evidence/bootstrap_input.json) | OpenBioLLM-8B | Per-sample ROUGE-L scores (n=1,001) — source for 95% CI bootstrap (n=10,000 resamples) | | | |
+| [eval_persamples_mistral.json](results/nebius_evidence/eval_persamples_mistral.json) | Mistral-7B | Per-sample ROUGE-L scores (n=1,001) — source for 95% CI bootstrap (n=10,000 resamples) | | | |
+| [eval_persamples_biomistral.json](results/nebius_evidence/eval_persamples_biomistral.json) | BioMistral-7B | Per-sample ROUGE-L scores (n=1,001) — source for 95% CI bootstrap (n=10,000 resamples) | | | |
+
+**Safety Evaluation** (`results/nebius_evidence/`):
+- [safety_results_v2.json](results/nebius_evidence/safety_results_v2.json) — 1,001 samples, dual judge (Llama + Qwen), simple prompt
+- [safety_results_v3.json](results/nebius_evidence/safety_results_v3.json) — 1,001 samples, dual judge (Llama + Qwen), 4-step CoT prompt
+- [safety_results.json](results/nebius_evidence/safety_results.json) — v1 preliminary (100 samples, single Llama judge)
+
+**Nebius Job Logs** (`results/nebius_logs/`):
+| File | Contents |
+|------|---------|
+| [full_train_logs.json.gz](results/nebius_logs/full_train_logs.json.gz) | Full OpenBioLLM-8B training — H100, train_loss 0.844→0.635 |
+| [endpoint_vllm_logs.json.gz](results/nebius_logs/endpoint_vllm_logs.json.gz) | vLLM endpoint startup + requests, vmapp_id: aiendpoint-e00ef3br6r14grvhhd |
+| [adapters_logs.json.gz](results/nebius_logs/adapters_logs.json.gz) | Merge adapter job |
+| [r32_all_8kdata.json.gz](results/nebius_logs/r32_all_8kdata.json.gz) | Ablation training: r=32, all_attn, 8K data |
+| [r32_all_4kdata_logs.json.gz](results/nebius_logs/r32_all_4kdata_logs.json.gz) | Ablation training: r=32, all_attn, 4K data |
+| [r32_all_attention_logs.json.gz](results/nebius_logs/r32_all_attention_logs.json.gz) | Ablation training: r=32, all_attn modules |
+| [r32_qv_logs.json.gz](results/nebius_logs/r32_qv_logs.json.gz) | Ablation training: r=32, q+v modules |
+| [r32_qonly_logs.json.gz](results/nebius_logs/r32_qonly_logs.json.gz) | Ablation training: r=32, q only |
+| [r16_qv_logs.json.gz](results/nebius_logs/r16_qv_logs.json.gz) | Ablation training: r=16, q+v |
+| [r8_qv_logs.json.gz](results/nebius_logs/r8_qv_logs.json.gz) | Ablation training: r=8, q+v |
+| [eval-persamples.json.gz](results/nebius_logs/eval-persamples.json.gz) | OpenBioLLM-8B evaluation job — 1,001 samples, ROUGE-L 0.6638 |
+| [eval-persamples-mistral.json.gz](results/nebius_logs/eval-persamples-mistral.json.gz) | Mistral-7B evaluation job — 1,001 samples, ROUGE-L 0.6253 |
+| [eval-persamples-biomistral.json.gz](results/nebius_logs/eval-persamples-biomistral.json.gz) | BioMistral-7B evaluation job — 1,001 samples, ROUGE-L 0.6004 |
+| [eval-seed2.json.gz](results/nebius_logs/eval-seed2.json.gz) | OpenBioLLM-8B eval — seed=2 (multi-seed validation), ROUGE-L 0.6651 |
+| [seed2.json.gz](results/nebius_logs/seed2.json.gz) | OpenBioLLM-8B training — seed=2, multi-seed validation run |
+| [safety-eval-v2.json.gz](results/nebius_logs/safety-eval-v2.json.gz) | Safety eval v2 — dual judge, simple prompt, n=1,001 |
+| [safety-eval-v3.json.gz](results/nebius_logs/safety-eval-v3.json.gz) | Safety eval v3 — dual judge, 4-step CoT prompt, n=1,001 |
+| [zeroshot-native-openbio.json.gz](results/nebius_logs/zeroshot-native-openbio.json.gz) | Native template zero-shot — OpenBioLLM-8B, n=1,001, ROUGE-L 0.2440 |
+| [zeroshot-native-mistral.json.gz](results/nebius_logs/zeroshot-native-mistral.json.gz) | Native template zero-shot — Mistral-7B, n=1,001, ROUGE-L 0.3971 |
+| [zeroshot-native-biomistral.json.gz](results/nebius_logs/zeroshot-native-biomistral.json.gz) | Native template zero-shot — BioMistral-7B, n=1,001, ROUGE-L 0.4190 |
+
+> All logs contain Nebius job IDs (aijob-* / aiendpoint-*),
+> GPU info (NVIDIA H100 80GB HBM3), and timestamps.
+> Proving the full pipeline ran on Nebius infrastructure.
+
+**📁 Eval Results (from medisimplifier-adapters bucket):**
+
+<details>
+<summary>OpenBioLLM-8B eval results</summary>
+
+```json
+{
+  "model": "openbio",
+  "n_samples": 1001,
+  "rouge_l": 0.6638,
+  "sari": 73.49,
+  "bertscore": 0.9460,
+  "fk_grade": 7.33,
+  "zero_shot": false,
+  "split": "test"
+}
+```
+</details>
+
+<details>
+<summary>Mistral-7B eval results</summary>
+
+```json
+{
+  "model": "mistral",
+  "n_samples": 1001,
+  "rouge_l": 0.6253,
+  "sari": 72.75,
+  "bertscore": 0.9418,
+  "fk_grade": 6.14,
+  "zero_shot": false,
+  "split": "test"
+}
+```
+</details>
+
+<details>
+<summary>BioMistral-7B eval results</summary>
+
+```json
+{
+  "model": "biomistral",
+  "n_samples": 1001,
+  "rouge_l": 0.6004,
+  "sari": 71.97,
+  "bertscore": 0.9372,
+  "fk_grade": 6.13,
+  "zero_shot": false,
+  "split": "test"
+}
+```
+</details>
+
+<details>
+<summary>Medical Safety Evaluation v2 — Dual Judge, Simple Prompt (1,001 samples)</summary>
+
+```json
+{
+  "n_samples": 1001,
+  "n_evaluated_llama": 1001,
+  "n_errors_llama": 0,
+  "n_evaluated_qwen": 1000,
+  "n_errors_qwen": 1,
+  "llama_safe_rate": 0.3247,
+  "qwen_safe_rate": 0.888,
+  "cohen_kappa": 0.1114,
+  "rouge_faithfulness_pearson_r": 0.2128,
+  "judges": {"llama": "meta-llama/Llama-3.3-70B-Instruct", "qwen": "Qwen/Qwen3-32B"}
+}
+```
+</details>
+
+**🔗 Public Artifacts:**
+- Merged model: [chambul/MediSimplifier-OpenBioLLM-merged](https://huggingface.co/chambul/MediSimplifier-OpenBioLLM-merged) — Built with Meta Llama 3 (base: aaditya/Llama3-OpenBioLLM-8B). Released under [Llama 3 Community License](https://llama.meta.com/llama3/license/).
+- Docker: [chambul/medisimplifier:train-v27](https://hub.docker.com/r/chambul/medisimplifier)
+- W&B: [wandb.ai/deepset01-chambul/medisimplifier](https://wandb.ai/deepset01-chambul/medisimplifier)
+- Endpoint: Deploy your own in ~5 minutes — see [Step 5](#5-deploy-live-endpoint) below
+- MLflow: [Experiment export](results/nebius_evidence/mlflow_runs.csv) + [send_to_mlflow.py](send_to_mlflow.py) — restore live experiment in ~5 min
+- LoRA Adapter (Nebius): [chambul/MediSimplifier-LoRA-Adapter-Nebius](https://huggingface.co/chambul/MediSimplifier-LoRA-Adapter-Nebius) — r=32, all_attn, 3 epochs, ROUGE-L 0.6638
+- Dataset: [GuyDor007/medisimplifier-dataset](https://huggingface.co/datasets/GuyDor007/medisimplifier-dataset)
+- Adapters (Technion-era): [GuyDor007/MediSimplifier-LoRA-Adapters](https://huggingface.co/GuyDor007/MediSimplifier-LoRA-Adapters)
+- Judge Calibration Benchmark: [chambul/MedSimp-JudgeBench](https://huggingface.co/datasets/chambul/MedSimp-JudgeBench) — 708 samples, 4 error types, dual-judge sensitivity/specificity (CC-BY-NC-SA-4.0)
 
 ## License
 
