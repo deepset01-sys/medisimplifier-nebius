@@ -114,8 +114,6 @@ All results use seed=42. Multi-seed validation (seeds 42 and 2) confirms ROUGE-L
 
 > **Adapter provenance:** `chambul/MediSimplifier-OpenBioLLM-merged` merges the Nebius-trained LoRA adapter (`chambul/MediSimplifier-LoRA-Adapter-Nebius`, r=32, all_attn, 3 epochs) with the base model. ROUGE-L 0.6638 documented in [`results_openbio.json`](results/nebius_evidence/results_openbio.json).
 
-> **FK-Grade target:** Technion target was FK ≤ 6.0. Best achieved: 6.14 (Mistral-7B, Nebius H100). The gap reflects the tension between medical accuracy preservation and maximum simplification.
-
 ## Baseline vs Fine-Tuned Results
 
 ### Zero-Shot Baseline (no fine-tuning, 1,001 test samples)
