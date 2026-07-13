@@ -454,8 +454,6 @@ Training Job                    Object Storage                  Eval/Serve Job
 > Remaining ~$202 covers failed jobs, accidental GPU type, endpoint serving,
 > Build VM, and iteration — all on Nebius Serverless, no reserved instances.
 
-> 7 parallel jobs = same wall-clock time as 1 job (~20 min total).
-
 > Technion hardware: RunPod H200 SXM (~90 min/model across 3 GPUs).
 > Nebius reproduction uses H100 NVLink (~70 min, single GPU per job).
 
