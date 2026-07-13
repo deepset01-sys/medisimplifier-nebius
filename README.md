@@ -170,7 +170,7 @@ designed to answer a question raised by the previous round's findings.
 | v2 (n=1,001) | Is evaluation judge-family dependent? | Two judges — Llama-70B + Qwen-32B: differ in **both family and scale** (intentional — to probe sensitivity across both dimensions simultaneously) | Llama 32.5% vs Qwen 88.8%, κ=0.11 |
 | v3 (n=1,001) | Does structured reasoning reduce bias? | Same two judges + 4-step CoT with anti-sycophancy warning (inspired by my LLM evaluation coursework — Nebius Academy AI Performance Engineering) | CoT amplifies bias — κ drops further to 0.04 |
 
-Each experiment used the full Nebius Token Factory pipeline — 4,004 judge calls across v1/v2/v3 safety rounds + 1,416 calibration calls = 5,420 total Token Factory calls.
+Each experiment used the full Nebius Token Factory pipeline — 4,004 judge calls across safety eval v2/v3 (v1 was a 100-sample pilot) + 1,416 calibration calls = 5,420 total Token Factory calls.
 
 ### Methodology
 
@@ -306,7 +306,7 @@ Pipeline:
     Nebius Job: Evaluation (ROUGE-L, SARI, BERTScore, FK-Grade)
         |
         v
-    Nebius Jobs: Safety eval v1/v2/v3 (Token Factory: 4,004 judge calls)
+    Nebius Jobs: Safety eval v2/v3 (Token Factory: 4,004 judge calls; v1 was a 100-sample pilot)
         |
         v
     Token Factory: Perturbation calibration (708 × 2 judges = 1,416 calls → MedSimp-JudgeBench)
