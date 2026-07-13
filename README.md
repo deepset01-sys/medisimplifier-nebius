@@ -1245,7 +1245,8 @@ All results are committed to this repository for durable verification:
 
 **🔗 Public Artifacts:**
 - Merged model: [chambul/MediSimplifier-OpenBioLLM-merged](https://huggingface.co/chambul/MediSimplifier-OpenBioLLM-merged) — Built with Meta Llama 3 (base: aaditya/Llama3-OpenBioLLM-8B). Released under [Llama 3 Community License](https://llama.meta.com/llama3/license/).
-- Docker: [chambul/medisimplifier:train-v27](https://hub.docker.com/r/chambul/medisimplifier)
+- Docker (training): [chambul/medisimplifier:train-v27](https://hub.docker.com/r/chambul/medisimplifier)
+- Docker (Safe Endpoint): [chambul/medisimplifier:endpoint-v2](https://hub.docker.com/r/chambul/medisimplifier) — vLLM + calibration-informed dual-judge guardrail
 - W&B: [wandb.ai/deepset01-chambul/medisimplifier](https://wandb.ai/deepset01-chambul/medisimplifier)
 - Endpoint: Deploy your own in ~5 minutes — see [Step 5](#5-deploy-live-endpoint) below
 - MLflow: [Experiment export](results/nebius_evidence/mlflow_runs.csv) + [send_to_mlflow.py](send_to_mlflow.py) — restore live experiment in ~5 min
