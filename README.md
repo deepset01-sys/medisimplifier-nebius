@@ -90,13 +90,6 @@ Winner configuration: **r=32, all_attn, 8K** — lowest `eval_loss` → used for
 
 > Each configuration was run once (n=1, seed=42) as a separate Nebius Job. Winner selected by `eval_loss` from committed training logs.
 
-> **Limitation:** Number of training epochs (3) was not independently ablated — ablation jobs use 1 epoch for compute efficiency while the full training run uses 3 epochs. The epoch effect is observed but not isolated as a controlled variable.
-
-> **Limitation:** `SFTTrainer` was used without `DataCollatorForCompletionOnlyLM`, so loss is computed on the full prompt+response sequence (not completion-only). Combined with `pad_token = eos_token`, this is the standard SFT footgun pair. The model still achieves ROUGE-L 0.6638 — suggesting the task is learnable without masking — but completion-only masking would be the correct approach and remains future work.
-
-> **Limitation:** `TASK_INSTRUCTION` in `train.py` and `evaluate.py` have drifted — the training prompt includes two additional constraints not present in the eval prompt. The model was trained against `train.py`'s stricter version; eval uses a slightly looser prompt. Template unification via `src/prompts.py` was deferred to avoid changing `evaluate.py` close to submission.
-
-> **Note on template residue:** ChatML tokens (`<|im_end|>`) are plain text in Llama-3's tokenizer (not special tokens), so `skip_special_tokens=True` would not strip a literal `<|im_end|>` from predictions. A grep of the committed eval job log (`results/nebius_logs/eval-persamples.json.gz`) found zero `<|im_end|>` occurrences — consistent with Llama-3's EOS token halting generation before any template suffix. ROUGE-L 0.6638 is unaffected. Adding explicit `StoppingCriteria` remains future work.
 
 ## Evaluation Results
 
@@ -1121,6 +1114,18 @@ easse @ git+https://github.com/feralvam/easse.git@6a4352ec299ed03fda8ee45445ca43
 Dataset: [Asclepius-Synthetic-Clinical-Notes](https://huggingface.co/datasets/starmpcc/Asclepius-Synthetic-Clinical-Notes) (CC-BY-NC-SA-4.0).
 Anonymized synthetic clinical notes. No real patient data.
 Note: CC-BY-NC-SA-4.0 restricts commercial use and requires derivatives to share under the same license.
+
+## Future Work & Limitations
+
+| Area | Limitation | Future Work |
+|------|-----------|-------------|
+| Training | `SFTTrainer` without completion-only loss masking (`DataCollatorForCompletionOnlyLM`) — loss computed on full prompt+response | Implement completion-only masking |
+| Training | Epoch effect not independently ablated (ablation uses 1 epoch, full training uses 3) | Multi-epoch ablation |
+| Evaluation | `TASK_INSTRUCTION` drifted between `train.py` and `evaluate.py` | Unify via `src/prompts.py` |
+| Evaluation | `<\|im_end\|>` not a special token in Llama-3 — zero residue found in logs, ROUGE-L unaffected | Add explicit `StoppingCriteria` |
+| Safety | Scale/family confound in judge disagreement — Qwen-72B unavailable on Nebius Token Factory | Scale-matched judge comparison |
+| Safety | Both judges miss diagnosis drops (7-14% sensitivity) | Human-anchored calibration |
+
 
 ## Research Evidence & Bibliography
 
