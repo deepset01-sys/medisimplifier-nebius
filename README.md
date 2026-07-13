@@ -450,7 +450,7 @@ Training Job                    Object Storage                  Eval/Serve Job
 | **Total Nebius spend** | | **$320.20** |
 
 > H100 NVLink rate: ~$3.85/hr on Nebius eu-north1.
-> Core pipeline compute (ablation + training + eval + safety + merge + bootstrap CI): ~$43.
+> Core pipeline compute (ablation + training + eval + safety + merge + bootstrap CI): ~$118 — see itemized table above.
 > Remaining ~$202 covers failed jobs, accidental GPU type, endpoint serving,
 > Build VM, and iteration — all on Nebius Serverless, no reserved instances.
 
