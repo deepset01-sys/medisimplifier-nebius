@@ -40,7 +40,7 @@ MediSimplifier is an end-to-end serverless ML research platform on Nebius — co
 | Data efficiency | 4K samples achieves 97% of 8K performance | Jobs |
 | Readability | FK-Grade 14.5 → 6.91 — significant simplification | Jobs |
 | Baseline-improvement correlation | Monotonic across all 3 models (n=3, descriptive only) | Jobs |
-| CoT amplifies judge disagreement | κ: 0.11→0.04 — counterintuitive, novel finding | Token Factory |
+| CoT amplifies judge disagreement | κ: 0.11→0.04 — counterintuitive, novel finding | Jobs + Token Factory |
 | Judge calibration | Qwen 2× better than Llama on structural errors (dose: 80% vs 44%) | Token Factory |
 | Diagnosis-drop blind spot | Both judges: 7–14% sensitivity | Token Factory |
 | Specificity | ~98% — near-zero false positives on clean simplifications | Token Factory |
