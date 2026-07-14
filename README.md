@@ -378,7 +378,9 @@ nebius ai endpoint create \
   --public
 ```
 
-> **Nebius S3 credentials required:**
+> **Note:** S3 credentials are optional for result verification — `reproduce.sh eval_only` prints ROUGE-L to Job stdout. S3 access is only needed to download the full per-sample JSON artifacts.
+>
+> **Nebius S3 credentials (optional — for full artifact download):**
 > ```bash
 > export AWS_ACCESS_KEY_ID=<your-nebius-access-key-aws-like-id>
 > export AWS_SECRET_ACCESS_KEY=<your-nebius-access-key-secret>
