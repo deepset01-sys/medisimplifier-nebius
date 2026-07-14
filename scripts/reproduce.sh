@@ -36,7 +36,7 @@ echo "==> Preflight OK (nebius CLI authenticated, HF token valid, gated model ac
 MODE="${1:-full}"
 SMOKE="${2:-}"  # pass "smoke" as second arg for a quick 20-sample sanity check
 
-IMAGE="chambul/medisimplifier:train-v27"
+IMAGE="chambul/medisimplifier:train-v27@sha256:ded965ed4ddedf6a82d66a2a5828845cdc26d4a1a13315f7513a9bf4e0a2f720"
 BUCKET="medisimplifier-adapters"
 PLATFORM="gpu-h100-sxm"
 PRESET="1gpu-16vcpu-200gb"
@@ -69,7 +69,7 @@ if [[ "$MODE" == "full" ]]; then
     --timeout 5h
 fi
 
-# ── Step 2: Ablation study (9 parallel jobs, ~$20 total) ─────────────────────
+# ── Step 2: Ablation study (7 parallel jobs, ~$9 total) ──────────────────────
 if [[ "$MODE" == "full" || "$MODE" == "ablation" ]]; then
   echo "==> Submitting ablation jobs (Phase 1 — rank, modules=q+v, data=8K)..."
   for RANK in 8 16 32; do
