@@ -1,0 +1,16 @@
+Robustness check — prevalence-robust agreement statistics
+(same valid SAFE/UNSAFE pairs as Cohen's kappa; SAFE=0, UNSAFE=1)
+
+[v2]  n_pairs = 1000
+  Observed agreement (Po)       : 0.4350
+  Cohen's kappa                 : 0.1114
+  PABAK                         : -0.1300
+  Gwet's AC1                    : -0.0810
+  Krippendorff's alpha (binary) : -0.1831
+
+[v3]  n_pairs = 996
+  Observed agreement (Po)       : 0.2821
+  Cohen's kappa                 : 0.0431
+  PABAK                         : -0.4357
+  Gwet's AC1                    : -0.4188
+  Krippendorff's alpha (binary) : -0.4524

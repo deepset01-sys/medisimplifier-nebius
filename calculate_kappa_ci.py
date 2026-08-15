@@ -70,6 +70,60 @@ def cohen_kappa(a, b):
     return (po - pe) / denom
 
 
+def observed_agreement(a, b):
+    """Proportion of items where the two raters agree (Po)."""
+    return float(np.mean(np.asarray(a) == np.asarray(b)))
+
+
+def pabak(a, b):
+    """Prevalence- and Bias-Adjusted Kappa: PABAK = 2*Po - 1."""
+    return 2.0 * observed_agreement(a, b) - 1.0
+
+
+def gwet_ac1(a, b):
+    """Gwet's AC1 for binary (0/1) ratings.
+
+    AC1 = (Po - Pe_gwet) / (1 - Pe_gwet),
+    where Pe_gwet = 2 * pi_bar * (1 - pi_bar) and pi_bar = (p1 + q1) / 2.
+    p1 and q1 are each rater's proportion of the positive class (label 1).
+    """
+    a = np.asarray(a)
+    b = np.asarray(b)
+    po = observed_agreement(a, b)
+    p1, q1 = np.mean(a), np.mean(b)
+    pi_bar = (p1 + q1) / 2.0
+    pe = 2.0 * pi_bar * (1.0 - pi_bar)
+    denom = 1.0 - pe
+    if denom == 0:
+        return np.nan
+    return (po - pe) / denom
+
+
+def krippendorff_alpha_binary(a, b):
+    """Krippendorff's alpha for two coders, binary data, complete pairs.
+
+    For binary categories the interval and nominal difference metrics coincide
+    (the only non-zero squared distance is 1^2 = 1), so this equals the nominal
+    alpha. Closed form for 2 coders with no missing values:
+
+        Do = 1 - Po                    (observed disagreement)
+        De = 2 * n0 * n1 / (N*(N-1))   (expected disagreement)
+        alpha = 1 - Do / De
+    with N = 2 * n_units and n1 = total count of label 1 across both coders.
+    """
+    a = np.asarray(a)
+    b = np.asarray(b)
+    n_units = a.size
+    do = 1.0 - observed_agreement(a, b)
+    N = 2 * n_units
+    n1 = int(np.sum(a) + np.sum(b))
+    n0 = N - n1
+    de = (2.0 * n0 * n1) / (N * (N - 1))
+    if de == 0:
+        return np.nan
+    return 1.0 - do / de
+
+
 def bootstrap_ci(a, b, rng, n_boot=N_BOOTSTRAP):
     """95% percentile bootstrap CI for kappa on paired arrays a, b."""
     n = a.size
@@ -109,9 +163,11 @@ def main():
     pairs = {v: load_pairs(path) for v, path in FILES.items()}
 
     results = {}
+    arrays = {}
     for v in ("v2", "v3"):
         a = np.array([lv for lv, qv in pairs[v].values()])
         b = np.array([qv for lv, qv in pairs[v].values()])
+        arrays[v] = (a, b)
         k = cohen_kappa(a, b)
         lo, hi = bootstrap_ci(a, b, rng)
         results[v] = (k, lo, hi)
@@ -131,6 +187,34 @@ def main():
     print(f"v3: κ={k3:.4f} [95% CI: {lo3:.4f}–{hi3:.4f}]")
     p_str = "<0.0001" if p_value < 0.0001 else f"{p_value:.4f}"
     print(f"Δκ = {delta:.4f}, p={p_str}")
+
+    # --- Prevalence-robust agreement statistics ----------------------------
+    # Computed on the same valid SAFE/UNSAFE pairs as Cohen's kappa. These
+    # separate genuine agreement from the prevalence/marginal artifacts that
+    # depress Cohen's kappa when one label dominates.
+    lines = [
+        "Robustness check — prevalence-robust agreement statistics",
+        "(same valid SAFE/UNSAFE pairs as Cohen's kappa; SAFE=0, UNSAFE=1)",
+        "",
+    ]
+    for v in ("v2", "v3"):
+        a, b = arrays[v]
+        lines.append(f"[{v}]  n_pairs = {a.size}")
+        lines.append(f"  Observed agreement (Po)       : {observed_agreement(a, b):.4f}")
+        lines.append(f"  Cohen's kappa                 : {results[v][0]:.4f}")
+        lines.append(f"  PABAK                         : {pabak(a, b):.4f}")
+        lines.append(f"  Gwet's AC1                    : {gwet_ac1(a, b):.4f}")
+        lines.append(f"  Krippendorff's alpha (binary) : {krippendorff_alpha_binary(a, b):.4f}")
+        lines.append("")
+    robustness_text = "\n".join(lines).rstrip() + "\n"
+
+    print()
+    print(robustness_text, end="")
+
+    out_path = os.path.join(BASE_DIR, "kappa_robustness_check.txt")
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write(robustness_text)
+    print(f"--- Robustness stats saved to: {out_path} ---")
 
 
 if __name__ == "__main__":
