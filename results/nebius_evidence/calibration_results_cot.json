@@ -1,0 +1,93 @@
+{
+  "condition": "cot",
+  "sensitivity_overall": {
+    "llama": {
+      "hits": 490,
+      "n": 508,
+      "rate": 0.9645669291338582,
+      "error": 0
+    },
+    "qwen": {
+      "hits": 360,
+      "n": 508,
+      "rate": 0.7086614173228346,
+      "error": 0
+    }
+  },
+  "sensitivity_by_type": {
+    "diagnosis": {
+      "n": 150,
+      "llama": {
+        "hits": 137,
+        "n": 150,
+        "rate": 0.9133333333333333,
+        "error": 0
+      },
+      "qwen": {
+        "hits": 52,
+        "n": 150,
+        "rate": 0.3466666666666667,
+        "error": 0
+      }
+    },
+    "dose": {
+      "n": 95,
+      "llama": {
+        "hits": 93,
+        "n": 95,
+        "rate": 0.9789473684210527,
+        "error": 0
+      },
+      "qwen": {
+        "hits": 88,
+        "n": 95,
+        "rate": 0.9263157894736842,
+        "error": 0
+      }
+    },
+    "lateral": {
+      "n": 150,
+      "llama": {
+        "hits": 150,
+        "n": 150,
+        "rate": 1.0,
+        "error": 0
+      },
+      "qwen": {
+        "hits": 143,
+        "n": 150,
+        "rate": 0.9533333333333334,
+        "error": 0
+      }
+    },
+    "negation": {
+      "n": 113,
+      "llama": {
+        "hits": 110,
+        "n": 113,
+        "rate": 0.9734513274336283,
+        "error": 0
+      },
+      "qwen": {
+        "hits": 77,
+        "n": 113,
+        "rate": 0.6814159292035398,
+        "error": 0
+      }
+    }
+  },
+  "specificity": {
+    "llama": {
+      "hits": 53,
+      "n": 200,
+      "rate": 0.265,
+      "error": 0
+    },
+    "qwen": {
+      "hits": 157,
+      "n": 200,
+      "rate": 0.785,
+      "error": 0
+    }
+  }
+}

@@ -1,0 +1,36 @@
+PER-JUDGE ACCURACY vs. MedSimp-JudgeBench GROUND TRUTH — CoT vs no-CoT
+Ground truth: condition=corrupted -> should be UNSAFE; condition=clean -> should be SAFE
+508 corrupted (dose/negation/lateral/diagnosis) + 200 clean controls. ERROR excluded from denominators.
+CoT = enable_thinking:True + step-by-step prompt; no-CoT = enable_thinking:False, direct prompt.
+
+========================================================================
+Llama judge
+========================================================================
+  metric                        no-CoT       CoT   Δ (CoT−noCoT)
+  Sensitivity (overall)          0.317     0.965          +0.648
+    sens: dose                   0.442     0.979          +0.537
+    sens: negation               0.301     0.973          +0.673
+    sens: lateral                0.427     1.000          +0.573
+    sens: diagnosis              0.140     0.913          +0.773
+  Specificity (clean)            0.985     0.265          -0.720
+  SDT d-prime                    1.694     1.178          -0.515
+  SDT criterion c                1.323    -1.217          -2.540
+  (no-CoT n: sens=508(+0err) spec=200(+0err) | CoT n: sens=508(+0err) spec=200(+0err))
+
+========================================================================
+Qwen judge
+========================================================================
+  metric                        no-CoT       CoT   Δ (CoT−noCoT)
+  Sensitivity (overall)          0.559     0.709          +0.150
+    sens: dose                   0.864     0.926          +0.063
+    sens: negation               0.549     0.681          +0.132
+    sens: lateral                0.849     0.953          +0.104
+    sens: diagnosis              0.071     0.347          +0.275
+  Specificity (clean)            0.995     0.785          -0.210
+  SDT d-prime                    2.717     1.339          -1.378
+  SDT criterion c                1.210     0.120          -1.091
+  (no-CoT n: sens=476(+32err) spec=196(+4err) | CoT n: sens=508(+0err) spec=200(+0err))
+
+Interpretation note:
+- d-prime = z(sensitivity) − z(1−specificity): discriminability, independent of decision bias.
+- criterion c > 0 = conservative (leans SAFE); c < 0 = liberal (leans UNSAFE).
