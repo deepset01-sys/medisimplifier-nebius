@@ -68,6 +68,16 @@ training, criterion setting, or judge choice) that reduces β̄ and σ²_S raise
 the ceiling. Running the D-study pre- and post-calibration quantifies that as
 ΔΦ_V, yielding an evidence-based raters-vs-calibration tradeoff.
 
+**Notation bridge & the error to avoid.** In the compact σ²_B / σ²_R / σ²_N
+naming used elsewhere in the proposal, the shared-bias term is
+σ²_B ≡ β̄² + σ²_S — the *undivided* mean-square of consensus-minus-truth. It must
+**never** be written σ²_B / n_i (or divided by any facet sample size): unlike
+σ²_R and σ²_N, shared bias is not averaged away by adding items or raters. A
+feature that all raters miss on every item has zero item-variance yet non-zero
+β̄², so dividing σ²_B by n_i sends it to zero as the benchmark grows — silently
+re-introducing, in D-study form, the exact blindness VAGT was built to remove.
+Only σ²_R and σ²_N carry the /n_r factor.
+
 ## 4. CAI as a derived index
 
 Restricting the decomposition to feature f gives the principled replacement for
