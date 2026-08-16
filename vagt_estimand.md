@@ -59,10 +59,11 @@ n_r = 2 (the demo's configuration — the hardest case): the TARGET estimands
 consensus-vs-known-truth gap, anchored by τ and robust to the σ²_R/σ²_N split.
 Only σ²_R itself is fragile at R=2 (a single contrast, 1 df); it enters Φ_V
 solely through the /n_r term and does not affect σ²_B. Hence the demo's
-σ²_B = 0.358 and Φ_V ≈ 0.40 are trustworthy, while its σ²_R ≈ 0 is a
+σ²_B = 0.347 and Φ_V ≈ 0.404 are trustworthy, while its σ²_R ≈ 0 is a
 low-precision estimate — consistent with, but not load-bearing for, the
 shared-error conclusion. Phase 3 (R=20) gives σ²_R full df and tightens every
-component.
+component. (Values updated to apply the sampling-variance correction per §3 of
+vagt_section.md: σ̂²_S = Var_i(ĉ_i) − MS_res/R.)
 
 ## 4. Estimation & pre-registered parameter recovery
 

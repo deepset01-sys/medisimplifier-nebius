@@ -39,3 +39,12 @@ exploratory (reported with effect-size CI, not a reject/retain decision).
 Generative assumptions: baseline d′=1.0, unbiased criterion (optimistic for
 d′ precision); estimator is rater-level paired d′ (conservative vs. the
 crossed rater×item GLMM of Repair #3). 10,000 iterations/cell, seed=42.
+
+RQ4 — LATITUDE × CONDITION INTERACTION POWER
+--------------------------------------------------------------------------
+Design: 350 items × 20 raters × 2 conditions (within-subjects), continuous latitude.
+DGP: mixed-effects logistic (item+rater random intercepts); f²=0.05 ⇒ interaction b3=0.640 (OR≈1.90 per SD latitude).
+Analysis: item-clustered linear-probability Wald test, α=0.05, 1000 sims, seed=42
+  (approximates the crossed rater×item logistic GLMM; statsmodels/lme4 unavailable).
+Type-I error under H0 (b3=0): 0.048  (calibrated, ~0.05).
+POWER at f²=0.05: 1.000  (item-level test is well-powered — resolves the vacuous n=4 Spearman).

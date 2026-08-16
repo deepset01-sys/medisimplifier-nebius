@@ -89,14 +89,20 @@ def krippendorff_alpha_binary(a, b):
 
 # ── VAGT decomposition (veridicality-anchored) ──────────────────────────────
 def vagt(X, tau, n_r=2):
+    R = X.shape[1]                            # number of raters in the data (here 2)
     c = X.mean(axis=1)
     b = c - tau
-    sigma_B = float(np.mean(b ** 2))          # β̄² + σ²_S — undivided
+    sigma_B_naive = float(np.mean(b ** 2))    # β̄² + σ²_S + R-rater sampling inflation
     grand = X.mean()
     alpha = X.mean(axis=0) - grand
     sigma_R = float(np.mean(alpha ** 2))
     eps = X - (c[:, None] + alpha[None, :])
     sigma_N = float(np.mean(eps ** 2))
+    # Sampling-variance correction (vagt_section.md §3): σ̂²_S = Var_i(ĉ_i) − MS_res/R.
+    # Since mean(b²) = β̄² + Var_i(b) and Var_i(b) is inflated by σ²_N/R (the R-rater
+    # consensus sampling variance), σ²_B = mean(b²) − σ²_N/R is the bias-corrected
+    # shared-bias mean-square (still undivided by any facet size in Φ_V below).
+    sigma_B = max(0.0, sigma_B_naive - sigma_N / R)
     p = float(tau.mean())
     sigma_tau = p * (1 - p)
     denom = sigma_tau + sigma_B + (sigma_R + sigma_N) / n_r
